@@ -16,14 +16,60 @@
         .layout-container > div {
             min-width: 0;
         }
-        @media (max-width: 1200px) {
+        
+        @media (max-width: 1024px) {
             .layout-container {
                 grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+            }
+            .layout-container > div {
+                display: contents;
+            }
+            
+            /* Order of panels on Mobile/Tablet */
+            #spotifyPanel { order: 1; }
+            #screenControlPanel { order: 2; }
+            #livePreviewPanel { order: 3; }
+            #activePlaylistPanel { order: 4; }
+            #mediaLibraryPanel { order: 5; }
+            #tickerPanel { order: 6; }
+            #savedPlaylistsPanel { order: 7; }
+            #ledSetupPanel { order: 8; }
+            
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+            header > div {
+                width: 100%;
+                justify-content: space-between;
             }
         }
+        
         @media (max-width: 768px) {
             .layout-container {
                 grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
+            .screen-select-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            .select-styled {
+                width: 100%;
+                min-width: 0;
+            }
+            .screen-select-bar > div:nth-child(3) {
+                display: none;
+            }
+            .screen-select-bar > div:last-child {
+                width: 100%;
+                display: flex;
+            }
+            .screen-select-bar > div:last-child > input {
+                flex: 1;
             }
         }
         
@@ -121,7 +167,7 @@
 
         <div class="layout-container">
             <!-- Pane 1: Global Media Library -->
-            <div class="panel">
+            <div class="panel" id="mediaLibraryPanel">
                 <div class="panel-header">
                     <h2 class="panel-title">Media Library</h2>
                 </div>
@@ -141,7 +187,7 @@
             <!-- Pane 2: Playback Control & Current Screen Playlist -->
             <div>
                 <!-- Screen Control -->
-                <div class="panel">
+                <div class="panel" id="screenControlPanel">
                     <div class="panel-header">
                         <h2 class="panel-title" id="controlPanelTitle">Screen Control</h2>
                         <span id="playingItemName" style="font-size: 0.85rem; color: var(--primary); font-weight: 500;">No media playing</span>
@@ -170,7 +216,7 @@
                 </div>
 
                 <!-- Screen Playlist -->
-                <div class="panel">
+                <div class="panel" id="activePlaylistPanel">
                     <div class="panel-header">
                         <h2 class="panel-title">Active Playlist</h2>
                         <div style="display: flex; gap: 0.5rem;">
@@ -185,7 +231,7 @@
                 </div>
 
                 <!-- Ticker Control Panel -->
-                <div class="panel">
+                <div class="panel" id="tickerPanel">
                     <div class="panel-header">
                         <h2 class="panel-title">Scrolling Ticker Overlay</h2>
                         <div class="switch-container" style="margin-bottom: 0;">
@@ -217,7 +263,7 @@
             <!-- Pane 3: Preview & Setup -->
             <div>
                 <!-- Screen Preview -->
-                <div class="panel">
+                <div class="panel" id="livePreviewPanel">
                     <div class="panel-header">
                         <h2 class="panel-title">Live Preview</h2>
                     </div>
@@ -263,7 +309,7 @@
                 </div>
 
                 <!-- Saved Playlists -->
-                <div class="panel">
+                <div class="panel" id="savedPlaylistsPanel">
                     <div class="panel-header">
                         <h2 class="panel-title">Saved Playlists</h2>
                     </div>
@@ -335,7 +381,7 @@
                 </div>
 
                 <!-- Screen Coordinates Configuration -->
-                <div class="panel">
+                <div class="panel" id="ledSetupPanel">
                     <div class="panel-header">
                         <h2 class="panel-title">LED Screen Setup</h2>
                         <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="launchPlayer()">Open Player</button>
