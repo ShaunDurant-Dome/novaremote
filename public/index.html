@@ -167,20 +167,22 @@
 
         <div class="layout-container">
             <!-- Pane 1: Global Media Library -->
-            <div class="panel" id="mediaLibraryPanel">
-                <div class="panel-header">
-                    <h2 class="panel-title">Media Library</h2>
-                </div>
-                
-                <!-- Uploader -->
-                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-                    <span class="upload-icon">📤</span>
-                    <p class="upload-text" style="font-size: 0.8rem;">Drag files or click here</p>
-                    <input type="file" id="fileInput" class="file-input" accept="video/mp4,image/*" multiple onchange="handleFileSelect(this)">
-                </div>
+            <div>
+                <div class="panel" id="mediaLibraryPanel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Media Library</h2>
+                    </div>
+                    
+                    <!-- Uploader -->
+                    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                        <span class="upload-icon">📤</span>
+                        <p class="upload-text" style="font-size: 0.8rem;">Drag files or click here</p>
+                        <input type="file" id="fileInput" class="file-input" accept="video/mp4,image/*" multiple onchange="handleFileSelect(this)">
+                    </div>
 
-                <div class="playlist-items" id="libraryItems" style="max-height: 550px;">
-                    <!-- Library files populated dynamically -->
+                    <div class="playlist-items" id="libraryItems" style="max-height: 550px;">
+                        <!-- Library files populated dynamically -->
+                    </div>
                 </div>
             </div>
 
