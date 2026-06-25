@@ -425,6 +425,67 @@ app.delete('/api/library/:id', (req, res) => {
     }
 });
 
+// Spotify OAuth Endpoints
+app.post('/api/spotify/exchange', async (req, res) => {
+    const { code, client_id, client_secret, redirect_uri } = req.body;
+    if (!code || !client_id || !client_secret || !redirect_uri) {
+        return res.status(400).json({ error: 'Missing parameters' });
+    }
+
+    try {
+        const authHeader = 'Basic ' + Buffer.from(client_id + ':' + client_secret).toString('base64');
+        const params = new URLSearchParams();
+        params.append('grant_type', 'authorization_code');
+        params.append('code', code);
+        params.append('redirect_uri', redirect_uri);
+
+        const response = await fetch('https://accounts.spotify.com/api/token', {
+            method: 'POST',
+            headers: {
+                'Authorization': authHeader,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: params.toString()
+        });
+
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Error exchanging Spotify code:', error);
+        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+    }
+});
+
+app.post('/api/spotify/refresh', async (req, res) => {
+    const { refresh_token, client_id, client_secret } = req.body;
+    if (!refresh_token || !client_id || !client_secret) {
+        return res.status(400).json({ error: 'Missing parameters' });
+    }
+
+    try {
+        const authHeader = 'Basic ' + Buffer.from(client_id + ':' + client_secret).toString('base64');
+        const params = new URLSearchParams();
+        params.append('grant_type', 'refresh_token');
+        params.append('refresh_token', refresh_token);
+
+        const response = await fetch('https://accounts.spotify.com/api/token', {
+            method: 'POST',
+            headers: {
+                'Authorization': authHeader,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: params.toString()
+        });
+
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Error refreshing Spotify token:', error);
+        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+    }
+});
+
+
 // WebSocket Handler
 wss.on('connection', (ws, req) => {
     // Parse screenId from URL query string
