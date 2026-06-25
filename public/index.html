@@ -842,16 +842,51 @@
             ensureActiveScreenExistsInUIState(state);
             const screen = state.screens[activeScreenId];
 
-            // Sleep Mode: auto-pause Spotify when screen goes black
-            if (lastBlackoutState === false && screen.isBlackout === true) {
-                console.log('[SLEEP] Screen blackout activated. Auto-pausing Spotify...');
-                if (spotifyToken && spotifyIsPlaying) {
+            // Sleep Mode: Spotify Auto-Pause and Auto-Resume on Blackout transitions
+            if (spotifyToken) {
+                if (lastBlackoutState === false && screen.isBlackout === true) {
+                    console.log('[SLEEP] Screen blackout activated. Auto-pausing Spotify...');
+                    
+                    // Save the device ID from the UI selector in case we need to resume
+                    const activeDeviceSelector = document.getElementById('spotifyDeviceSelector');
+                    const lastDeviceId = activeDeviceSelector ? activeDeviceSelector.value : null;
+                    if (lastDeviceId && lastDeviceId !== 'No active Spotify apps found') {
+                        localStorage.setItem('spotifyLastDeviceIdBeforeBlackout', lastDeviceId);
+                    } else {
+                        localStorage.removeItem('spotifyLastDeviceIdBeforeBlackout');
+                    }
+
+                    // Call pause API regardless of local spotifyIsPlaying state to ensure it pauses
                     spotifyFetch('me/player/pause', 'PUT')
                         .then(() => {
+                            console.log('[SLEEP] Spotify successfully auto-paused.');
+                            localStorage.setItem('spotifyWasPlayingBeforeBlackout', 'true');
                             spotifyIsPlaying = false;
                             setTimeout(spotifyRefresh, 500);
                         })
-                        .catch(err => console.log('Auto-pause Spotify on blackout failed:', err));
+                        .catch(err => {
+                            console.log('[SLEEP] Spotify auto-pause failed or was already paused:', err);
+                            // If it failed because it was already paused, we don't want to resume it later
+                            localStorage.setItem('spotifyWasPlayingBeforeBlackout', 'false');
+                        });
+                } else if (lastBlackoutState === true && screen.isBlackout === false) {
+                    console.log('[SLEEP] Screen blackout deactivated. Checking if we should resume Spotify...');
+                    const wasPlaying = localStorage.getItem('spotifyWasPlayingBeforeBlackout') === 'true';
+                    const lastDeviceId = localStorage.getItem('spotifyLastDeviceIdBeforeBlackout');
+                    if (wasPlaying) {
+                        if (lastDeviceId) {
+                            console.log('[SLEEP] Resuming Spotify playback on device:', lastDeviceId);
+                            spotifyTransferPlayback(lastDeviceId);
+                        } else {
+                            console.log('[SLEEP] Resuming Spotify playback on default active device...');
+                            spotifyFetch('me/player/play', 'PUT')
+                                .then(() => setTimeout(spotifyRefresh, 500))
+                                .catch(err => console.log('[SLEEP] Auto-resume Spotify on wake failed:', err));
+                        }
+                    }
+                    // Clean up flags
+                    localStorage.removeItem('spotifyWasPlayingBeforeBlackout');
+                    localStorage.removeItem('spotifyLastDeviceIdBeforeBlackout');
                 }
             }
             lastBlackoutState = screen.isBlackout;
