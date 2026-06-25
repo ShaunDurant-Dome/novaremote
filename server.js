@@ -54,8 +54,25 @@ let state = {
 };
 
 // Load saved state if exists
-const stateFile = path.join(__dirname, 'state.json');
+const stateFile = path.join(__dirname, 'public', 'uploads', 'state.json');
 function loadState() {
+    // Migration: if state.json is in root, move it to public/uploads
+    const oldStateFile = path.join(__dirname, 'state.json');
+    const uploadsDir = path.join(__dirname, 'public', 'uploads');
+    
+    if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+    
+    if (fs.existsSync(oldStateFile) && !fs.existsSync(stateFile)) {
+        try {
+            fs.renameSync(oldStateFile, stateFile);
+            console.log('[MIGRATION] Moved state.json from root to public/uploads/');
+        } catch (err) {
+            console.warn('[MIGRATION] Failed to move state.json:', err.message);
+        }
+    }
+
     if (fs.existsSync(stateFile)) {
         try {
             const data = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
@@ -73,6 +90,10 @@ loadState();
 
 function saveState() {
     try {
+        const uploadsDir = path.dirname(stateFile);
+        if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+        }
         fs.writeFileSync(stateFile, JSON.stringify(state, null, 2), 'utf8');
     } catch (e) {
         console.error('Error writing state file:', e);
