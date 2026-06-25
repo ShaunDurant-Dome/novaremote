@@ -9,8 +9,12 @@
         /* Extra styles for two-pane layout */
         .layout-container {
             display: grid;
-            grid-template-columns: 1fr 2fr 1fr;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
             gap: 2rem;
+            width: 100%;
+        }
+        .layout-container > div {
+            min-width: 0;
         }
         @media (max-width: 1200px) {
             .layout-container {
@@ -313,6 +317,27 @@
                             Launches or closes Chrome/Edge on the LED Controller PC remotely. Use this to reveal/access the desktop (e.g. for Spotify) without walking to the PC.
                         </small>
                     </div>
+
+                    <!-- Blackout Scheduler -->
+                    <div style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div class="switch-container" style="margin-bottom: 0.75rem;">
+                            <label class="form-label" style="font-weight: 600; margin: 0;">⏱️ Blackout Schedule</label>
+                            <label class="switch">
+                                <input type="checkbox" id="scheduleEnable" onchange="updateBlackoutSchedule()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div id="scheduleTimes" style="display: flex; gap: 0.5rem; transition: opacity 0.2s ease;">
+                            <div style="flex: 1;">
+                                <label class="form-label" style="font-size: 0.75rem; margin-bottom: 0.25rem;">Start (On)</label>
+                                <input type="time" id="scheduleOnTime" class="input-text" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" onchange="updateBlackoutSchedule()">
+                            </div>
+                            <div style="flex: 1;">
+                                <label class="form-label" style="font-size: 0.75rem; margin-bottom: 0.25rem;">End (Off)</label>
+                                <input type="time" id="scheduleOffTime" class="input-text" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" onchange="updateBlackoutSchedule()">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -438,6 +463,22 @@
 
         function remoteControlPC(action) {
             sendAction('REMOTE_PC_CONTROL', { action });
+        }
+
+        function updateBlackoutSchedule() {
+            const enabled = document.getElementById('scheduleEnable').checked;
+            const onTime = document.getElementById('scheduleOnTime').value;
+            const offTime = document.getElementById('scheduleOffTime').value;
+            
+            // Toggle visual cues
+            document.getElementById('scheduleTimes').style.opacity = enabled ? '1' : '0.4';
+            document.getElementById('scheduleTimes').style.pointerEvents = enabled ? 'auto' : 'none';
+            
+            sendAction('UPDATE_BLACKOUT_SCHEDULE', { enabled, onTime, offTime });
+        }
+
+        function updateVideoSound(id, sound) {
+            sendAction('UPDATE_VIDEO_SOUND', { id, sound });
         }
 
         // Media Library controls
@@ -637,6 +678,15 @@
                 previewTicker.classList.remove('active');
             }
 
+            // Sync Blackout Schedule
+            if (screen.blackoutSchedule) {
+                document.getElementById('scheduleEnable').checked = !!screen.blackoutSchedule.enabled;
+                document.getElementById('scheduleOnTime').value = screen.blackoutSchedule.onTime || '22:00';
+                document.getElementById('scheduleOffTime').value = screen.blackoutSchedule.offTime || '08:00';
+                document.getElementById('scheduleTimes').style.opacity = screen.blackoutSchedule.enabled ? '1' : '0.4';
+                document.getElementById('scheduleTimes').style.pointerEvents = screen.blackoutSchedule.enabled ? 'auto' : 'none';
+            }
+
             // Render Playlist Items (Pane 2 bottom)
             const playlistContainer = document.getElementById('playlistItems');
             playlistContainer.innerHTML = '';
@@ -667,6 +717,16 @@
                                    onchange="updateDuration('${item.id}', this.value)">
                             <span style="font-size:0.75rem;color:var(--text-muted)">s</span>
                         </div>
+                    `;
+                }
+
+                let soundCtrl = '';
+                if (item.type === 'video') {
+                    soundCtrl = `
+                        <label style="display:flex;align-items:center;gap:0.25rem;font-size:0.75rem;color:var(--text-muted);cursor:pointer;" onclick="event.stopPropagation()">
+                            <input type="checkbox" ${item.muted ? '' : 'checked'} 
+                                   onchange="updateVideoSound('${item.id}', this.checked)"> 🔊 Sound
+                        </label>
                     `;
                 }
 
@@ -708,6 +768,7 @@
                             <div style="display:flex; align-items:center; gap:0.75rem; width:100%;">
                                 <span class="item-type ${item.type}">${item.type}</span>
                                 ${durationCtrl}
+                                ${soundCtrl}
                             </div>
                             ${tempLabelsCtrl}
                         </div>

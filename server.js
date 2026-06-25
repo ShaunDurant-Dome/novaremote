@@ -34,7 +34,13 @@ let state = {
                 speed: 5,
                 color: '#ffffff',
                 bgColor: 'rgba(0, 0, 0, 0.6)'
-            }
+            },
+            blackoutSchedule: {
+                enabled: false,
+                onTime: '22:00',
+                offTime: '08:00'
+            },
+            lastScheduledState: null
         }
     },
     savedPlaylists: [],    // Array of: { name: 'Morning Ads', playlist: [...] }
@@ -89,7 +95,13 @@ function ensureScreenExists(screenId) {
                 speed: 5,
                 color: '#ffffff',
                 bgColor: 'rgba(0, 0, 0, 0.6)'
-            }
+            },
+            blackoutSchedule: {
+                enabled: false,
+                onTime: '22:00',
+                offTime: '08:00'
+            },
+            lastScheduledState: null
         };
         saveState();
     }
@@ -150,7 +162,15 @@ const upload = multer({
 
 // Middleware
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: '1y',
+    setHeaders: (res, filePath, stat) => {
+        // Cache uploaded images and videos aggressively to prevent buffering
+        if (filePath.toLowerCase().includes('uploads')) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+    }
+}));
 
 // REST Endpoints
 app.get('/api/state', (req, res) => {
@@ -563,6 +583,23 @@ wss.on('connection', (ws, req) => {
                         });
                     }
                     break;
+                case 'UPDATE_VIDEO_SOUND':
+                    const videoItem = screen.playlist.find(p => p.id === data.id);
+                    if (videoItem && videoItem.type === 'video') {
+                        videoItem.muted = !data.sound;
+                    }
+                    broadcastScreenState(sid);
+                    break;
+                case 'UPDATE_BLACKOUT_SCHEDULE':
+                    screen.blackoutSchedule = {
+                        enabled: !!data.enabled,
+                        onTime: data.onTime || '22:00',
+                        offTime: data.offTime || '08:00'
+                    };
+                    // Reset lastScheduledState so that it triggers evaluation immediately
+                    screen.lastScheduledState = null;
+                    broadcastScreenState(sid);
+                    break;
                 case 'DELETE_SCREEN':
                     // Prevent deleting default screen
                     if (data.targetScreenId && data.targetScreenId !== 'default') {
@@ -583,6 +620,51 @@ wss.on('connection', (ws, req) => {
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+// Blackout scheduler check (runs every 10 seconds to respond quickly to scheduled times)
+setInterval(() => {
+    try {
+        const namibiaTimeStr = new Date().toLocaleString("en-US", { timeZone: "Africa/Windhoek" });
+        const localDate = new Date(namibiaTimeStr);
+        const hours = String(localDate.getHours()).padStart(2, '0');
+        const minutes = String(localDate.getMinutes()).padStart(2, '0');
+        const currentTime = `${hours}:${minutes}`;
+
+        let stateChanged = false;
+
+        for (let sid in state.screens) {
+            const screen = state.screens[sid];
+            if (screen.blackoutSchedule && screen.blackoutSchedule.enabled) {
+                const { onTime, offTime } = screen.blackoutSchedule;
+                if (onTime && offTime) {
+                    let shouldBeBlackout = false;
+                    if (onTime < offTime) {
+                        // e.g., 08:00 to 17:00
+                        shouldBeBlackout = (currentTime >= onTime && currentTime < offTime);
+                    } else {
+                        // e.g., 22:00 to 06:00 (overnight blackout)
+                        shouldBeBlackout = (currentTime >= onTime || currentTime < offTime);
+                    }
+
+                    if (screen.lastScheduledState !== shouldBeBlackout) {
+                        console.log(`[SCHEDULE] Toggling blackout for screen "${sid}" to ${shouldBeBlackout} (Current time: ${currentTime}, Schedule: ${onTime} - ${offTime})`);
+                        screen.isBlackout = shouldBeBlackout;
+                        screen.lastScheduledState = shouldBeBlackout;
+                        stateChanged = true;
+                        broadcastScreenState(sid);
+                    }
+                }
+            }
+        }
+
+        if (stateChanged) {
+            saveState();
+            broadcastGlobalState();
+        }
+    } catch (err) {
+        console.error('Error running blackout schedule check:', err);
+    }
+}, 10000);
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`=========================================`);

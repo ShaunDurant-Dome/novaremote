@@ -307,6 +307,9 @@
                         applyDimensions(data.screenConfig.width, data.screenConfig.height);
                     }
                     updatePlayer(data.state);
+                    if (data.state && data.state.playlist) {
+                        prefetchMedia(data.state.playlist);
+                    }
                 }
             };
         }
@@ -315,6 +318,22 @@
             if (ws && ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({ type, ...payload }));
             }
+        }
+
+        const prefetchedUrls = new Set();
+        function prefetchMedia(playlist) {
+            playlist.forEach(item => {
+                if (item.filename && item.type !== 'temp') {
+                    const fileUrl = `/uploads/${item.filename}`;
+                    if (!prefetchedUrls.has(fileUrl)) {
+                        prefetchedUrls.add(fileUrl);
+                        console.log(`[Prefetch] Pre-downloading: ${fileUrl}`);
+                        fetch(fileUrl, { priority: 'low' })
+                            .then(() => console.log(`[Prefetch] Cached: ${fileUrl}`))
+                            .catch(err => console.warn(`[Prefetch] Error preloading ${fileUrl}:`, err));
+                    }
+                }
+            });
         }
 
         function fetchTemps() {
@@ -557,7 +576,7 @@
 
                     // Audio volume sync
                     vidEl.volume = state.volume;
-                    vidEl.muted = (state.volume === 0);
+                    vidEl.muted = (state.volume === 0) || (item.muted === true);
 
                     // Play/Pause sync
                     if (state.isPlaying && !state.isBlackout) {
