@@ -281,7 +281,14 @@
             // Parse screenId from URL query parameters
             const urlParams = new URLSearchParams(window.location.search);
             const screenId = urlParams.get('screenId') || 'default';
-            const wsUrl = `${proto}//${window.location.host}?screenId=${screenId}`;
+            
+            // Handle subpath proxies (like /digital/)
+            const pathParts = window.location.pathname.split('/');
+            const pathPrefix = pathParts.slice(0, -1).filter(p => p && p !== 'player.html' && p !== 'index.html').join('/');
+            const prefixStr = pathPrefix ? '/' + pathPrefix : '';
+            const wsUrl = `${proto}//${window.location.host}${prefixStr}/?screenId=${screenId}`;
+            
+            console.log(`Connecting to WebSocket at: ${wsUrl}`);
             ws = new WebSocket(wsUrl);
 
             ws.onopen = () => {

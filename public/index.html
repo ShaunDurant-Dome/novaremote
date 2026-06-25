@@ -326,7 +326,12 @@
         function connectWebSocket() {
             const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             // Register as admin to get global state updates
-            const wsUrl = `${proto}//${window.location.host}?screenId=admin`;
+            const pathParts = window.location.pathname.split('/');
+            const pathPrefix = pathParts.slice(0, -1).filter(p => p && p !== 'player.html' && p !== 'index.html').join('/');
+            const prefixStr = pathPrefix ? '/' + pathPrefix : '';
+            const wsUrl = `${proto}//${window.location.host}${prefixStr}/?screenId=admin`;
+            
+            console.log(`Connecting to WebSocket at: ${wsUrl}`);
             ws = new WebSocket(wsUrl);
 
             ws.onopen = () => {
