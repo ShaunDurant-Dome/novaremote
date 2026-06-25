@@ -124,7 +124,7 @@
                 <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
                     <span class="upload-icon">📤</span>
                     <p class="upload-text" style="font-size: 0.8rem;">Drag files or click here</p>
-                    <input type="file" id="fileInput" class="file-input" accept="video/mp4,image/*" onchange="handleFileSelect(this)">
+                    <input type="file" id="fileInput" class="file-input" accept="video/mp4,image/*" multiple onchange="handleFileSelect(this)">
                 </div>
 
                 <div class="playlist-items" id="libraryItems" style="max-height: 550px;">
@@ -893,39 +893,54 @@
             const dt = e.dataTransfer;
             const files = dt.files;
             if (files.length > 0) {
-                uploadFile(files[0]);
+                uploadFiles(files);
             }
         });
 
         function handleFileSelect(input) {
             if (input.files.length > 0) {
-                uploadFile(input.files[0]);
+                uploadFiles(input.files);
             }
         }
 
-        function uploadFile(file) {
-            const formData = new FormData();
-            formData.append('file', file);
-
+        async function uploadFiles(files) {
             const statusText = document.getElementById('connectionStatus').querySelector('.status-text');
-            statusText.innerText = 'Uploading...';
-
-            fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                statusText.innerText = 'Connected';
-                if (data.error) {
-                    alert(data.error);
+            const total = files.length;
+            let successCount = 0;
+            let failCount = 0;
+            
+            for (let i = 0; i < total; i++) {
+                const file = files[i];
+                statusText.innerText = `Uploading (${i + 1}/${total})...`;
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                try {
+                    const res = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (data.error) {
+                        console.error(`Upload error for ${file.name}:`, data.error);
+                        failCount++;
+                    } else {
+                        successCount++;
+                    }
+                } catch (err) {
+                    console.error(`Upload failed for ${file.name}:`, err);
+                    failCount++;
                 }
-            })
-            .catch(err => {
-                statusText.innerText = 'Connected';
-                console.error(err);
-                alert('Upload failed!');
-            });
+            }
+            
+            statusText.innerText = 'Connected';
+            // Clear file input value to allow selecting same files again if needed
+            document.getElementById('fileInput').value = '';
+            
+            if (failCount > 0) {
+                alert(`Upload complete: ${successCount} succeeded, ${failCount} failed.`);
+            }
         }
 
         function launchPlayer() {
