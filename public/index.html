@@ -603,6 +603,7 @@
 
         function switchScreen(screenId) {
             activeScreenId = screenId;
+            lastBlackoutState = null; // Reset tracker to prevent false auto-pause on screen switch
             if (globalState) {
                 renderScreenControls(globalState);
             }
@@ -840,6 +841,20 @@
         function renderScreenControls(state) {
             ensureActiveScreenExistsInUIState(state);
             const screen = state.screens[activeScreenId];
+
+            // Sleep Mode: auto-pause Spotify when screen goes black
+            if (lastBlackoutState === false && screen.isBlackout === true) {
+                console.log('[SLEEP] Screen blackout activated. Auto-pausing Spotify...');
+                if (spotifyToken && spotifyIsPlaying) {
+                    spotifyFetch('me/player/pause', 'PUT')
+                        .then(() => {
+                            spotifyIsPlaying = false;
+                            setTimeout(spotifyRefresh, 500);
+                        })
+                        .catch(err => console.log('Auto-pause Spotify on blackout failed:', err));
+                }
+            }
+            lastBlackoutState = screen.isBlackout;
 
             document.getElementById('controlPanelTitle').innerText = `${screen.name} Control`;
             document.getElementById('playlistCount').innerText = `${screen.playlist.length} items`;
@@ -1178,6 +1193,7 @@
         let spotifyExpiry = localStorage.getItem('spotify_token_expiry');
         let spotifyRefreshInterval = null;
         let spotifyIsPlaying = false;
+        let lastBlackoutState = null;
 
         async function checkSpotifyAuth() {
             // Check if redirect url contains auth code
