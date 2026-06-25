@@ -1,0 +1,14 @@
+# Node dependencies
+node_modules/
+
+# Local database and configuration states
+state.json
+
+# Local media uploads (keep directory, ignore contents)
+public/uploads/*
+!public/uploads/.gitkeep
+
+# System and logs
+*.log
+.DS_Store
+Thumbs.db

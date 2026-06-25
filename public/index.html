@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaRemote LED Command Center</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        /* Extra styles for two-pane layout */
+        .layout-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 2rem;
+        }
+        @media (max-width: 1200px) {
+            .layout-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .layout-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .screen-select-bar {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+        }
+        
+        .select-styled {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            font-family: inherit;
+            font-size: 0.95rem;
+            cursor: pointer;
+            min-width: 200px;
+        }
+        .select-styled option {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+        }
+        
+        .library-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        .library-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        .library-thumb {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            object-fit: cover;
+            margin-right: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>NovaRemote</h1>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">LED & Digital Signage Controller</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <a href="/novaremote-player.apk" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-color: rgba(255,123,0,0.3); color: var(--primary); text-decoration: none;" download>
+                    🤖 Download Android App
+                </a>
+                <div id="connectionStatus" class="status-badge">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Connecting...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Screen Selection and Creation Bar -->
+        <div class="screen-select-bar">
+            <span style="font-weight: 500; font-size: 1rem; color: var(--primary);">Active Screen:</span>
+            <select id="screenSelector" class="select-styled" onchange="switchScreen(this.value)">
+                <!-- Screens populated dynamically -->
+            </select>
+            
+            <div style="flex-grow: 1;"></div>
+            
+            <!-- Add new screen form -->
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" id="newScreenId" class="input-text" style="width: 180px; padding: 0.4rem 0.8rem; font-size: 0.85rem;" placeholder="e.g. hall, lobby, bar">
+                <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="createNewScreen()">➕ Add Screen</button>
+            </div>
+        </div>
+
+        <div class="layout-container">
+            <!-- Pane 1: Global Media Library -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Media Library</h2>
+                </div>
+                
+                <!-- Uploader -->
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                    <span class="upload-icon">📤</span>
+                    <p class="upload-text" style="font-size: 0.8rem;">Drag files or click here</p>
+                    <input type="file" id="fileInput" class="file-input" accept="video/mp4,image/*" onchange="handleFileSelect(this)">
+                </div>
+
+                <div class="playlist-items" id="libraryItems" style="max-height: 550px;">
+                    <!-- Library files populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Pane 2: Playback Control & Current Screen Playlist -->
+            <div>
+                <!-- Screen Control -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title" id="controlPanelTitle">Screen Control</h2>
+                        <span id="playingItemName" style="font-size: 0.85rem; color: var(--primary); font-weight: 500;">No media playing</span>
+                    </div>
+
+                    <div class="control-bar">
+                        <button class="btn btn-secondary" onclick="sendAction('PREV')" title="Previous">
+                            <span class="btn-icon">⏮</span> Prev
+                        </button>
+                        <button id="btnPlay" class="btn btn-primary" onclick="togglePlay()" title="Play">
+                            <span class="btn-icon" id="playIcon">▶</span> <span id="playText">Play</span>
+                        </button>
+                        <button class="btn btn-secondary" onclick="sendAction('NEXT')" title="Next">
+                            <span class="btn-icon">⏭</span> Next
+                        </button>
+                        <button id="btnBlackout" class="btn btn-blackout" onclick="toggleBlackout()" title="Blackout Display">
+                            <span class="btn-icon">⬛</span> Blackout
+                        </button>
+                    </div>
+
+                    <div class="volume-control">
+                        <span style="font-size: 1.1rem;" title="Volume">🔊</span>
+                        <input id="volumeSlider" class="volume-slider" type="range" min="0" max="1" step="0.05" oninput="setVolume(this.value)">
+                        <span id="volumeVal" style="font-size: 0.85rem; color: var(--text-muted); width: 35px; text-align: right;">100%</span>
+                    </div>
+                </div>
+
+                <!-- Screen Playlist -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Active Playlist</h2>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: rgba(255,123,0,0.3); color: var(--primary);" onclick="addTempSlide()">📊 + Temp Slide</button>
+                            <span id="playlistCount" class="status-badge" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; height: auto;">0 items</span>
+                        </div>
+                    </div>
+
+                    <div class="playlist-items" id="playlistItems" style="max-height: 400px;">
+                        <!-- Screen playlist items populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Ticker Control Panel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Scrolling Ticker Overlay</h2>
+                        <div class="switch-container" style="margin-bottom: 0;">
+                            <label class="switch">
+                                <input type="checkbox" id="tickerEnable" onchange="updateTicker()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="tickerText">Ticker Message</label>
+                        <input type="text" id="tickerText" class="input-text" placeholder="Type overlay message..." oninput="updateTicker()">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="tickerSpeed">Scroll Speed</label>
+                            <input type="range" id="tickerSpeed" class="volume-slider" min="1" max="10" step="1" oninput="updateTicker()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="tickerColor">Text Color</label>
+                            <input type="color" id="tickerColor" class="input-text" style="height: 44px; padding: 4px; cursor: pointer;" oninput="updateTicker()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pane 3: Preview & Setup -->
+            <div>
+                <!-- Screen Preview -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Live Preview</h2>
+                    </div>
+                    
+                    <div class="screen-preview-container">
+                        <div class="blackout-overlay" id="previewBlackout">
+                            DISPLAY BLACKOUT ACTIVE
+                        </div>
+                        <div class="preview-placeholder" id="previewPlaceholder">
+                            <span>📺</span>
+                            <span>No Active Playback</span>
+                        </div>
+                        
+                        <img id="previewImage" class="screen-preview" style="display: none;">
+                        <video id="previewVideo" class="screen-preview" style="display: none;" autoplay muted loop></video>
+                        
+                        <!-- Mini Temp Slide Preview -->
+                        <div id="previewTemp" class="temp-slide-layout temp-slide-preview" style="display: none; height: 100%; width: 100%;">
+                            <div class="temp-header">
+                                <img src="/logo_white.png" class="temp-logo temp-preview-logo" alt="The Dome">
+                            </div>
+                            <div class="temp-grid temp-preview-grid">
+                                <div class="temp-card temp-preview-card outdoor-card">
+                                    <div class="temp-label temp-preview-label">Outdoor</div>
+                                    <div class="temp-value temp-preview-value">
+                                        <span id="previewOutdoorVal">--</span><span class="temp-unit temp-preview-unit">°C</span>
+                                    </div>
+                                </div>
+                                <div class="temp-card temp-preview-card hall-card">
+                                    <div class="temp-label temp-preview-label">Main Hall</div>
+                                    <div class="temp-value temp-preview-value">
+                                        <span id="previewHallVal">--</span><span class="temp-unit temp-preview-unit">°C</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ticker Preview Overlay -->
+                        <div class="ticker-preview-container" id="previewTicker">
+                            <span class="ticker-preview-text" id="previewTickerText"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Saved Playlists -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Saved Playlists</h2>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label class="form-label" for="newPlaylistName">Save current screen layout:</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="newPlaylistName" class="input-text" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" placeholder="Playlist Name...">
+                            <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="saveCurrentPlaylist()">Save</button>
+                        </div>
+                    </div>
+                    <div class="saved-playlists-list" id="savedPlaylistsList">
+                        <!-- List populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Screen Coordinates Configuration -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">LED Screen Setup</h2>
+                        <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="launchPlayer()">Open Player</button>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Position X</label>
+                            <input type="number" id="screenX" class="input-text" onchange="updateScreenConfig()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Position Y</label>
+                            <input type="number" id="screenY" class="input-text" onchange="updateScreenConfig()">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Width</label>
+                            <input type="number" id="screenWidth" class="input-text" onchange="updateScreenConfig()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Height</label>
+                            <input type="number" id="screenHeight" class="input-text" onchange="updateScreenConfig()">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label class="form-label" for="domeApiUrl">Dome Management API (Sensors)</label>
+                        <input type="text" id="domeApiUrl" class="input-text" placeholder="http://192.168.178.X/api/temps" onchange="updateDomeApiUrl()">
+                    </div>
+
+                    <div style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                        <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Host PC Player Controls</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-primary" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; height: auto;" onclick="remoteControlPC('launch')">🚀 Launch Player</button>
+                            <button class="btn btn-danger" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; height: auto;" onclick="remoteControlPC('close')">🛑 Close Player</button>
+                        </div>
+                        <small style="display: block; margin-top: 0.4rem; color: var(--text-muted); font-size: 0.75rem; line-height: 1.2;">
+                            Launches or closes Chrome/Edge on the LED Controller PC remotely. Use this to reveal/access the desktop (e.g. for Spotify) without walking to the PC.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws;
+        let globalState = null;
+        let activeScreenId = 'default';
+
+        function connectWebSocket() {
+            const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            // Register as admin to get global state updates
+            const wsUrl = `${proto}//${window.location.host}?screenId=admin`;
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                const badge = document.getElementById('connectionStatus');
+                badge.classList.add('connected');
+                badge.querySelector('.status-text').innerText = 'Connected';
+            };
+
+            ws.onclose = () => {
+                const badge = document.getElementById('connectionStatus');
+                badge.classList.remove('connected');
+                badge.querySelector('.status-text').innerText = 'Disconnected';
+                setTimeout(connectWebSocket, 3000);
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'GLOBAL_STATE_UPDATE') {
+                    updateUI(data.state);
+                }
+            };
+        }
+
+        function sendAction(type, payload = {}) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                // Attach targeted screenId
+                ws.send(JSON.stringify({ type, screenId: activeScreenId, ...payload }));
+            }
+        }
+
+        function switchScreen(screenId) {
+            activeScreenId = screenId;
+            if (globalState) {
+                renderScreenControls(globalState);
+            }
+        }
+
+        function createNewScreen() {
+            const input = document.getElementById('newScreenId');
+            const sid = input.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (!sid) {
+                alert('Please enter a valid screen ID (letters and numbers only).');
+                return;
+            }
+            activeScreenId = sid;
+            sendAction('PLAY', { index: -1 }); // Trigger server initialization of screen state
+            input.value = '';
+        }
+
+        function togglePlay() {
+            if (!globalState) return;
+            const screen = globalState.screens[activeScreenId];
+            if (screen) {
+                if (screen.isPlaying) {
+                    sendAction('PAUSE');
+                } else {
+                    sendAction('PLAY');
+                }
+            }
+        }
+
+        function toggleBlackout() {
+            if (!globalState) return;
+            const screen = globalState.screens[activeScreenId];
+            if (screen) {
+                sendAction('SET_BLACKOUT', { value: !screen.isBlackout });
+            }
+        }
+
+        function setVolume(val) {
+            sendAction('SET_VOLUME', { volume: parseFloat(val) });
+        }
+
+        function addTempSlide() {
+            sendAction('ADD_TEMP_SLIDE', { duration: 15 });
+        }
+
+        function updateTicker() {
+            const enabled = document.getElementById('tickerEnable').checked;
+            const text = document.getElementById('tickerText').value;
+            const speed = parseInt(document.getElementById('tickerSpeed').value);
+            const color = document.getElementById('tickerColor').value;
+            
+            sendAction('UPDATE_TICKER', {
+                ticker: { enabled, text, speed, color }
+            });
+        }
+
+        function updateScreenConfig() {
+            const x = parseInt(document.getElementById('screenX').value);
+            const y = parseInt(document.getElementById('screenY').value);
+            const width = parseInt(document.getElementById('screenWidth').value);
+            const height = parseInt(document.getElementById('screenHeight').value);
+
+            sendAction('UPDATE_SCREEN_CONFIG', {
+                config: { x, y, width, height }
+            });
+        }
+
+        function updateDomeApiUrl() {
+            const url = document.getElementById('domeApiUrl').value;
+            sendAction('SET_DOME_API_URL', { url });
+        }
+
+        function remoteControlPC(action) {
+            sendAction('REMOTE_PC_CONTROL', { action });
+        }
+
+        // Media Library controls
+        function addLibraryItemToPlaylist(libraryId) {
+            sendAction('ADD_LIBRARY_ITEM_TO_PLAYLIST', { libraryId });
+        }
+
+        function deleteLibraryItem(id, event) {
+            event.stopPropagation();
+            if (confirm('Delete this file from server? This will also remove it from all screen playlists.')) {
+                fetch(`/api/library/${id}`, { method: 'DELETE' })
+                    .then(res => res.json())
+                    .catch(err => console.error(err));
+            }
+        }
+
+        // Playlist manager calls
+        function saveCurrentPlaylist() {
+            const name = document.getElementById('newPlaylistName').value.trim();
+            if (!name) {
+                alert('Please type a name for the playlist.');
+                return;
+            }
+            fetch('/api/playlists/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, screenId: activeScreenId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('newPlaylistName').value = '';
+                    console.log('Playlist saved!');
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        function loadPlaylist(name) {
+            if (confirm(`Load playlist "${name}"? This will replace current screen's playlist.`)) {
+                fetch(`/api/playlists/load/${encodeURIComponent(name)}?screenId=${activeScreenId}`, { method: 'POST' })
+                    .then(res => res.json())
+                    .catch(err => console.error(err));
+            }
+        }
+
+        function deletePlaylist(name, event) {
+            event.stopPropagation();
+            if (confirm(`Delete saved playlist "${name}"?`)) {
+                fetch(`/api/playlists/${encodeURIComponent(name)}`, { method: 'DELETE' })
+                    .then(res => res.json())
+                    .catch(err => console.error(err));
+            }
+        }
+
+        function fetchPreviewTemps() {
+            fetch('/api/temps')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('previewOutdoorVal').innerText = parseFloat(data.outdoor).toFixed(1);
+                    document.getElementById('previewHallVal').innerText = parseFloat(data.mainHall).toFixed(1);
+                })
+                .catch(err => console.error('Error previewing temps:', err));
+        }
+
+        function updateUI(state) {
+            globalState = state;
+
+            // 1. Populate Screen Selector Dropdown
+            const screenSelector = document.getElementById('screenSelector');
+            const currentSelected = screenSelector.value || activeScreenId;
+            screenSelector.innerHTML = '';
+            
+            for (let sid in state.screens) {
+                const option = document.createElement('option');
+                option.value = sid;
+                option.innerText = state.screens[sid].name;
+                screenSelector.appendChild(option);
+            }
+            screenSelector.value = activeScreenId;
+
+            // 2. Render Media Library (Pane 1)
+            const libraryContainer = document.getElementById('libraryItems');
+            libraryContainer.innerHTML = '';
+            
+            if (state.mediaLibrary && state.mediaLibrary.length > 0) {
+                state.mediaLibrary.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'library-item';
+                    
+                    let thumb = `<div class="library-thumb" style="display:flex;align-items:center;justify-content:center;background:#151824;font-size:1.1rem;">🖼</div>`;
+                    if (item.type === 'image') {
+                        thumb = `<img src="/uploads/${item.filename}" class="library-thumb">`;
+                    } else if (item.type === 'video') {
+                        thumb = `<div class="library-thumb" style="display:flex;align-items:center;justify-content:center;background:#151824;color:var(--secondary);font-size:1.1rem;">📹</div>`;
+                    }
+                    
+                    row.innerHTML = `
+                        ${thumb}
+                        <div style="flex-grow:1; overflow:hidden;">
+                            <div style="font-size:0.85rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">${item.type}</div>
+                        </div>
+                        <button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;" onclick="addLibraryItemToPlaylist('${item.id}')">Add</button>
+                        <button class="btn-item-action delete" style="margin-left:0.25rem;" onclick="deleteLibraryItem('${item.id}', event)">🗑</button>
+                    `;
+                    libraryContainer.appendChild(row);
+                });
+            } else {
+                libraryContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 2rem 0;">Library is empty.<br>Upload media files above.</div>`;
+            }
+
+            // 3. Render Saved Playlists list
+            const savedPlaylistsList = document.getElementById('savedPlaylistsList');
+            savedPlaylistsList.innerHTML = '';
+            
+            if (state.savedPlaylists && state.savedPlaylists.length > 0) {
+                state.savedPlaylists.forEach(p => {
+                    const row = document.createElement('div');
+                    row.className = 'saved-playlist-row';
+                    row.innerHTML = `
+                        <span class="saved-playlist-name">${p.name}</span>
+                        <div class="saved-playlist-actions">
+                            <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; border-color: rgba(255,255,255,0.08);" onclick="loadPlaylist('${p.name}')">Load</button>
+                            <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background:rgba(255,56,56,0.1);" onclick="deletePlaylist('${p.name}', event)">Delete</button>
+                        </div>
+                    `;
+                    savedPlaylistsList.appendChild(row);
+                });
+            } else {
+                savedPlaylistsList.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0;">No saved layouts.</div>`;
+            }
+
+            // 4. Update Screen coordinates / Global Configs
+            document.getElementById('screenX').value = state.screenConfig.x;
+            document.getElementById('screenY').value = state.screenConfig.y;
+            document.getElementById('screenWidth').value = state.screenConfig.width;
+            document.getElementById('screenHeight').value = state.screenConfig.height;
+            document.getElementById('domeApiUrl').value = state.domeManagementApiUrl || '';
+
+            // 5. Update Screen Controls & Playlists
+            renderScreenControls(state);
+        }
+
+        function renderScreenControls(state) {
+            ensureActiveScreenExistsInUIState(state);
+            const screen = state.screens[activeScreenId];
+
+            document.getElementById('controlPanelTitle').innerText = `${screen.name} Control`;
+            document.getElementById('playlistCount').innerText = `${screen.playlist.length} items`;
+
+            // Update Play/Pause buttons
+            const playIcon = document.getElementById('playIcon');
+            const playText = document.getElementById('playText');
+            const btnPlay = document.getElementById('btnPlay');
+            
+            if (screen.isPlaying) {
+                playIcon.innerText = '⏸';
+                playText.innerText = 'Pause';
+                btnPlay.style.background = 'linear-gradient(135deg, #00ff87, #00d2ff)';
+            } else {
+                playIcon.innerText = '▶';
+                playText.innerText = 'Play';
+                btnPlay.style.background = 'linear-gradient(135deg, var(--primary), var(--secondary))';
+            }
+
+            // Update Blackout Button
+            const btnBlackout = document.getElementById('btnBlackout');
+            const previewBlackout = document.getElementById('previewBlackout');
+            if (screen.isBlackout) {
+                btnBlackout.classList.add('active');
+                previewBlackout.classList.add('active');
+            } else {
+                btnBlackout.classList.remove('active');
+                previewBlackout.classList.remove('active');
+            }
+
+            // Sync volume elements
+            document.getElementById('volumeSlider').value = screen.volume;
+            document.getElementById('volumeVal').innerText = `${Math.round(screen.volume * 100)}%`;
+
+            // Update Ticker panel inputs
+            document.getElementById('tickerEnable').checked = screen.ticker.enabled;
+            document.getElementById('tickerText').value = screen.ticker.text;
+            document.getElementById('tickerSpeed').value = screen.ticker.speed;
+            document.getElementById('tickerColor').value = screen.ticker.color;
+
+            const previewTicker = document.getElementById('previewTicker');
+            const previewTickerText = document.getElementById('previewTickerText');
+            if (screen.ticker.enabled) {
+                previewTicker.classList.add('active');
+                previewTickerText.style.color = screen.ticker.color;
+                previewTickerText.innerText = screen.ticker.text;
+                const animationDuration = (35 - (screen.ticker.speed * 3)) + 's';
+                previewTickerText.style.animationDuration = animationDuration;
+            } else {
+                previewTicker.classList.remove('active');
+            }
+
+            // Render Playlist Items (Pane 2 bottom)
+            const playlistContainer = document.getElementById('playlistItems');
+            playlistContainer.innerHTML = '';
+            
+            screen.playlist.forEach((item, index) => {
+                const isActive = index === screen.currentIndex;
+                const activeClass = isActive ? 'active' : '';
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `playlist-item ${activeClass}`;
+                itemDiv.onclick = () => sendAction('PLAY', { index });
+
+                let mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:#151824;">🖼</div>`;
+                if (item.type === 'image') {
+                    mediaTag = `<img src="/uploads/${item.filename}" class="item-thumb">`;
+                } else if (item.type === 'video') {
+                    mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;background:#151824;color:var(--secondary);font-size:1.5rem;">📹</div>`;
+                } else if (item.type === 'temp') {
+                    mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;background:#151824;color:var(--primary);font-size:1.5rem;">📊</div>`;
+                }
+
+                let durationCtrl = '';
+                if (item.type === 'image' || item.type === 'temp') {
+                    durationCtrl = `
+                        <div style="display:flex;align-items:center;gap:0.35rem;" onclick="event.stopPropagation()">
+                            <span style="font-size:0.75rem;color:var(--text-muted)">Dur:</span>
+                            <input class="duration-input" type="number" min="1" max="3600" value="${item.duration || (item.type === 'temp' ? 15 : 10)}" 
+                                   onchange="updateDuration('${item.id}', this.value)">
+                            <span style="font-size:0.75rem;color:var(--text-muted)">s</span>
+                        </div>
+                    `;
+                }
+
+                let tempLabelsCtrl = '';
+                if (item.type === 'temp') {
+                    tempLabelsCtrl = `
+                        <div style="display:flex; flex-direction:column; gap:0.25rem; margin-top:0.35rem;" onclick="event.stopPropagation()">
+                            <div style="display:flex; align-items:center; gap:0.25rem;">
+                                <span style="font-size:0.7rem; color:var(--text-muted); width:45px;">Label 1:</span>
+                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                       type="text" value="${item.label1 || 'Outdoor Temperature'}" 
+                                       onchange="updateTempSettings('${item.id}', this.value, null, null, null)">
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.25rem;">
+                                <span style="font-size:0.7rem; color:var(--text-muted); width:45px;">Label 2:</span>
+                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                       type="text" value="${item.label2 || 'Main Hall Temperature'}" 
+                                       onchange="updateTempSettings('${item.id}', null, this.value, null, null)">
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.75rem; margin-top:0.15rem;">
+                                <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                    <input type="checkbox" ${item.showGraph ? 'checked' : ''} 
+                                           onchange="updateTempSettings('${item.id}', null, null, this.checked, null)"> 📈 Graph
+                                </label>
+                                <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                    <input type="checkbox" ${item.boldFont ? 'checked' : ''} 
+                                           onchange="updateTempSettings('${item.id}', null, null, null, this.checked)"> 🔤 Bold
+                                </label>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                itemDiv.innerHTML = `
+                    ${mediaTag}
+                    <div class="item-info">
+                        <div class="item-title" title="${item.name}">${item.name}</div>
+                        <div class="item-meta" style="flex-direction:column; align-items:flex-start; gap:0.25rem;">
+                            <div style="display:flex; align-items:center; gap:0.75rem; width:100%;">
+                                <span class="item-type ${item.type}">${item.type}</span>
+                                ${durationCtrl}
+                            </div>
+                            ${tempLabelsCtrl}
+                        </div>
+                    </div>
+                    <button class="btn-item-action delete" onclick="removePlaylistItem('${item.id}', event)" title="Remove from Playlist">❌</button>
+                `;
+                playlistContainer.appendChild(itemDiv);
+            });
+
+            // Update Live Preview Area
+            const imgPreview = document.getElementById('previewImage');
+            const vidPreview = document.getElementById('previewVideo');
+            const tempPreview = document.getElementById('previewTemp');
+            const placeholder = document.getElementById('previewPlaceholder');
+            const nameLabel = document.getElementById('playingItemName');
+
+            if (screen.currentIndex >= 0 && screen.currentIndex < screen.playlist.length) {
+                const currentItem = screen.playlist[screen.currentIndex];
+                nameLabel.innerText = `Playing: ${currentItem.name}`;
+                placeholder.style.display = 'none';
+                
+                if (currentItem.type === 'image') {
+                    vidPreview.style.display = 'none';
+                    vidPreview.pause();
+                    tempPreview.style.display = 'none';
+                    
+                    imgPreview.src = `/uploads/${currentItem.filename}`;
+                    imgPreview.style.display = 'block';
+                } else if (currentItem.type === 'video') {
+                    imgPreview.style.display = 'none';
+                    imgPreview.removeAttribute('src');
+                    tempPreview.style.display = 'none';
+                    
+                    const mediaUrl = `/uploads/${currentItem.filename}`;
+                    if (vidPreview.src !== window.location.origin + mediaUrl) {
+                        vidPreview.src = mediaUrl;
+                    }
+                    vidPreview.style.display = 'block';
+                    if (screen.isPlaying && !screen.isBlackout) {
+                        vidPreview.play();
+                    } else {
+                        vidPreview.pause();
+                    }
+                    vidPreview.volume = screen.volume;
+                } else if (currentItem.type === 'temp') {
+                    imgPreview.style.display = 'none';
+                    imgPreview.removeAttribute('src');
+                    vidPreview.style.display = 'none';
+                    vidPreview.pause();
+                    
+                    // Set dynamic labels in preview
+                    tempPreview.querySelector('.outdoor-card .temp-label').innerText = currentItem.label1 || 'Outdoor';
+                    tempPreview.querySelector('.hall-card .temp-label').innerText = currentItem.label2 || 'Main Hall';
+                    
+                    tempPreview.style.display = 'flex';
+                    fetchPreviewTemps();
+                }
+            } else {
+                nameLabel.innerText = 'No media playing';
+                imgPreview.style.display = 'none';
+                vidPreview.style.display = 'none';
+                vidPreview.pause();
+                tempPreview.style.display = 'none';
+                placeholder.style.display = 'flex';
+            }
+        }
+
+        function ensureActiveScreenExistsInUIState(state) {
+            if (!state.screens[activeScreenId]) {
+                activeScreenId = 'default';
+            }
+        }
+
+        function removePlaylistItem(id, event) {
+            event.stopPropagation();
+            sendAction('REMOVE_PLAYLIST_ITEM', { id });
+        }
+
+        function updateDuration(id, val) {
+            sendAction('UPDATE_DURATION', { id, duration: val });
+        }
+
+        function updateTempSettings(id, label1, label2, showGraph, boldFont) {
+            if (!globalState) return;
+            const screen = globalState.screens[activeScreenId];
+            if (screen) {
+                const item = screen.playlist.find(p => p.id === id);
+                if (item) {
+                    const l1 = label1 !== null ? label1 : (item.label1 || 'Outdoor Temperature');
+                    const l2 = label2 !== null ? label2 : (item.label2 || 'Main Hall Temperature');
+                    const sg = showGraph !== null ? showGraph : !!item.showGraph;
+                    const bf = boldFont !== null ? boldFont : !!item.boldFont;
+                    sendAction('UPDATE_TEMP_LABELS', { 
+                        id, 
+                        label1: l1, 
+                        label2: l2,
+                        showGraph: sg,
+                        boldFont: bf
+                    });
+                }
+            }
+        }
+
+        // Upload handlers
+        const uploadZone = document.getElementById('uploadZone');
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+            }, false);
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                uploadFile(files[0]);
+            }
+        });
+
+        function handleFileSelect(input) {
+            if (input.files.length > 0) {
+                uploadFile(input.files[0]);
+            }
+        }
+
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const statusText = document.getElementById('connectionStatus').querySelector('.status-text');
+            statusText.innerText = 'Uploading...';
+
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                statusText.innerText = 'Connected';
+                if (data.error) {
+                    alert(data.error);
+                }
+            })
+            .catch(err => {
+                statusText.innerText = 'Connected';
+                console.error(err);
+                alert('Upload failed!');
+            });
+        }
+
+        function launchPlayer() {
+            let x = 1920, y = 0, width = 1920, height = 1080;
+            if (globalState && globalState.screenConfig) {
+                x = globalState.screenConfig.x || x;
+                y = globalState.screenConfig.y || y;
+                width = globalState.screenConfig.width || width;
+                height = globalState.screenConfig.height || height;
+            }
+            const options = `width=${width},height=${height},left=${x},top=${y},menubar=no,toolbar=no,location=no,status=no`;
+            const win = window.open(`/player.html?screenId=${activeScreenId}&width=${width}&height=${height}`, 'NovaRemotePlayer', options);
+            if (!win) {
+                // Fallback if popup blocker is active
+                window.open(`/player.html?screenId=${activeScreenId}&width=${width}&height=${height}`, '_blank');
+            }
+        }
+
+        connectWebSocket();
+    </script>
+</body>
+</html>

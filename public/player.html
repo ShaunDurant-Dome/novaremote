@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaRemote LED Player</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            cursor: none; /* Hide cursor on the LED screen */
+        }
+    </style>
+</head>
+<body class="player-body">
+    <div id="playerContainer" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; overflow: hidden; background: #000;">
+        <!-- Blackout Screen Overlay -->
+        <div id="blackout" class="player-blackout"></div>
+
+        <!-- Media containers -->
+        <img id="imgContainer" class="player-media" style="display: none;">
+        <video id="vidContainer" class="player-media" style="display: none;" autoplay muted></video>
+
+        <!-- Dome Temperature Slide -->
+        <div id="tempContainer" class="temp-slide-layout" style="display: none;">
+            <div class="temp-header">
+                <img src="/logo_white.png" class="temp-logo" alt="The Dome">
+            </div>
+            <div class="temp-grid">
+                <div class="temp-card outdoor-card">
+                    <div id="outdoorLabel" class="temp-label">Outdoor Temperature</div>
+                    <div class="temp-value">
+                        <span id="outdoorVal">--</span><span class="temp-unit">°C</span>
+                    </div>
+                </div>
+                <div class="temp-card hall-card">
+                    <div id="hallLabel" class="temp-label">Main Hall Temperature</div>
+                    <div class="temp-value">
+                        <span id="hallVal">--</span><span class="temp-unit">°C</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Graph container on the right side -->
+            <div id="tempGraphContainer" class="temp-graph-container" style="display: none;">
+                <div class="temp-graph-title">Indoor Temperature History (24h)</div>
+                <svg id="tempGraphSvg" class="temp-graph-svg"></svg>
+            </div>
+
+            <div class="temp-footer" id="tempTime">
+                Updated: Just now
+            </div>
+        </div>
+
+        <!-- Ticker Marquee Overlay -->
+        <div id="ticker" class="player-ticker" style="display: none;">
+            <span id="tickerText" class="player-ticker-text"></span>
+        </div>
+    </div>
+
+    <script>
+        let styleOverrideElement = null;
+
+        function applyDimensions(width, height) {
+            if (!width || !height) return;
+            const container = document.getElementById('playerContainer');
+            if (container) {
+                container.style.width = width + 'px';
+                container.style.height = height + 'px';
+            }
+
+            // Remove old override if exists to prevent duplication
+            if (styleOverrideElement) {
+                styleOverrideElement.remove();
+                styleOverrideElement = null;
+            }
+
+            const hVal = parseInt(height);
+            if (hVal < 500) {
+                styleOverrideElement = document.createElement('style');
+                if (hVal >= 350) {
+                    // Compact vertical layout
+                    styleOverrideElement.textContent = `
+                        .temp-slide-layout { padding: 1.5rem 2rem !important; }
+                        .temp-grid { gap: 1.5rem !important; }
+                        .temp-card { padding: 1.25rem 2rem !important; border-radius: 16px !important; }
+                        .temp-label { font-size: 1rem !important; margin-bottom: 0.5rem !important; }
+                        .temp-value { font-size: 3.5rem !important; }
+                        .temp-unit { font-size: 1.75rem !important; }
+                        .temp-logo { width: 30vw !important; max-width: 250px !important; }
+                        .player-ticker-text { font-size: 1.8rem !important; }
+                        .player-ticker { padding: 0.75rem 0 !important; }
+                        
+                        /* Graph layout overrides */
+                        .temp-slide-layout.with-graph { flex-direction: row !important; flex-wrap: wrap !important; padding: 2rem !important; }
+                        .temp-slide-layout.with-graph .temp-header { width: 100% !important; margin-bottom: 1rem !important; }
+                        .temp-slide-layout.with-graph .temp-grid { width: 45% !important; flex-direction: column !important; gap: 1.5rem !important; }
+                        .temp-slide-layout.with-graph .temp-card { padding: 1.5rem 1.5rem !important; }
+                        .temp-slide-layout.with-graph .temp-graph-container { display: flex !important; width: 50% !important; height: 320px !important; }
+                    `;
+                } else if (hVal >= 220) {
+                    // Widescreen horizontal banner layout (for 220px to 350px, e.g. 1280x256)
+                    styleOverrideElement.textContent = `
+                        .temp-slide-layout { 
+                            flex-direction: row !important; 
+                            justify-content: space-between !important; 
+                            align-items: center !important; 
+                            padding: 1rem 3rem !important; 
+                        }
+                        .temp-header { 
+                            width: 25% !important; 
+                            margin: 0 !important; 
+                            display: flex !important; 
+                            justify-content: center !important; 
+                        }
+                        .temp-logo { 
+                            width: 100% !important; 
+                            max-width: 220px !important; 
+                            height: auto !important; 
+                            margin: 0 !important;
+                        }
+                        .temp-grid { 
+                            width: 70% !important; 
+                            flex-direction: row !important; 
+                            gap: 2rem !important; 
+                            justify-content: flex-end !important; 
+                            padding: 0 !important; 
+                            margin: 0 !important; 
+                            max-width: none !important;
+                        }
+                        .temp-card { 
+                            padding: 0.75rem 1.5rem !important; 
+                            border-radius: 16px !important; 
+                            flex: 1 !important;
+                            max-width: 240px !important;
+                            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+                        }
+                        .temp-label { 
+                            font-size: 0.8rem !important; 
+                            margin-bottom: 0.25rem !important; 
+                            letter-spacing: 1px !important; 
+                        }
+                        .temp-value { 
+                            font-size: 2.8rem !important; 
+                        }
+                        .temp-unit { 
+                            font-size: 1.4rem !important; 
+                        }
+                        .player-ticker-text { 
+                            font-size: 1.6rem !important; 
+                        }
+                        .player-ticker { 
+                            padding: 0.5rem 0 !important; 
+                        }
+                        .temp-footer {
+                            display: none !important; 
+                        }
+                        
+                        /* Graph layout overrides */
+                        .temp-slide-layout.with-graph { flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 1rem 2rem !important; }
+                        .temp-slide-layout.with-graph .temp-header { width: 15% !important; margin: 0 !important; }
+                        .temp-slide-layout.with-graph .temp-logo { max-width: 130px !important; }
+                        .temp-slide-layout.with-graph .temp-grid { width: 32% !important; flex-direction: column !important; gap: 0.6rem !important; padding: 0 !important; margin: 0 !important; }
+                        .temp-slide-layout.with-graph .temp-card { width: 100% !important; max-width: none !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 0.5rem 1.25rem !important; border-radius: 12px !important; }
+                        .temp-slide-layout.with-graph .temp-label { font-size: 0.75rem !important; margin: 0 !important; text-align: left !important; }
+                        .temp-slide-layout.with-graph .temp-value { font-size: 2.2rem !important; }
+                        .temp-slide-layout.with-graph .temp-unit { font-size: 1.1rem !important; }
+                        .temp-slide-layout.with-graph .temp-graph-container { display: flex !important; width: 48% !important; height: 210px !important; padding: 0.8rem 1rem !important; }
+                    `;
+                } else {
+                    // Ultra-compact horizontal banner layout (for under 220px, e.g. 960x192)
+                    styleOverrideElement.textContent = `
+                        .temp-slide-layout { 
+                            flex-direction: row !important; 
+                            justify-content: space-between !important; 
+                            align-items: center !important; 
+                            padding: 0.5rem 2rem !important; 
+                        }
+                        .temp-header { 
+                            width: 25% !important; 
+                            margin: 0 !important; 
+                            display: flex !important; 
+                            justify-content: center !important; 
+                        }
+                        .temp-logo { 
+                            width: 100% !important; 
+                            max-width: 170px !important; 
+                            height: auto !important; 
+                            margin: 0 !important;
+                        }
+                        .temp-grid { 
+                            width: 70% !important; 
+                            flex-direction: row !important; 
+                            gap: 1.25rem !important; 
+                            justify-content: flex-end !important; 
+                            padding: 0 !important; 
+                            margin: 0 !important; 
+                            max-width: none !important;
+                        }
+                        .temp-card { 
+                            padding: 0.4rem 1rem !important; 
+                            border-radius: 12px !important; 
+                            flex: 1 !important;
+                            max-width: 200px !important;
+                            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5) !important;
+                        }
+                        .temp-label { 
+                            font-size: 0.7rem !important; 
+                            margin-bottom: 0.15rem !important; 
+                            letter-spacing: 0.5px !important; 
+                        }
+                        .temp-value { 
+                            font-size: 2.2rem !important; 
+                        }
+                        .temp-unit { 
+                            font-size: 1.1rem !important; 
+                        }
+                        .player-ticker-text { 
+                            font-size: 1.3rem !important; 
+                        }
+                        .player-ticker { 
+                            padding: 0.35rem 0 !important; 
+                        }
+                        .temp-footer {
+                            display: none !important; 
+                        }
+                        
+                        /* Graph layout overrides (LED Wall 960x192 stacked style) */
+                        .temp-slide-layout.with-graph { flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 0.5rem 1.5rem !important; }
+                        .temp-slide-layout.with-graph .temp-header { width: 15% !important; margin: 0 !important; }
+                        .temp-slide-layout.with-graph .temp-logo { max-width: 110px !important; }
+                        .temp-slide-layout.with-graph .temp-grid { width: 32% !important; flex-direction: column !important; gap: 0.4rem !important; padding: 0 !important; margin: 0 !important; }
+                        .temp-slide-layout.with-graph .temp-card { width: 100% !important; max-width: none !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 0.3rem 1rem !important; border-radius: 8px !important; }
+                        .temp-slide-layout.with-graph .temp-label { font-size: 0.65rem !important; margin: 0 !important; text-align: left !important; }
+                        .temp-slide-layout.with-graph .temp-value { font-size: 1.8rem !important; }
+                        .temp-slide-layout.with-graph .temp-unit { font-size: 0.9rem !important; }
+                        .temp-slide-layout.with-graph .temp-graph-container { display: flex !important; width: 48% !important; height: 165px !important; padding: 0.5rem 0.8rem !important; }
+                    `;
+                }
+                document.head.appendChild(styleOverrideElement);
+            }
+        }
+
+        // Parse startup width/height from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const screenW = urlParams.get('width');
+        const screenH = urlParams.get('height');
+        if (screenW && screenH) {
+            applyDimensions(screenW, screenH);
+        }
+
+        let ws;
+        let currentState = null;
+        let imageTimer = null;
+        let tempFetchInterval = null;
+        let historyFetchInterval = null;
+
+        const imgEl = document.getElementById('imgContainer');
+        const vidEl = document.getElementById('vidContainer');
+        const tempEl = document.getElementById('tempContainer');
+        const blackoutEl = document.getElementById('blackout');
+        const tickerEl = document.getElementById('ticker');
+        const tickerTextEl = document.getElementById('tickerText');
+        
+        const outdoorValEl = document.getElementById('outdoorVal');
+        const hallValEl = document.getElementById('hallVal');
+        const tempTimeEl = document.getElementById('tempTime');
+
+        // Automatically send NEXT command when video ends
+        vidEl.onended = () => {
+            sendAction('NEXT');
+        };
+
+        function connectWebSocket() {
+            const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            // Parse screenId from URL query parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const screenId = urlParams.get('screenId') || 'default';
+            const wsUrl = `${proto}//${window.location.host}?screenId=${screenId}`;
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log(`Player connected to server for screenId: ${screenId}`);
+            };
+
+            ws.onclose = () => {
+                console.log('Player connection lost. Reconnecting...');
+                setTimeout(connectWebSocket, 3000);
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'STATE_UPDATE') {
+                    if (data.screenConfig) {
+                        applyDimensions(data.screenConfig.width, data.screenConfig.height);
+                    }
+                    updatePlayer(data.state);
+                }
+            };
+        }
+
+        function sendAction(type, payload = {}) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type, ...payload }));
+            }
+        }
+
+        function fetchTemps() {
+            fetch('/api/temps')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.outdoor !== undefined && data.outdoor !== null) {
+                        outdoorValEl.innerText = parseFloat(data.outdoor).toFixed(1);
+                    }
+                    if (data.mainHall !== undefined && data.mainHall !== null) {
+                        hallValEl.innerText = parseFloat(data.mainHall).toFixed(1);
+                    }
+                    const now = new Date();
+                    tempTimeEl.innerText = `Updated: ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                })
+                .catch(err => {
+                    console.error('Error fetching temps:', err);
+                    outdoorValEl.innerText = '--';
+                    hallValEl.innerText = '--';
+                });
+        }
+
+        function fetchAndDrawGraph() {
+            fetch('/api/temps/history')
+                .then(res => res.json())
+                .then(data => {
+                    drawSvgGraph(data);
+                })
+                .catch(err => {
+                    console.error('Error fetching temp history:', err);
+                });
+        }
+
+        function drawSvgGraph(data) {
+            const svg = document.getElementById('tempGraphSvg');
+            if (!svg) return;
+            
+            // Clear old elements
+            svg.innerHTML = '';
+            
+            if (!data || data.length === 0) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', '50%');
+                text.setAttribute('y', '50%');
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', 'rgba(255,255,255,0.4)');
+                text.setAttribute('font-size', '11');
+                text.textContent = 'No historical data available';
+                svg.appendChild(text);
+                return;
+            }
+            
+            const svgW = svg.clientWidth || 400;
+            const svgH = svg.clientHeight || 150;
+            const paddingLeft = 32;
+            const paddingRight = 10;
+            const paddingTop = 15;
+            const paddingBottom = 20;
+            
+            const chartW = svgW - paddingLeft - paddingRight;
+            const chartH = svgH - paddingTop - paddingBottom;
+            
+            const values = data.map(d => d.value);
+            let maxVal = Math.max(...values);
+            let minVal = Math.min(...values);
+            
+            if (maxVal === minVal) {
+                maxVal += 1;
+                minVal -= 1;
+            } else {
+                const diff = maxVal - minVal;
+                maxVal += diff * 0.15;
+                minVal -= diff * 0.15;
+            }
+            
+            const gridCount = 3;
+            for (let i = 0; i <= gridCount; i++) {
+                const yVal = minVal + (maxVal - minVal) * (i / gridCount);
+                const yPos = svgH - paddingBottom - (chartH * (i / gridCount));
+                
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', paddingLeft);
+                line.setAttribute('y1', yPos);
+                line.setAttribute('x2', svgW - paddingRight);
+                line.setAttribute('y2', yPos);
+                line.setAttribute('stroke', 'rgba(255,255,255,0.06)');
+                line.setAttribute('stroke-width', '1');
+                svg.appendChild(line);
+                
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', paddingLeft - 6);
+                text.setAttribute('y', yPos + 3);
+                text.setAttribute('text-anchor', 'end');
+                text.setAttribute('fill', 'rgba(255,255,255,0.5)');
+                text.setAttribute('font-size', '9');
+                text.setAttribute('font-weight', '700');
+                text.textContent = yVal.toFixed(1) + '°';
+                svg.appendChild(text);
+            }
+            
+            const points = data.map((d, index) => {
+                const xPos = paddingLeft + (chartW * (index / (data.length - 1)));
+                const yPos = svgH - paddingBottom - (chartH * ((d.value - minVal) / (maxVal - minVal)));
+                return { x: xPos, y: yPos, time: d.time, value: d.value };
+            });
+            
+            let areaPathStr = `M ${points[0].x} ${svgH - paddingBottom} `;
+            points.forEach(p => {
+                areaPathStr += `L ${p.x} ${p.y} `;
+            });
+            areaPathStr += `L ${points[points.length - 1].x} ${svgH - paddingBottom} Z`;
+            
+            let defs = svg.querySelector('defs');
+            if (!defs) {
+                defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                svg.appendChild(defs);
+            }
+            
+            const gradId = 'tempAreaGradient';
+            let grad = document.getElementById(gradId);
+            if (!grad) {
+                grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+                grad.setAttribute('id', gradId);
+                grad.setAttribute('x1', '0%');
+                grad.setAttribute('y1', '0%');
+                grad.setAttribute('x2', '0%');
+                grad.setAttribute('y2', '100%');
+                
+                const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                stop1.setAttribute('offset', '0%');
+                stop1.setAttribute('stop-color', '#00d2ff');
+                stop1.setAttribute('stop-opacity', '0.25');
+                
+                const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                stop2.setAttribute('offset', '100%');
+                stop2.setAttribute('stop-color', '#00d2ff');
+                stop2.setAttribute('stop-opacity', '0.00');
+                
+                grad.appendChild(stop1);
+                grad.appendChild(stop2);
+                defs.appendChild(grad);
+            }
+            
+            const areaPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            areaPath.setAttribute('d', areaPathStr);
+            areaPath.setAttribute('fill', `url(#${gradId})`);
+            svg.appendChild(areaPath);
+            
+            let linePathStr = `M ${points[0].x} ${points[0].y} `;
+            for (let i = 1; i < points.length; i++) {
+                linePathStr += `L ${points[i].x} ${points[i].y} `;
+            }
+            
+            const linePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            linePath.setAttribute('d', linePathStr);
+            linePath.setAttribute('fill', 'none');
+            linePath.setAttribute('stroke', '#00d2ff');
+            linePath.setAttribute('stroke-width', '2');
+            linePath.setAttribute('stroke-linecap', 'round');
+            linePath.setAttribute('stroke-linejoin', 'round');
+            linePath.setAttribute('filter', 'drop-shadow(0 0 3px rgba(0,210,255,0.4))');
+            svg.appendChild(linePath);
+            
+            const timeLabelsCount = 4;
+            const step = Math.floor((points.length - 1) / (timeLabelsCount - 1));
+            for (let i = 0; i < timeLabelsCount; i++) {
+                const index = Math.min(i * step, points.length - 1);
+                const p = points[index];
+                const tStr = p.time.split(' ')[1] ? p.time.split(' ')[1].substring(0, 5) : '';
+                
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', p.x);
+                text.setAttribute('y', svgH - 4);
+                text.setAttribute('text-anchor', i === 0 ? 'start' : (i === timeLabelsCount - 1 ? 'end' : 'middle'));
+                text.setAttribute('fill', 'rgba(255,255,255,0.4)');
+                text.setAttribute('font-size', '9');
+                text.setAttribute('font-weight', '700');
+                text.textContent = tStr;
+                svg.appendChild(text);
+            }
+        }
+
+        function updatePlayer(state) {
+            currentState = state;
+            clearTimeout(imageTimer);
+            clearInterval(tempFetchInterval);
+
+            // Handle Blackout
+            if (state.isBlackout) {
+                blackoutEl.classList.add('active');
+            } else {
+                blackoutEl.classList.remove('active');
+            }
+
+            // Sync Ticker
+            if (state.ticker.enabled && !state.isBlackout) {
+                tickerEl.style.display = 'block';
+                tickerTextEl.innerText = state.ticker.text;
+                tickerTextEl.style.color = state.ticker.color;
+                
+                // Convert 1-10 speed to marquee animation duration
+                const animDuration = (35 - (state.ticker.speed * 3)) + 's';
+                tickerTextEl.style.animationDuration = animDuration;
+            } else {
+                tickerEl.style.display = 'none';
+            }
+
+            // Verify if there is media to display
+            if (state.currentIndex >= 0 && state.currentIndex < state.playlist.length) {
+                const item = state.playlist[state.currentIndex];
+                const mediaUrl = `/uploads/${item.filename}`;
+
+                if (item.type === 'image') {
+                    // Hide other containers
+                    vidEl.style.display = 'none';
+                    vidEl.pause();
+                    vidEl.removeAttribute('src');
+                    tempEl.style.display = 'none';
+
+                    imgEl.src = mediaUrl;
+                    imgEl.style.display = 'block';
+
+                    // Slideshow timer for images
+                    if (state.isPlaying && !state.isBlackout) {
+                        const durationMs = (item.duration || 10) * 1000;
+                        imageTimer = setTimeout(() => {
+                            sendAction('NEXT');
+                        }, durationMs);
+                    }
+                } else if (item.type === 'video') {
+                    // Hide other containers
+                    imgEl.style.display = 'none';
+                    imgEl.removeAttribute('src');
+                    tempEl.style.display = 'none';
+
+                    if (vidEl.src !== window.location.origin + mediaUrl) {
+                        vidEl.src = mediaUrl;
+                    }
+                    vidEl.style.display = 'block';
+
+                    // Audio volume sync
+                    vidEl.volume = state.volume;
+                    vidEl.muted = (state.volume === 0);
+
+                    // Play/Pause sync
+                    if (state.isPlaying && !state.isBlackout) {
+                        vidEl.play().catch(err => console.log('Video play start delayed:', err));
+                    } else {
+                        vidEl.pause();
+                    }
+                } else if (item.type === 'temp') {
+                    // Hide media elements
+                    imgEl.style.display = 'none';
+                    imgEl.removeAttribute('src');
+                    vidEl.style.display = 'none';
+                    vidEl.pause();
+                    vidEl.removeAttribute('src');
+
+                    // Show Temperature Display
+                    document.getElementById('outdoorLabel').innerText = item.label1 || 'Outdoor Temperature';
+                    document.getElementById('hallLabel').innerText = item.label2 || 'Main Hall Temperature';
+
+                    // Toggle bold font styling
+                    if (item.boldFont) {
+                        tempEl.classList.add('bold-fonts');
+                    } else {
+                        tempEl.classList.remove('bold-fonts');
+                    }
+
+                    // Toggle graph layout
+                    const graphContainer = document.getElementById('tempGraphContainer');
+                    if (item.showGraph) {
+                        tempEl.classList.add('with-graph');
+                        if (graphContainer) graphContainer.style.display = 'flex';
+                        
+                        // Initial fetch & draw
+                        fetchAndDrawGraph();
+                        
+                        // Refresh graph every minute
+                        historyFetchInterval = setInterval(fetchAndDrawGraph, 60000);
+                    } else {
+                        tempEl.classList.remove('with-graph');
+                        if (graphContainer) graphContainer.style.display = 'none';
+                    }
+
+                    tempEl.style.display = 'flex';
+                    fetchTemps();
+                    
+                    // Fetch fresh temperatures every 10 seconds while this slide is active
+                    tempFetchInterval = setInterval(fetchTemps, 10000);
+
+                    // Slideshow timer for temperatures
+                    if (state.isPlaying && !state.isBlackout) {
+                        const durationMs = (item.duration || 15) * 1000;
+                        imageTimer = setTimeout(() => {
+                            sendAction('NEXT');
+                        }, durationMs);
+                    }
+                }
+            } else {
+                // Clear display
+                imgEl.style.display = 'none';
+                imgEl.removeAttribute('src');
+                vidEl.style.display = 'none';
+                vidEl.pause();
+                vidEl.removeAttribute('src');
+                tempEl.style.display = 'none';
+            }
+        }
+
+        // Initialize connection
+        connectWebSocket();
+    </script>
+</body>
+</html>
