@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NovaRemote LED Command Center</title>
+    <title>The Dome Digital Platform</title>
     <link rel="stylesheet" href="app.css">
     <style>
         /* Extra styles for two-pane layout */
@@ -77,14 +77,20 @@
             object-fit: cover;
             margin-right: 0.75rem;
         }
+        .platform-title::before {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div>
-                <h1>NovaRemote</h1>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">LED & Digital Signage Controller</p>
+            <div style="display: flex; align-items: center; gap: 1.25rem;">
+                <img src="/logo_white.png" alt="The Dome" style="height: 45px; object-fit: contain; filter: brightness(1.2);">
+                <div style="border-left: 1px solid rgba(255, 255, 255, 0.1); padding-left: 1.25rem; display: flex; flex-direction: column; justify-content: center;">
+                    <h1 class="platform-title" style="font-size: 1.7rem; font-weight: 700; color: var(--text-main); background: none; -webkit-text-fill-color: var(--text-main); -webkit-background-clip: initial; display: flex; align-items: center; gap: 0; margin: 0;">The Dome Digital Platform</h1>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.1rem; font-weight: 500;">LED & Digital Signage Controller</p>
+                </div>
             </div>
             <div style="display: flex; align-items: center; gap: 1rem;">
                 <a href="/novaremote-player.apk" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-color: rgba(255,123,0,0.3); color: var(--primary); text-decoration: none;" download>
