@@ -45,6 +45,15 @@
                 width: 100%;
                 justify-content: space-between;
             }
+            
+            /* Adjust button size for tablet two-column layout */
+            .control-bar {
+                gap: 0.75rem;
+            }
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
         }
         
         @media (max-width: 768px) {
@@ -70,6 +79,84 @@
             }
             .screen-select-bar > div:last-child > input {
                 flex: 1;
+            }
+            
+            /* Stack header buttons vertically to fit narrow mobile screens */
+            header > div:last-child {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 0.75rem;
+                width: 100%;
+            }
+            header > div:last-child > a,
+            header > div:last-child > div {
+                width: 100% !important;
+                justify-content: center !important;
+            }
+            
+            /* Shrink container padding on mobile */
+            .container {
+                padding: 1rem;
+            }
+            
+            /* Shrink panel padding on mobile */
+            .panel {
+                padding: 1rem;
+                border-radius: 12px;
+            }
+            .panel-header {
+                margin-bottom: 1rem;
+            }
+            
+            /* Wrap screen control buttons into a 2x2 grid */
+            .control-bar {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            .control-bar > button {
+                flex: 1 1 calc(50% - 0.25rem);
+                justify-content: center;
+                padding: 0.6rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            /* Title wrapping on small screens */
+            header > div:first-child {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+            header > div:first-child > div {
+                border-left: none !important;
+                padding-left: 0 !important;
+                margin-top: 0.25rem;
+            }
+            .platform-title {
+                font-size: 1.4rem !important;
+            }
+            
+            /* Wrap double inputs like Saved Playlists buttons */
+            .panel div[style*="display: flex; gap: 0.5rem;"] {
+                flex-wrap: wrap !important;
+            }
+            .panel div[style*="display: flex; gap: 0.5rem;"] > input {
+                flex: 1 1 100% !important;
+            }
+            .panel div[style*="display: flex; gap: 0.5rem;"] > button {
+                flex: 1 1 100% !important;
+                justify-content: center;
+            }
+            .screen-select-bar > div:last-child {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            .screen-select-bar > div:last-child > input {
+                flex: 1 1 100% !important;
+            }
+            .screen-select-bar > div:last-child > button {
+                flex: 1 1 100% !important;
             }
         }
         
