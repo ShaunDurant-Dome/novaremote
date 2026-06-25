@@ -5,7 +5,7 @@ echo  Launching Microsoft Edge in Fullscreen Player...
 echo ===================================================
 
 :: The URL of the player page on portal.thedomenamibia.com
-set "PLAYER_URL=https://portal.thedomenamibia.com/digital/player.html?screenId=default&width=1920&height=384"
+set "PLAYER_URL=https://portal.thedomenamibia.com/digital/player.html?screenId=default&width=955&height=192"
 
 :: Kill any existing edge instances to allow the player to launch cleanly
 echo [INFO] Closing existing Microsoft Edge instances...
