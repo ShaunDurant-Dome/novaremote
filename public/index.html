@@ -76,6 +76,18 @@
             .panel-title {
                 font-size: 1.3rem !important;
             }
+            
+            /* Wrap screen control buttons into a 2x2 grid */
+            .control-bar {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            .control-bar > button {
+                flex: 1 1 calc(50% - 0.25rem);
+                justify-content: center;
+                padding: 0.8rem 1.25rem !important;
+                font-size: 1rem !important;
+            }
         }
         
         @media (max-width: 768px) {
@@ -124,18 +136,6 @@
             }
             .panel-header {
                 margin-bottom: 1rem;
-            }
-            
-            /* Wrap screen control buttons into a 2x2 grid */
-            .control-bar {
-                flex-wrap: wrap;
-                gap: 0.5rem;
-            }
-            .control-bar > button {
-                flex: 1 1 calc(50% - 0.25rem);
-                justify-content: center;
-                padding: 0.8rem 1.25rem !important;
-                font-size: 1rem !important;
             }
         }
         
