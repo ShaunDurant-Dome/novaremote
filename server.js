@@ -11,10 +11,25 @@ const wss = new WebSocket.Server({ server });
 
 const PORT = process.env.PORT || 5000;
 
-// Ensure folders exist
-const uploadsDir = path.join(__dirname, 'public', 'uploads');
+// Determine the storage path (detecting Render persistent disk mounts)
+let uploadsDir = path.join(__dirname, 'public', 'uploads');
+
+if (fs.existsSync('/public/uploads')) {
+    uploadsDir = '/public/uploads';
+    console.log('[STORAGE] Using Render absolute mount disk at: /public/uploads');
+} else if (fs.existsSync('/opt/render/project/src/public/uploads')) {
+    uploadsDir = '/opt/render/project/src/public/uploads';
+    console.log('[STORAGE] Using Render absolute source disk at: /opt/render/project/src/public/uploads');
+} else {
+    console.log(`[STORAGE] Using local directory: ${uploadsDir}`);
+}
+
 if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
+    try {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+    } catch (err) {
+        console.warn(`[STORAGE] Error creating directory ${uploadsDir}:`, err.message);
+    }
 }
 
 // Global State (Multi-Screen)
@@ -54,15 +69,10 @@ let state = {
 };
 
 // Load saved state if exists
-const stateFile = path.join(__dirname, 'public', 'uploads', 'state.json');
+const stateFile = path.join(uploadsDir, 'state.json');
 function loadState() {
     // Migration: if state.json is in root, move it to public/uploads
     const oldStateFile = path.join(__dirname, 'state.json');
-    const uploadsDir = path.join(__dirname, 'public', 'uploads');
-    
-    if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-    }
     
     if (fs.existsSync(oldStateFile) && !fs.existsSync(stateFile)) {
         try {
@@ -183,15 +193,16 @@ const upload = multer({
 
 // Middleware
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'), {
+
+// Explicitly serve uploads folder from the calculated uploadsDir
+app.use('/uploads', express.static(uploadsDir, {
     maxAge: '1y',
     setHeaders: (res, filePath, stat) => {
-        // Cache uploaded images and videos aggressively to prevent buffering
-        if (filePath.toLowerCase().includes('uploads')) {
-            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-        }
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     }
 }));
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 // REST Endpoints
 app.get('/api/state', (req, res) => {
