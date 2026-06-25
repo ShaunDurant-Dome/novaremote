@@ -16,6 +16,12 @@
         .layout-container > div {
             min-width: 0;
         }
+        .panel {
+            min-width: 0;
+        }
+        .item-info {
+            min-width: 0;
+        }
         
         @media (max-width: 1024px) {
             .layout-container {
@@ -453,9 +459,9 @@
 
                     <!-- Active Player View (Hidden when disconnected) -->
                     <div id="spotifyPlayer" style="display: none;">
-                        <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.25rem;">
-                            <img id="spotifyTrackArt" style="width: 50px; height: 50px; border-radius: 8px; background: rgba(0,0,0,0.4); object-fit: cover; border: 1px solid var(--border-color);">
-                            <div style="overflow: hidden; flex: 1;">
+                        <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.25rem; min-width: 0;">
+                            <img id="spotifyTrackArt" style="width: 50px; height: 50px; border-radius: 8px; background: rgba(0,0,0,0.4); object-fit: cover; border: 1px solid var(--border-color); flex-shrink: 0;">
+                            <div style="overflow: hidden; flex: 1; min-width: 0;">
                                 <div id="spotifyTrackName" style="font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main);">No Track Playing</div>
                                 <div id="spotifyArtistName" style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
                             </div>
@@ -786,7 +792,7 @@
                     
                     row.innerHTML = `
                         ${thumb}
-                        <div style="flex-grow:1; overflow:hidden;">
+                        <div style="flex-grow:1; overflow:hidden; min-width:0;">
                             <div style="font-size:0.85rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
                             <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">${item.type}</div>
                         </div>
