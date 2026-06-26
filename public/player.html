@@ -383,23 +383,32 @@
                 });
         }
 
-        function fetchAndDrawGraph() {
+        function fetchAndDrawGraph(historyHours) {
+            const hh = historyHours || 24;
             fetch('/api/temps/history')
                 .then(res => res.json())
                 .then(data => {
-                    drawSvgGraph(data);
+                    const pointsCount = hh * 6;
+                    const slicedData = data.slice(-pointsCount);
+                    drawSvgGraph(slicedData, hh);
                 })
                 .catch(err => {
                     console.error('Error fetching temp history:', err);
                 });
         }
 
-        function drawSvgGraph(data) {
+        function drawSvgGraph(data, historyHours) {
             const svg = document.getElementById('tempGraphSvg');
             if (!svg) return;
             
             // Clear old elements
             svg.innerHTML = '';
+            
+            const hh = historyHours || 24;
+            const titleEl = document.querySelector('.temp-graph-title');
+            if (titleEl) {
+                titleEl.textContent = `Indoor Temperature History (${hh}h)`;
+            }
             
             if (!data || data.length === 0) {
                 const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -561,6 +570,7 @@
                 currentItemFilename = item ? item.filename : null;
                 currentPlaylistIndex = state.currentIndex;
                 clearInterval(tempFetchInterval);
+                clearInterval(historyFetchInterval);
             }
 
             // Handle Blackout
@@ -689,11 +699,12 @@
                         tempEl.classList.add('with-graph');
                         if (graphContainer) graphContainer.style.display = 'flex';
                         
+                        const hh = item.historyHours || 24;
                         // Initial fetch & draw
-                        fetchAndDrawGraph();
+                        fetchAndDrawGraph(hh);
                         
                         // Refresh graph every minute
-                        historyFetchInterval = setInterval(fetchAndDrawGraph, 60000);
+                        historyFetchInterval = setInterval(() => fetchAndDrawGraph(hh), 60000);
                     } else {
                         tempEl.classList.remove('with-graph');
                         if (graphContainer) graphContainer.style.display = 'none';
