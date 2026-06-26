@@ -569,6 +569,12 @@
                     imgEl.removeAttribute('src');
                     tempEl.style.display = 'none';
 
+                    if (vidEl.src === window.location.origin + mediaUrl && vidEl.ended && state.isPlaying && !state.isBlackout) {
+                        console.log('[PLAYER] Video already ended while offline. Requesting NEXT...');
+                        sendAction('NEXT');
+                        return;
+                    }
+
                     if (vidEl.src !== window.location.origin + mediaUrl) {
                         vidEl.src = mediaUrl;
                     }

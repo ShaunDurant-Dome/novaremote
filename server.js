@@ -65,7 +65,8 @@ let state = {
         width: 1920,
         height: 1080
     },
-    domeManagementApiUrl: ''
+    domeManagementApiUrl: '',
+    spotifyConfig: null
 };
 
 // Load saved state if exists
@@ -449,6 +450,19 @@ app.post('/api/spotify/exchange', async (req, res) => {
         });
 
         const data = await response.json();
+        if (response.status === 200 && data.access_token) {
+            state.spotifyConfig = {
+                accessToken: data.access_token,
+                refreshToken: data.refresh_token || (state.spotifyConfig ? state.spotifyConfig.refreshToken : ''),
+                tokenExpiry: Date.now() + (data.expires_in * 1000),
+                clientId: client_id,
+                clientSecret: client_secret,
+                wasPlayingBeforeBlackout: (state.spotifyConfig ? state.spotifyConfig.wasPlayingBeforeBlackout : false),
+                lastDeviceId: (state.spotifyConfig ? state.spotifyConfig.lastDeviceId : '')
+            };
+            saveState();
+            console.log('[SPOTIFY-SERVER] Successfully exchanged and saved Spotify config.');
+        }
         res.status(response.status).json(data);
     } catch (error) {
         console.error('Error exchanging Spotify code:', error);
@@ -478,12 +492,166 @@ app.post('/api/spotify/refresh', async (req, res) => {
         });
 
         const data = await response.json();
+        if (response.status === 200 && data.access_token) {
+            state.spotifyConfig = {
+                ...state.spotifyConfig,
+                accessToken: data.access_token,
+                refreshToken: data.refresh_token || state.spotifyConfig.refreshToken,
+                tokenExpiry: Date.now() + (data.expires_in * 1000),
+                clientId: client_id,
+                clientSecret: client_secret
+            };
+            saveState();
+            console.log('[SPOTIFY-SERVER] Successfully refreshed and saved Spotify config.');
+        }
         res.status(response.status).json(data);
     } catch (error) {
         console.error('Error refreshing Spotify token:', error);
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
 });
+
+// Spotify Server-Side playback control helpers
+async function getOrRefreshSpotifyToken() {
+    if (!state.spotifyConfig || !state.spotifyConfig.refreshToken) return null;
+    const { accessToken, tokenExpiry, refreshToken, clientId, clientSecret } = state.spotifyConfig;
+
+    // Check if expired or expiring within 60s
+    if (Date.now() + 60000 > tokenExpiry) {
+        console.log('[SPOTIFY-SERVER] Token expiring soon. Refreshing on server...');
+        try {
+            const authHeader = 'Basic ' + Buffer.from(clientId + ':' + clientSecret).toString('base64');
+            const params = new URLSearchParams();
+            params.append('grant_type', 'refresh_token');
+            params.append('refresh_token', refreshToken);
+
+            const response = await fetch('https://accounts.spotify.com/api/token', {
+                method: 'POST',
+                headers: {
+                    'Authorization': authHeader,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: params.toString()
+            });
+
+            if (response.status === 200) {
+                const data = await response.json();
+                state.spotifyConfig.accessToken = data.access_token;
+                state.spotifyConfig.tokenExpiry = Date.now() + (data.expires_in * 1000);
+                if (data.refresh_token) {
+                    state.spotifyConfig.refreshToken = data.refresh_token;
+                }
+                saveState();
+                console.log('[SPOTIFY-SERVER] Token refreshed successfully.');
+                return state.spotifyConfig.accessToken;
+            } else {
+                console.error('[SPOTIFY-SERVER] Failed to refresh token. Status:', response.status);
+                return null;
+            }
+        } catch (error) {
+            console.error('[SPOTIFY-SERVER] Error refreshing token:', error);
+            return null;
+        }
+    }
+    return accessToken;
+}
+
+async function spotifyServerAction(action) {
+    if (!state.spotifyConfig) {
+        console.log('[SPOTIFY-SERVER] Spotify is not configured, skipping blackout action:', action);
+        return;
+    }
+    const token = await getOrRefreshSpotifyToken();
+    if (!token) {
+        console.log('[SPOTIFY-SERVER] No valid token, cannot perform action:', action);
+        return;
+    }
+
+    if (action === 'pause') {
+        console.log('[SPOTIFY-SERVER] Sending Pause request to Spotify...');
+        try {
+            // First check if currently playing to decide whether to resume on wake
+            const playingRes = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            let wasPlaying = false;
+            let currentDeviceId = state.spotifyConfig.lastDeviceId;
+
+            if (playingRes.status === 200) {
+                const playingData = await playingRes.json();
+                wasPlaying = !!(playingData && playingData.is_playing);
+            }
+            
+            // Get active devices to save device ID
+            const devicesRes = await fetch('https://api.spotify.com/v1/me/player/devices', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (devicesRes.status === 200) {
+                const devicesData = await devicesRes.json();
+                if (devicesData && devicesData.devices) {
+                    const activeDev = devicesData.devices.find(d => d.is_active);
+                    if (activeDev) {
+                        currentDeviceId = activeDev.id;
+                    }
+                }
+            }
+
+            // Perform Pause request
+            const pauseRes = await fetch('https://api.spotify.com/v1/me/player/pause', {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            console.log('[SPOTIFY-SERVER] Pause response status:', pauseRes.status);
+            // If it succeeds (204) OR if it was already playing according to API, mark wasPlaying as true
+            const finalWasPlaying = (pauseRes.status === 204) || wasPlaying;
+            state.spotifyConfig.wasPlayingBeforeBlackout = finalWasPlaying;
+            if (currentDeviceId) {
+                state.spotifyConfig.lastDeviceId = currentDeviceId;
+            }
+            saveState();
+            console.log(`[SPOTIFY-SERVER] Saved wasPlayingBeforeBlackout = ${finalWasPlaying}, deviceId = ${currentDeviceId}`);
+        } catch (err) {
+            console.error('[SPOTIFY-SERVER] Error during auto-pause:', err);
+        }
+    } else if (action === 'resume') {
+        if (!state.spotifyConfig.wasPlayingBeforeBlackout) {
+            console.log('[SPOTIFY-SERVER] Spotify was not playing before blackout, skipping resume.');
+            return;
+        }
+
+        console.log('[SPOTIFY-SERVER] Sending Resume request to Spotify...');
+        try {
+            const deviceId = state.spotifyConfig.lastDeviceId;
+            let resumeRes;
+            if (deviceId) {
+                console.log('[SPOTIFY-SERVER] Resuming on device ID:', deviceId);
+                // Call Transfer Playback with play = true to wake it up
+                resumeRes = await fetch('https://api.spotify.com/v1/me/player', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ device_ids: [deviceId], play: true })
+                });
+            } else {
+                console.log('[SPOTIFY-SERVER] Resuming on default active device...');
+                resumeRes = await fetch('https://api.spotify.com/v1/me/player/play', {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            }
+            console.log('[SPOTIFY-SERVER] Resume response status:', resumeRes.status);
+            
+            // Clean up wasPlaying flag
+            state.spotifyConfig.wasPlayingBeforeBlackout = false;
+            saveState();
+        } catch (err) {
+            console.error('[SPOTIFY-SERVER] Error during auto-resume:', err);
+        }
+    }
+}
 
 
 // WebSocket Handler
@@ -558,6 +726,13 @@ wss.on('connection', (ws, req) => {
                 case 'SET_BLACKOUT':
                     screen.isBlackout = !!data.value;
                     broadcastScreenState(sid);
+                    if (sid === 'default') {
+                        if (screen.isBlackout) {
+                            spotifyServerAction('pause');
+                        } else {
+                            spotifyServerAction('resume');
+                        }
+                    }
                     break;
                 case 'UPDATE_TICKER':
                     screen.ticker = { ...screen.ticker, ...data.ticker };
@@ -699,6 +874,14 @@ wss.on('connection', (ws, req) => {
                         delete state.screens[data.targetScreenId];
                     }
                     break;
+                case 'SPOTIFY_SYNC_DEVICE':
+                    if (state.spotifyConfig) {
+                        state.spotifyConfig.lastDeviceId = data.deviceId;
+                    }
+                    break;
+                case 'SPOTIFY_DISCONNECT':
+                    state.spotifyConfig = null;
+                    break;
             }
             
             saveState();
@@ -745,6 +928,15 @@ setInterval(() => {
                         screen.lastScheduledState = shouldBeBlackout;
                         stateChanged = true;
                         broadcastScreenState(sid);
+                        
+                        // Trigger Spotify server action on schedule-driven blackout change
+                        if (sid === 'default') {
+                            if (shouldBeBlackout) {
+                                spotifyServerAction('pause');
+                            } else {
+                                spotifyServerAction('resume');
+                            }
+                        }
                     }
                 }
             }
