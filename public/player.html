@@ -257,6 +257,7 @@
         let ws;
         let currentState = null;
         let imageTimer = null;
+        let videoSafetyTimer = null;
         let tempFetchInterval = null;
         let historyFetchInterval = null;
 
@@ -271,8 +272,22 @@
         const hallValEl = document.getElementById('hallVal');
         const tempTimeEl = document.getElementById('tempTime');
 
-        // Automatically send NEXT command when video ends
+        // Automatically send NEXT command when video ends or fails
         vidEl.onended = () => {
+            clearTimeout(videoSafetyTimer);
+            videoSafetyTimer = null;
+            sendAction('NEXT');
+        };
+
+        vidEl.onerror = () => {
+            console.error('[PLAYER] Video playback error, skipping...');
+            clearTimeout(videoSafetyTimer);
+            videoSafetyTimer = null;
+            sendAction('NEXT');
+        };
+
+        imgEl.onerror = () => {
+            console.error('[PLAYER] Image loading error, skipping...');
             sendAction('NEXT');
         };
 
@@ -519,6 +534,8 @@
         function updatePlayer(state) {
             currentState = state;
             clearTimeout(imageTimer);
+            clearTimeout(videoSafetyTimer);
+            videoSafetyTimer = null;
             clearInterval(tempFetchInterval);
 
             // Handle Blackout
@@ -571,11 +588,32 @@
 
                     if (vidEl.src.endsWith(item.filename) && vidEl.ended && state.isPlaying && !state.isBlackout) {
                         console.log('[PLAYER] Video already ended while offline. Requesting NEXT...');
+                        clearTimeout(videoSafetyTimer);
+                        videoSafetyTimer = null;
                         sendAction('NEXT');
                     }
 
                     if (!vidEl.src.endsWith(item.filename)) {
+                        clearTimeout(videoSafetyTimer);
+                        videoSafetyTimer = null;
                         vidEl.src = mediaUrl;
+
+                        // Set up safety timer once metadata loads or immediately as fallback
+                        const setSafetyTimer = (duration) => {
+                            clearTimeout(videoSafetyTimer);
+                            const finalDuration = duration || item.duration || 15;
+                            videoSafetyTimer = setTimeout(() => {
+                                console.warn('[PLAYER] Video safety timeout. Skipping...');
+                                sendAction('NEXT');
+                            }, (finalDuration + 5) * 1000);
+                        };
+
+                        vidEl.onloadedmetadata = () => {
+                            setSafetyTimer(vidEl.duration);
+                        };
+
+                        // Fallback safety timer if metadata fails to load
+                        setSafetyTimer(item.duration || 15);
                     }
                     vidEl.style.display = 'block';
 
@@ -585,9 +623,21 @@
 
                     // Play/Pause sync
                     if (state.isPlaying && !state.isBlackout) {
-                        vidEl.play().catch(err => console.log('Video play start delayed:', err));
+                        // Re-start safety timer if it was cleared and we are resuming
+                        if (!videoSafetyTimer) {
+                            const duration = vidEl.duration || item.duration || 15;
+                            videoSafetyTimer = setTimeout(() => {
+                                console.warn('[PLAYER] Video safety timeout. Skipping...');
+                                sendAction('NEXT');
+                            }, (duration + 5) * 1000);
+                        }
+                        vidEl.play().catch(err => {
+                            console.log('Video play start blocked, relying on safety timer:', err);
+                        });
                     } else {
                         vidEl.pause();
+                        clearTimeout(videoSafetyTimer);
+                        videoSafetyTimer = null;
                     }
                 } else if (item.type === 'temp') {
                     // Hide media elements
