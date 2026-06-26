@@ -260,6 +260,9 @@
         let videoSafetyTimer = null;
         let tempFetchInterval = null;
         let historyFetchInterval = null;
+        let currentPlaylistIndex = -1;
+        let currentItemFilename = null;
+        let disconnectTime = null;
 
         const imgEl = document.getElementById('imgContainer');
         const vidEl = document.getElementById('vidContainer');
@@ -308,10 +311,19 @@
 
             ws.onopen = () => {
                 console.log(`Player connected to server for screenId: ${screenId}`);
+                if (disconnectTime && Date.now() - disconnectTime > 20000) {
+                    console.log('Connection was lost for more than 20s. Reloading page to ensure latest assets...');
+                    window.location.reload();
+                    return;
+                }
+                disconnectTime = null;
             };
 
             ws.onclose = () => {
                 console.log('Player connection lost. Reconnecting...');
+                if (!disconnectTime) {
+                    disconnectTime = Date.now();
+                }
                 setTimeout(connectWebSocket, 3000);
             };
 
@@ -533,10 +545,23 @@
 
         function updatePlayer(state) {
             currentState = state;
-            clearTimeout(imageTimer);
-            clearTimeout(videoSafetyTimer);
-            videoSafetyTimer = null;
-            clearInterval(tempFetchInterval);
+            
+            const item = (state.currentIndex >= 0 && state.currentIndex < state.playlist.length) 
+                ? state.playlist[state.currentIndex] 
+                : null;
+            
+            const hasItemChanged = !item || (currentItemFilename !== item.filename) || (currentPlaylistIndex !== state.currentIndex);
+            
+            if (hasItemChanged) {
+                clearTimeout(imageTimer);
+                clearTimeout(videoSafetyTimer);
+                videoSafetyTimer = null;
+                imageTimer = null;
+                
+                currentItemFilename = item ? item.filename : null;
+                currentPlaylistIndex = state.currentIndex;
+                clearInterval(tempFetchInterval);
+            }
 
             // Handle Blackout
             if (state.isBlackout) {
