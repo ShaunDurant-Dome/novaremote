@@ -799,7 +799,8 @@ wss.on('connection', (ws, req) => {
                         label1: 'Outdoor Temperature',
                         label2: 'Main Hall Temperature',
                         showGraph: true,
-                        historyHours: 6
+                        historyHours: 6,
+                        bgTheme: 'dome'
                     };
                     screen.playlist.push(newTemp);
                     if (screen.currentIndex === -1) {
@@ -815,6 +816,7 @@ wss.on('connection', (ws, req) => {
                         tempItem.showGraph = data.showGraph !== undefined ? !!data.showGraph : tempItem.showGraph;
                         tempItem.boldFont = data.boldFont !== undefined ? !!data.boldFont : tempItem.boldFont;
                         tempItem.historyHours = data.historyHours !== undefined ? parseInt(data.historyHours) : (tempItem.historyHours || 24);
+                        tempItem.bgTheme = data.bgTheme !== undefined ? data.bgTheme : (tempItem.bgTheme || 'dome');
                     }
                     broadcastScreenState(sid);
                     break;

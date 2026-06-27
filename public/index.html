@@ -1086,32 +1086,44 @@
                                 <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Label 1:</span>
                                 <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
                                        type="text" value="${item.label1 || 'Outdoor Temperature'}" 
-                                       onchange="updateTempSettings('${item.id}', this.value, null, null, null, null)">
+                                       onchange="updateTempSettings('${item.id}', this.value, null, null, null, null, null)">
                             </div>
                             <div style="display:flex; align-items:center; gap:0.25rem;">
                                 <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Label 2:</span>
                                 <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
                                        type="text" value="${item.label2 || 'Main Hall Temperature'}" 
-                                       onchange="updateTempSettings('${item.id}', null, this.value, null, null, null)">
+                                       onchange="updateTempSettings('${item.id}', null, this.value, null, null, null, null)">
                             </div>
                             <div style="display:flex; align-items:center; gap:0.25rem;">
                                 <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">History:</span>
                                 <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px; border-color: rgba(255,255,255,0.08);" 
-                                        onchange="updateTempSettings('${item.id}', null, null, null, null, this.value)">
+                                        onchange="updateTempSettings('${item.id}', null, null, null, null, this.value, null)">
                                     <option value="24" ${item.historyHours == 24 ? 'selected' : ''}>24 Hours</option>
                                     <option value="12" ${item.historyHours == 12 ? 'selected' : ''}>12 Hours</option>
                                     <option value="6" ${(item.historyHours == 6 || !item.historyHours) ? 'selected' : ''}>6 Hours</option>
                                     <option value="3" ${item.historyHours == 3 ? 'selected' : ''}>3 Hours</option>
                                 </select>
                             </div>
+                            <div style="display:flex; align-items:center; gap:0.25rem;">
+                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Theme:</span>
+                                <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px; border-color: rgba(255,255,255,0.08);" 
+                                        onchange="updateTempSettings('${item.id}', null, null, null, null, null, this.value)">
+                                    <option value="dome" ${(item.bgTheme == 'dome' || !item.bgTheme) ? 'selected' : ''}>Dome Theme</option>
+                                    <option value="neon" ${item.bgTheme == 'neon' ? 'selected' : ''}>Neon Blue</option>
+                                    <option value="cyberpunk" ${item.bgTheme == 'cyberpunk' ? 'selected' : ''}>Cyberpunk</option>
+                                    <option value="forest" ${item.bgTheme == 'forest' ? 'selected' : ''}>Forest Green</option>
+                                    <option value="dark" ${item.bgTheme == 'dark' ? 'selected' : ''}>Charcoal Dark</option>
+                                    <option value="sunset" ${item.bgTheme == 'sunset' ? 'selected' : ''}>Sunset Glow</option>
+                                </select>
+                            </div>
                             <div style="display:flex; align-items:center; gap:0.75rem; margin-top:0.15rem;">
                                 <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
                                     <input type="checkbox" ${item.showGraph ? 'checked' : ''} 
-                                           onchange="updateTempSettings('${item.id}', null, null, this.checked, null, null)"> 📈 Graph
+                                           onchange="updateTempSettings('${item.id}', null, null, this.checked, null, null, null)"> 📈 Graph
                                 </label>
                                 <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
                                     <input type="checkbox" ${item.boldFont ? 'checked' : ''} 
-                                           onchange="updateTempSettings('${item.id}', null, null, null, this.checked, null)"> 🔤 Bold
+                                           onchange="updateTempSettings('${item.id}', null, null, null, this.checked, null, null)"> 🔤 Bold
                                 </label>
                             </div>
                         </div>
@@ -1181,6 +1193,11 @@
                     tempPreview.querySelector('.outdoor-card .temp-label').innerText = currentItem.label1 || 'Outdoor';
                     tempPreview.querySelector('.hall-card .temp-label').innerText = currentItem.label2 || 'Main Hall';
                     
+                    // Apply theme background class
+                    tempPreview.className = 'temp-slide-layout temp-slide-preview';
+                    const theme = currentItem.bgTheme || 'dome';
+                    tempPreview.classList.add(`theme-${theme}`);
+
                     tempPreview.style.display = 'flex';
                     fetchPreviewTemps();
                 }
@@ -1209,7 +1226,7 @@
             sendAction('UPDATE_DURATION', { id, duration: val });
         }
 
-        function updateTempSettings(id, label1, label2, showGraph, boldFont, historyHours) {
+        function updateTempSettings(id, label1, label2, showGraph, boldFont, historyHours, bgTheme) {
             if (!globalState) return;
             const screen = globalState.screens[activeScreenId];
             if (screen) {
@@ -1220,13 +1237,15 @@
                     const sg = showGraph !== null ? showGraph : !!item.showGraph;
                     const bf = boldFont !== null ? boldFont : !!item.boldFont;
                     const hh = historyHours !== null ? parseInt(historyHours) : (item.historyHours || 24);
+                    const theme = bgTheme !== null ? bgTheme : (item.bgTheme || 'dome');
                     sendAction('UPDATE_TEMP_LABELS', { 
                         id, 
                         label1: l1, 
                         label2: l2,
                         showGraph: sg,
                         boldFont: bf,
-                        historyHours: hh
+                        historyHours: hh,
+                        bgTheme: theme
                     });
                 }
             }

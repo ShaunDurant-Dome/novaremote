@@ -657,11 +657,50 @@ input:checked + .slider:before {
     top: 0;
     left: 0;
     z-index: 5;
+    background-size: 400% 400%;
+    animation: gradientShift 20s ease infinite;
+}
+
+/* Theme: Dome (Orange & Navy) */
+.temp-slide-layout.theme-dome {
     background: #05070f;
     background: -webkit-linear-gradient(135deg, #05070f, #0d1633, #6d3500, #05070f);
     background: linear-gradient(-45deg, #05070f, #0d1633, #6d3500, #05070f);
-    background-size: 400% 400%;
-    animation: gradientShift 20s ease infinite;
+}
+
+/* Theme: Neon Blue (Cyan, Blue & Navy) */
+.temp-slide-layout.theme-neon {
+    background: #030a16;
+    background: -webkit-linear-gradient(135deg, #030a16, #092147, #005f73, #030a16);
+    background: linear-gradient(-45deg, #030a16, #092147, #005f73, #030a16);
+}
+
+/* Theme: Cyberpunk (Purple, Magenta & Dark Navy) */
+.temp-slide-layout.theme-cyberpunk {
+    background: #0b0314;
+    background: -webkit-linear-gradient(135deg, #0b0314, #260a3a, #5c0032, #0b0314);
+    background: linear-gradient(-45deg, #0b0314, #260a3a, #5c0032, #0b0314);
+}
+
+/* Theme: Forest Green (Teal, Emerald & Dark Green) */
+.temp-slide-layout.theme-forest {
+    background: #020b08;
+    background: -webkit-linear-gradient(135deg, #020b08, #072217, #0b4b32, #020b08);
+    background: linear-gradient(-45deg, #020b08, #072217, #0b4b32, #020b08);
+}
+
+/* Theme: Charcoal Dark ( Slate Gray & Deep Charcoal ) */
+.temp-slide-layout.theme-dark {
+    background: #09090b;
+    background: -webkit-linear-gradient(135deg, #09090b, #18181b, #27272a, #09090b);
+    background: linear-gradient(-45deg, #09090b, #18181b, #27272a, #09090b);
+}
+
+/* Theme: Sunset Glow (Red, Gold & Deep Magenta/Purple) */
+.temp-slide-layout.theme-sunset {
+    background: #11050e;
+    background: -webkit-linear-gradient(135deg, #11050e, #2e081c, #6c121e, #11050e);
+    background: linear-gradient(-45deg, #11050e, #2e081c, #6c121e, #11050e);
 }
 
 .temp-slide-preview {

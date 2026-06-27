@@ -686,6 +686,11 @@
                     document.getElementById('outdoorLabel').innerText = item.label1 || 'Outdoor Temperature';
                     document.getElementById('hallLabel').innerText = item.label2 || 'Main Hall Temperature';
 
+                    // Reset theme class names on tempEl
+                    tempEl.className = 'temp-slide-layout';
+                    const theme = item.bgTheme || 'dome';
+                    tempEl.classList.add(`theme-${theme}`);
+
                     // Toggle bold font styling
                     if (item.boldFont) {
                         tempEl.classList.add('bold-fonts');
