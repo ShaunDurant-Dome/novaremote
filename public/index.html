@@ -1154,7 +1154,16 @@
             const tempPreview = document.getElementById('previewTemp');
             const placeholder = document.getElementById('previewPlaceholder');
             const nameLabel = document.getElementById('playingItemName');
-
+ 
+            // Scale preview container aspect ratio to match active screen's configured resolution
+            const previewContainer = document.querySelector('.screen-preview-container');
+            const config = state.screenConfig || { width: 960, height: 192 };
+            const width = config.width || 960;
+            const height = config.height || 192;
+            if (previewContainer) {
+                previewContainer.style.aspectRatio = `${width}/${height}`;
+            }
+ 
             if (screen.currentIndex >= 0 && screen.currentIndex < screen.playlist.length) {
                 const currentItem = screen.playlist[screen.currentIndex];
                 nameLabel.innerText = `Playing: ${currentItem.name}`;
@@ -1193,11 +1202,21 @@
                     tempPreview.querySelector('.outdoor-card .temp-label').innerText = currentItem.label1 || 'Outdoor';
                     tempPreview.querySelector('.hall-card .temp-label').innerText = currentItem.label2 || 'Main Hall';
                     
-                    // Apply theme background class
+                    // Reset classes and apply active theme
                     tempPreview.className = 'temp-slide-layout temp-slide-preview';
                     const theme = currentItem.bgTheme || 'dome';
                     tempPreview.classList.add(`theme-${theme}`);
-
+ 
+                    // Toggle bold font class
+                    if (currentItem.boldFont) {
+                        tempPreview.classList.add('bold-fonts');
+                    }
+ 
+                    // Apply widescreen layout if screen height is under 350px
+                    if (height < 350) {
+                        tempPreview.classList.add('layout-horizontal');
+                    }
+ 
                     tempPreview.style.display = 'flex';
                     fetchPreviewTemps();
                 }

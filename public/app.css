@@ -925,6 +925,50 @@ input:checked + .slider:before {
     font-size: 0.75rem !important;
 }
 
+/* Horizontal Widescreen Preview Layout (for banner-style screens) */
+.temp-slide-preview.layout-horizontal {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0.4rem 1rem !important;
+}
+.temp-slide-preview.layout-horizontal .temp-header {
+    width: 25% !important;
+    margin: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+}
+.temp-slide-preview.layout-horizontal .temp-preview-logo {
+    width: 100% !important;
+    max-width: 65px !important;
+}
+.temp-slide-preview.layout-horizontal .temp-preview-grid {
+    width: 70% !important;
+    flex-direction: row !important;
+    gap: 0.5rem !important;
+    justify-content: flex-end !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+}
+.temp-slide-preview.layout-horizontal .temp-preview-card {
+    padding: 0.25rem 0.5rem !important;
+    border-radius: 6px !important;
+    flex: 1 !important;
+    max-width: 100px !important;
+}
+.temp-slide-preview.layout-horizontal .temp-preview-label {
+    font-size: 0.38rem !important;
+    margin-bottom: 0.05rem !important;
+    letter-spacing: 0.2px !important;
+}
+.temp-slide-preview.layout-horizontal .temp-preview-value {
+    font-size: 0.95rem !important;
+}
+.temp-slide-preview.layout-horizontal .temp-preview-unit {
+    font-size: 0.48rem !important;
+}
+
 .temp-footer {
     color: var(--text-muted);
     font-size: 1rem;
