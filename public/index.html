@@ -542,6 +542,16 @@
                             </label>
                         </div>
                         <div id="scheduleTimes" style="display: flex; flex-direction: column; gap: 0.4rem; transition: opacity 0.2s ease;">
+                            <!-- Column Headers -->
+                            <div style="display: flex; align-items: center; gap: 0.4rem; padding: 0.15rem 0.5rem; margin-bottom: 0.15rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.35rem;">
+                                <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-muted); min-width: 65px;">Day</span>
+                                <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
+                                    <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-muted); flex: 1; text-align: center; line-height: 1.1;">Blackout Start<br><span style="font-size: 0.55rem; font-weight: 400; color: rgba(255,255,255,0.4);">(Screen Off)</span></span>
+                                    <span style="font-size: 0.7rem; color: transparent; width: 12px; text-align: center;">to</span>
+                                    <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-muted); flex: 1; text-align: center; line-height: 1.1;">Blackout End<br><span style="font-size: 0.55rem; font-weight: 400; color: rgba(255,255,255,0.4);">(Screen On)</span></span>
+                                </div>
+                                <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-muted); width: 26px; text-align: center;">Copy</span>
+                            </div>
                             <div id="scheduleDaysContainer" style="display: flex; flex-direction: column; gap: 0.35rem;">
                                 <!-- Mon -->
                                 <div class="schedule-day-row" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.02); padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
