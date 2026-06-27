@@ -263,6 +263,13 @@
         let currentPlaylistIndex = -1;
         let currentItemFilename = null;
         let disconnectTime = null;
+        
+        // Active item configuration trackers
+        let currentItemId = null;
+        let currentBgTheme = null;
+        let currentBoldFont = null;
+        let currentShowGraph = null;
+        let currentHistoryHours = null;
 
         const imgEl = document.getElementById('imgContainer');
         const vidEl = document.getElementById('vidContainer');
@@ -559,7 +566,8 @@
                 ? state.playlist[state.currentIndex] 
                 : null;
             
-            const hasItemChanged = !item || (currentItemFilename !== item.filename) || (currentPlaylistIndex !== state.currentIndex);
+            const itemId = item ? item.id : null;
+            const hasItemChanged = !item || (currentItemId !== itemId) || (currentPlaylistIndex !== state.currentIndex);
             
             if (hasItemChanged) {
                 clearTimeout(imageTimer);
@@ -567,19 +575,23 @@
                 videoSafetyTimer = null;
                 imageTimer = null;
                 
-                currentItemFilename = item ? item.filename : null;
-                currentPlaylistIndex = state.currentIndex;
                 clearInterval(tempFetchInterval);
                 clearInterval(historyFetchInterval);
+                tempFetchInterval = null;
+                historyFetchInterval = null;
+                
+                currentItemId = itemId;
+                currentItemFilename = item ? item.filename : null;
+                currentPlaylistIndex = state.currentIndex;
             }
-
+ 
             // Handle Blackout
             if (state.isBlackout) {
                 blackoutEl.classList.add('active');
             } else {
                 blackoutEl.classList.remove('active');
             }
-
+ 
             // Sync Ticker
             if (state.ticker.enabled && !state.isBlackout) {
                 tickerEl.style.display = 'block';
@@ -592,47 +604,54 @@
             } else {
                 tickerEl.style.display = 'none';
             }
-
+ 
             // Verify if there is media to display
             if (state.currentIndex >= 0 && state.currentIndex < state.playlist.length) {
                 const item = state.playlist[state.currentIndex];
                 const mediaUrl = `/uploads/${item.filename}`;
-
+ 
                 if (item.type === 'image') {
                     // Hide other containers
                     vidEl.style.display = 'none';
                     vidEl.pause();
                     vidEl.removeAttribute('src');
                     tempEl.style.display = 'none';
-
+ 
                     imgEl.src = mediaUrl;
                     imgEl.style.display = 'block';
-
+ 
                     // Slideshow timer for images
                     if (state.isPlaying && !state.isBlackout) {
-                        const durationMs = (item.duration || 10) * 1000;
-                        imageTimer = setTimeout(() => {
-                            sendAction('NEXT');
-                        }, durationMs);
+                        if (imageTimer === null) {
+                            const durationMs = (item.duration || 10) * 1000;
+                            imageTimer = setTimeout(() => {
+                                sendAction('NEXT');
+                            }, durationMs);
+                        }
+                    } else {
+                        if (imageTimer !== null) {
+                            clearTimeout(imageTimer);
+                            imageTimer = null;
+                        }
                     }
                 } else if (item.type === 'video') {
                     // Hide other containers
                     imgEl.style.display = 'none';
                     imgEl.removeAttribute('src');
                     tempEl.style.display = 'none';
-
+ 
                     if (vidEl.src.endsWith(item.filename) && vidEl.ended && state.isPlaying && !state.isBlackout) {
                         console.log('[PLAYER] Video already ended while offline. Requesting NEXT...');
                         clearTimeout(videoSafetyTimer);
                         videoSafetyTimer = null;
                         sendAction('NEXT');
                     }
-
+ 
                     if (!vidEl.src.endsWith(item.filename)) {
                         clearTimeout(videoSafetyTimer);
                         videoSafetyTimer = null;
                         vidEl.src = mediaUrl;
-
+ 
                         // Set up safety timer once metadata loads or immediately as fallback
                         const setSafetyTimer = (duration) => {
                             clearTimeout(videoSafetyTimer);
@@ -642,20 +661,20 @@
                                 sendAction('NEXT');
                             }, (finalDuration + 5) * 1000);
                         };
-
+ 
                         vidEl.onloadedmetadata = () => {
                             setSafetyTimer(vidEl.duration);
                         };
-
+ 
                         // Fallback safety timer if metadata fails to load
                         setSafetyTimer(item.duration || 15);
                     }
                     vidEl.style.display = 'block';
-
+ 
                     // Audio volume sync
                     vidEl.volume = state.volume;
                     vidEl.muted = (state.volume === 0) || (item.muted === true);
-
+ 
                     // Play/Pause sync
                     if (state.isPlaying && !state.isBlackout) {
                         // Re-start safety timer if it was cleared and we are resuming
@@ -681,52 +700,78 @@
                     vidEl.style.display = 'none';
                     vidEl.pause();
                     vidEl.removeAttribute('src');
-
+ 
                     // Show Temperature Display
                     document.getElementById('outdoorLabel').innerText = item.label1 || 'Outdoor Temperature';
                     document.getElementById('hallLabel').innerText = item.label2 || 'Main Hall Temperature';
-
-                    // Reset theme class names on tempEl
-                    tempEl.className = 'temp-slide-layout';
+ 
+                    // Reset theme class names on tempEl if changed
                     const theme = item.bgTheme || 'dome';
-                    tempEl.classList.add(`theme-${theme}`);
-
-                    // Toggle bold font styling
-                    if (item.boldFont) {
-                        tempEl.classList.add('bold-fonts');
-                    } else {
-                        tempEl.classList.remove('bold-fonts');
+                    if (currentBgTheme !== theme || hasItemChanged) {
+                        tempEl.className = 'temp-slide-layout';
+                        tempEl.classList.add(`theme-${theme}`);
+                        currentBgTheme = theme;
                     }
-
-                    // Toggle graph layout
+ 
+                    // Toggle bold font styling if changed
+                    if (currentBoldFont !== !!item.boldFont || hasItemChanged) {
+                        if (item.boldFont) {
+                            tempEl.classList.add('bold-fonts');
+                        } else {
+                            tempEl.classList.remove('bold-fonts');
+                        }
+                        currentBoldFont = !!item.boldFont;
+                    }
+ 
+                    // Toggle graph layout / update intervals if changed
                     const graphContainer = document.getElementById('tempGraphContainer');
-                    if (item.showGraph) {
-                        tempEl.classList.add('with-graph');
-                        if (graphContainer) graphContainer.style.display = 'flex';
-                        
-                        const hh = item.historyHours || 24;
-                        // Initial fetch & draw
-                        fetchAndDrawGraph(hh);
-                        
-                        // Refresh graph every minute
-                        historyFetchInterval = setInterval(() => fetchAndDrawGraph(hh), 60000);
-                    } else {
-                        tempEl.classList.remove('with-graph');
-                        if (graphContainer) graphContainer.style.display = 'none';
-                    }
-
-                    tempEl.style.display = 'flex';
-                    fetchTemps();
+                    const showGraph = !!item.showGraph;
+                    const hh = item.historyHours || 24;
                     
-                    // Fetch fresh temperatures every 10 seconds while this slide is active
-                    tempFetchInterval = setInterval(fetchTemps, 10000);
-
+                    if (currentShowGraph !== showGraph || currentHistoryHours !== hh || hasItemChanged) {
+                        // Always clear the existing interval if we are resetting/changing
+                        if (historyFetchInterval) {
+                            clearInterval(historyFetchInterval);
+                            historyFetchInterval = null;
+                        }
+ 
+                        if (showGraph) {
+                            tempEl.classList.add('with-graph');
+                            if (graphContainer) graphContainer.style.display = 'flex';
+                            
+                            // Initial fetch & draw
+                            fetchAndDrawGraph(hh);
+                            
+                            // Refresh graph every minute
+                            historyFetchInterval = setInterval(() => fetchAndDrawGraph(hh), 60000);
+                        } else {
+                            tempEl.classList.remove('with-graph');
+                            if (graphContainer) graphContainer.style.display = 'none';
+                        }
+                        currentShowGraph = showGraph;
+                        currentHistoryHours = hh;
+                    }
+ 
+                    if (tempFetchInterval === null) {
+                        tempEl.style.display = 'flex';
+                        fetchTemps();
+                        // Fetch fresh temperatures every 10 seconds while this slide is active
+                        tempFetchInterval = setInterval(fetchTemps, 10000);
+                    }
+ 
                     // Slideshow timer for temperatures
                     if (state.isPlaying && !state.isBlackout) {
-                        const durationMs = (item.duration || 15) * 1000;
-                        imageTimer = setTimeout(() => {
-                            sendAction('NEXT');
-                        }, durationMs);
+                        if (imageTimer === null) {
+                            const durationMs = (item.duration || 15) * 1000;
+                            imageTimer = setTimeout(() => {
+                                sendAction('NEXT');
+                            }, durationMs);
+                        }
+                    } else {
+                        if (imageTimer !== null) {
+                            clearTimeout(imageTimer);
+                            imageTimer = null;
+                        }
                     }
                 }
             } else {
