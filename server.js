@@ -91,6 +91,16 @@ function loadState() {
             // Stop playback on start for all screens to be safe
             for (let sid in state.screens) {
                 state.screens[sid].isPlaying = false;
+                if (!state.screens[sid].blackoutSchedule) {
+                    state.screens[sid].blackoutSchedule = {
+                        enabled: false,
+                        onTime: '22:00',
+                        offTime: '08:00'
+                    };
+                }
+                if (state.screens[sid].lastScheduledState === undefined) {
+                    state.screens[sid].lastScheduledState = null;
+                }
             }
         } catch (e) {
             console.error('Error reading state file, using defaults.', e);
@@ -903,11 +913,21 @@ app.get('*', (req, res) => {
 // Blackout scheduler check (runs every 10 seconds to respond quickly to scheduled times)
 setInterval(() => {
     try {
-        const namibiaTimeStr = new Date().toLocaleString("en-US", { timeZone: "Africa/Windhoek" });
-        const localDate = new Date(namibiaTimeStr);
-        const hours = String(localDate.getHours()).padStart(2, '0');
-        const minutes = String(localDate.getMinutes()).padStart(2, '0');
-        const currentTime = `${hours}:${minutes}`;
+        const formatter = new Intl.DateTimeFormat("en-US", {
+            timeZone: "Africa/Windhoek",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+        });
+        const parts = formatter.formatToParts(new Date());
+        let hours = '00';
+        let minutes = '00';
+        for (const part of parts) {
+            if (part.type === 'hour') hours = part.value;
+            if (part.type === 'minute') minutes = part.value;
+        }
+        if (hours === '24') hours = '00';
+        const currentTime = `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
 
         let stateChanged = false;
 
@@ -955,8 +975,16 @@ setInterval(() => {
 }, 10000);
 
 server.listen(PORT, '0.0.0.0', () => {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Africa/Windhoek",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+    });
     console.log(`=========================================`);
     console.log(` NovaRemote Server is running!`);
+    console.log(` Current Namibia time: ${formatter.format(new Date())}`);
     console.log(` Web Admin Dashboard: http://localhost:${PORT}/`);
     console.log(` Remote Access:       http://<your-pc-ip>:${PORT}/`);
     console.log(` Player Screen:       http://localhost:${PORT}/player.html`);
