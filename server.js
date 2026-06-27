@@ -91,13 +91,33 @@ function loadState() {
             // Stop playback on start for all screens to be safe
             for (let sid in state.screens) {
                 state.screens[sid].isPlaying = false;
+                
+                const defaultDays = {};
+                for (let i = 0; i < 7; i++) {
+                    defaultDays[i] = { enabled: true, onTime: '22:00', offTime: '08:00' };
+                }
+
                 if (!state.screens[sid].blackoutSchedule) {
                     state.screens[sid].blackoutSchedule = {
                         enabled: false,
-                        onTime: '22:00',
-                        offTime: '08:00'
+                        days: defaultDays
+                    };
+                } else if (!state.screens[sid].blackoutSchedule.days) {
+                    const oldOn = state.screens[sid].blackoutSchedule.onTime || '22:00';
+                    const oldOff = state.screens[sid].blackoutSchedule.offTime || '08:00';
+                    const oldEnabled = state.screens[sid].blackoutSchedule.enabled !== undefined ? !!state.screens[sid].blackoutSchedule.enabled : false;
+                    
+                    const migratedDays = {};
+                    for (let i = 0; i < 7; i++) {
+                        migratedDays[i] = { enabled: true, onTime: oldOn, offTime: oldOff };
+                    }
+                    
+                    state.screens[sid].blackoutSchedule = {
+                        enabled: oldEnabled,
+                        days: migratedDays
                     };
                 }
+                
                 if (state.screens[sid].lastScheduledState === undefined) {
                     state.screens[sid].lastScheduledState = null;
                 }
@@ -140,8 +160,15 @@ function ensureScreenExists(screenId) {
             },
             blackoutSchedule: {
                 enabled: false,
-                onTime: '22:00',
-                offTime: '08:00'
+                days: {
+                    0: { enabled: true, onTime: '22:00', offTime: '08:00' },
+                    1: { enabled: true, onTime: '22:00', offTime: '08:00' },
+                    2: { enabled: true, onTime: '22:00', offTime: '08:00' },
+                    3: { enabled: true, onTime: '22:00', offTime: '08:00' },
+                    4: { enabled: true, onTime: '22:00', offTime: '08:00' },
+                    5: { enabled: true, onTime: '22:00', offTime: '08:00' },
+                    6: { enabled: true, onTime: '22:00', offTime: '08:00' }
+                }
             },
             lastScheduledState: null
         };
@@ -874,8 +901,7 @@ wss.on('connection', (ws, req) => {
                 case 'UPDATE_BLACKOUT_SCHEDULE':
                     screen.blackoutSchedule = {
                         enabled: !!data.enabled,
-                        onTime: data.onTime || '22:00',
-                        offTime: data.offTime || '08:00'
+                        days: data.days || {}
                     };
                     // Reset lastScheduledState so that it triggers evaluation immediately
                     screen.lastScheduledState = null;
@@ -929,36 +955,68 @@ setInterval(() => {
         if (hours === '24') hours = '00';
         const currentTime = `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
 
+        const formatterDay = new Intl.DateTimeFormat("en-US", {
+            timeZone: "Africa/Windhoek",
+            weekday: "short"
+        });
+        const weekdayStr = formatterDay.format(new Date());
+        const dayNamesMap = { 'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
+        const currentDay = dayNamesMap[weekdayStr];
+
         let stateChanged = false;
 
         for (let sid in state.screens) {
             const screen = state.screens[sid];
             if (screen.blackoutSchedule && screen.blackoutSchedule.enabled) {
-                const { onTime, offTime } = screen.blackoutSchedule;
-                if (onTime && offTime) {
-                    let shouldBeBlackout = false;
-                    if (onTime < offTime) {
-                        // e.g., 08:00 to 17:00
-                        shouldBeBlackout = (currentTime >= onTime && currentTime < offTime);
-                    } else {
-                        // e.g., 22:00 to 06:00 (overnight blackout)
-                        shouldBeBlackout = (currentTime >= onTime || currentTime < offTime);
-                    }
+                const days = screen.blackoutSchedule.days || {};
+                
+                // Get today's and yesterday's schedules
+                const todaySched = days[currentDay];
+                const yesterdaySched = days[(currentDay + 6) % 7];
 
-                    if (screen.lastScheduledState !== shouldBeBlackout) {
-                        console.log(`[SCHEDULE] Toggling blackout for screen "${sid}" to ${shouldBeBlackout} (Current time: ${currentTime}, Schedule: ${onTime} - ${offTime})`);
-                        screen.isBlackout = shouldBeBlackout;
-                        screen.lastScheduledState = shouldBeBlackout;
-                        stateChanged = true;
-                        broadcastScreenState(sid);
-                        
-                        // Trigger Spotify server action on schedule-driven blackout change
-                        if (sid === 'default') {
-                            if (shouldBeBlackout) {
-                                spotifyServerAction('pause');
-                            } else {
-                                spotifyServerAction('resume');
+                let shouldBeBlackout = false;
+
+                // 1. Check today's schedule
+                if (todaySched && todaySched.enabled) {
+                    const { onTime, offTime } = todaySched;
+                    if (onTime && offTime) {
+                        if (onTime < offTime) {
+                            if (currentTime >= onTime && currentTime < offTime) {
+                                shouldBeBlackout = true;
                             }
+                        } else {
+                            // Overnight schedule: from onTime to midnight
+                            if (currentTime >= onTime) {
+                                shouldBeBlackout = true;
+                            }
+                        }
+                    }
+                }
+
+                // 2. Check yesterday's schedule (if it crossed midnight)
+                if (yesterdaySched && yesterdaySched.enabled) {
+                    const { onTime, offTime } = yesterdaySched;
+                    if (onTime && offTime && onTime > offTime) {
+                        // Overnight schedule: from midnight to offTime
+                        if (currentTime < offTime) {
+                            shouldBeBlackout = true;
+                        }
+                    }
+                }
+
+                if (screen.lastScheduledState !== shouldBeBlackout) {
+                    console.log(`[SCHEDULE] Toggling blackout for screen "${sid}" to ${shouldBeBlackout} (Current time: ${currentTime}, Day: ${weekdayStr})`);
+                    screen.isBlackout = shouldBeBlackout;
+                    screen.lastScheduledState = shouldBeBlackout;
+                    stateChanged = true;
+                    broadcastScreenState(sid);
+                    
+                    // Trigger Spotify server action on schedule-driven blackout change
+                    if (sid === 'default') {
+                        if (shouldBeBlackout) {
+                            spotifyServerAction('pause');
+                        } else {
+                            spotifyServerAction('resume');
                         }
                     }
                 }

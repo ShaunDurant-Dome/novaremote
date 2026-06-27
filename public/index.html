@@ -541,14 +541,99 @@
                                 <span class="slider"></span>
                             </label>
                         </div>
-                        <div id="scheduleTimes" style="display: flex; gap: 0.5rem; transition: opacity 0.2s ease;">
-                            <div style="flex: 1;">
-                                <label class="form-label" style="font-size: 0.75rem; margin-bottom: 0.25rem;">Start (On)</label>
-                                <input type="time" id="scheduleOnTime" class="input-text" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" onchange="updateBlackoutSchedule()">
-                            </div>
-                            <div style="flex: 1;">
-                                <label class="form-label" style="font-size: 0.75rem; margin-bottom: 0.25rem;">End (Off)</label>
-                                <input type="time" id="scheduleOffTime" class="input-text" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" onchange="updateBlackoutSchedule()">
+                        <div id="scheduleTimes" style="display: flex; flex-direction: column; gap: 0.4rem; transition: opacity 0.2s ease;">
+                            <div id="scheduleDaysContainer" style="display: flex; flex-direction: column; gap: 0.35rem;">
+                                <!-- Mon -->
+                                <div class="schedule-day-row" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.02); padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+                                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 500; min-width: 65px; cursor: pointer; user-select: none; margin: 0;">
+                                        <input type="checkbox" id="schedDayEnable_1" onchange="updateBlackoutSchedule()">
+                                        <span>Mon</span>
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
+                                        <input type="time" id="schedDayOn_1" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
+                                        <span style="font-size: 0.7rem; color: var(--text-muted);">to</span>
+                                        <input type="time" id="schedDayOff_1" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
+                                    </div>
+                                    <button class="btn" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; height: auto; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1);" title="Copy this day's schedule to all other days" onclick="copyScheduleToAllDays(1, event)">📋</button>
+                                </div>
+                                <!-- Tue -->
+                                <div class="schedule-day-row" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.02); padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+                                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 500; min-width: 65px; cursor: pointer; user-select: none; margin: 0;">
+                                        <input type="checkbox" id="schedDayEnable_2" onchange="updateBlackoutSchedule()">
+                                        <span>Tue</span>
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
+                                        <input type="time" id="schedDayOn_2" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
+                                        <span style="font-size: 0.7rem; color: var(--text-muted);">to</span>
+                                        <input type="time" id="schedDayOff_2" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
+                                    </div>
+                                    <button class="btn" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; height: auto; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1);" title="Copy this day's schedule to all other days" onclick="copyScheduleToAllDays(2, event)">📋</button>
+                                </div>
+                                <!-- Wed -->
+                                <div class="schedule-day-row" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.02); padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+                                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 500; min-width: 65px; cursor: pointer; user-select: none; margin: 0;">
+                                        <input type="checkbox" id="schedDayEnable_3" onchange="updateBlackoutSchedule()">
+                                        <span>Wed</span>
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
+                                        <input type="time" id="schedDayOn_3" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
+                                        <span style="font-size: 0.7rem; color: var(--text-muted);">to</span>
+                                        <input type="time" id="schedDayOff_3" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
+                                    </div>
+                                    <button class="btn" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; height: auto; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1);" title="Copy this day's schedule to all other days" onclick="copyScheduleToAllDays(3, event)">📋</button>
+                                </div>
+                                <!-- Thu -->
+                                <div class="schedule-day-row" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.02); padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+                                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 500; min-width: 65px; cursor: pointer; user-select: none; margin: 0;">
+                                        <input type="checkbox" id="schedDayEnable_4" onchange="updateBlackoutSchedule()">
+                                        <span>Thu</span>
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
+                                        <input type="time" id="schedDayOn_4" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
+                                        <span style="font-size: 0.7rem; color: var(--text-muted);">to</span>
+                                        <input type="time" id="schedDayOff_4" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
+                                    </div>
+                                    <button class="btn" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; height: auto; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1);" title="Copy this day's schedule to all other days" onclick="copyScheduleToAllDays(4, event)">📋</button>
+                                </div>
+                                <!-- Fri -->
+                                <div class="schedule-day-row" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.02); padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+                                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 500; min-width: 65px; cursor: pointer; user-select: none; margin: 0;">
+                                        <input type="checkbox" id="schedDayEnable_5" onchange="updateBlackoutSchedule()">
+                                        <span>Fri</span>
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
+                                        <input type="time" id="schedDayOn_5" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
+                                        <span style="font-size: 0.7rem; color: var(--text-muted);">to</span>
+                                        <input type="time" id="schedDayOff_5" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
+                                    </div>
+                                    <button class="btn" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; height: auto; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1);" title="Copy this day's schedule to all other days" onclick="copyScheduleToAllDays(5, event)">📋</button>
+                                </div>
+                                <!-- Sat -->
+                                <div class="schedule-day-row" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.02); padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+                                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 500; min-width: 65px; cursor: pointer; user-select: none; margin: 0;">
+                                        <input type="checkbox" id="schedDayEnable_6" onchange="updateBlackoutSchedule()">
+                                        <span>Sat</span>
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
+                                        <input type="time" id="schedDayOn_6" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
+                                        <span style="font-size: 0.7rem; color: var(--text-muted);">to</span>
+                                        <input type="time" id="schedDayOff_6" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
+                                    </div>
+                                    <button class="btn" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; height: auto; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1);" title="Copy this day's schedule to all other days" onclick="copyScheduleToAllDays(6, event)">📋</button>
+                                </div>
+                                <!-- Sun -->
+                                <div class="schedule-day-row" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.02); padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+                                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 500; min-width: 65px; cursor: pointer; user-select: none; margin: 0;">
+                                        <input type="checkbox" id="schedDayEnable_0" onchange="updateBlackoutSchedule()">
+                                        <span>Sun</span>
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
+                                        <input type="time" id="schedDayOn_0" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
+                                        <span style="font-size: 0.7rem; color: var(--text-muted);">to</span>
+                                        <input type="time" id="schedDayOff_0" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
+                                    </div>
+                                    <button class="btn" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; height: auto; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1);" title="Copy this day's schedule to all other days" onclick="copyScheduleToAllDays(0, event)">📋</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -681,14 +766,36 @@
 
         function updateBlackoutSchedule() {
             const enabled = document.getElementById('scheduleEnable').checked;
-            const onTime = document.getElementById('scheduleOnTime').value;
-            const offTime = document.getElementById('scheduleOffTime').value;
             
             // Toggle visual cues
             document.getElementById('scheduleTimes').style.opacity = enabled ? '1' : '0.4';
             document.getElementById('scheduleTimes').style.pointerEvents = enabled ? 'auto' : 'none';
             
-            sendAction('UPDATE_BLACKOUT_SCHEDULE', { enabled, onTime, offTime });
+            const days = {};
+            for (let i = 0; i < 7; i++) {
+                days[i] = {
+                    enabled: document.getElementById(`schedDayEnable_${i}`).checked,
+                    onTime: document.getElementById(`schedDayOn_${i}`).value,
+                    offTime: document.getElementById(`schedDayOff_${i}`).value
+                };
+            }
+            
+            sendAction('UPDATE_BLACKOUT_SCHEDULE', { enabled, days });
+        }
+
+        function copyScheduleToAllDays(sourceIdx, event) {
+            if (event) event.stopPropagation();
+            const sourceEnabled = document.getElementById(`schedDayEnable_${sourceIdx}`).checked;
+            const sourceOn = document.getElementById(`schedDayOn_${sourceIdx}`).value;
+            const sourceOff = document.getElementById(`schedDayOff_${sourceIdx}`).value;
+
+            for (let i = 0; i < 7; i++) {
+                if (i === sourceIdx) continue;
+                document.getElementById(`schedDayEnable_${i}`).checked = sourceEnabled;
+                document.getElementById(`schedDayOn_${i}`).value = sourceOn;
+                document.getElementById(`schedDayOff_${i}`).value = sourceOff;
+            }
+            updateBlackoutSchedule();
         }
 
         function updateVideoSound(id, sound) {
@@ -895,10 +1002,27 @@
             // Sync Blackout Schedule
             if (screen.blackoutSchedule) {
                 document.getElementById('scheduleEnable').checked = !!screen.blackoutSchedule.enabled;
-                document.getElementById('scheduleOnTime').value = screen.blackoutSchedule.onTime || '22:00';
-                document.getElementById('scheduleOffTime').value = screen.blackoutSchedule.offTime || '08:00';
                 document.getElementById('scheduleTimes').style.opacity = screen.blackoutSchedule.enabled ? '1' : '0.4';
                 document.getElementById('scheduleTimes').style.pointerEvents = screen.blackoutSchedule.enabled ? 'auto' : 'none';
+                
+                const days = screen.blackoutSchedule.days || {};
+                for (let i = 0; i < 7; i++) {
+                    const dayData = days[i] || { enabled: false, onTime: '22:00', offTime: '08:00' };
+                    
+                    const cb = document.getElementById(`schedDayEnable_${i}`);
+                    const onInput = document.getElementById(`schedDayOn_${i}`);
+                    const offInput = document.getElementById(`schedDayOff_${i}`);
+                    
+                    if (cb && document.activeElement !== cb) {
+                        cb.checked = !!dayData.enabled;
+                    }
+                    if (onInput && document.activeElement !== onInput) {
+                        onInput.value = dayData.onTime || '22:00';
+                    }
+                    if (offInput && document.activeElement !== offInput) {
+                        offInput.value = dayData.offTime || '08:00';
+                    }
+                }
             }
 
             // Render Playlist Items (Pane 2 bottom)
