@@ -81,6 +81,12 @@
             }
 
             const hVal = parseInt(height);
+            const tempContainer = document.getElementById('tempContainer');
+            if (hVal >= 500) {
+                if (tempContainer) tempContainer.classList.add('layout-widescreen');
+            } else {
+                if (tempContainer) tempContainer.classList.remove('layout-widescreen');
+            }
             if (hVal < 500) {
                 styleOverrideElement = document.createElement('style');
                 if (hVal >= 350) {
