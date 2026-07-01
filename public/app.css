@@ -1112,3 +1112,84 @@ input:checked + .slider:before {
 .temp-slide-preview .temp-graph-container {
     display: none !important;
 }
+
+/* Widescreen/1080p Temp Slide Layouts (excluding mini dashboard preview) */
+@media (min-height: 500px) {
+    /* 1. Layout when Graph is Active (Side-by-Side Widescreen Layout) */
+    .temp-slide-layout:not(.temp-slide-preview).with-graph {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        padding: 4rem 5rem !important;
+        align-content: space-between;
+    }
+    .temp-slide-layout:not(.temp-slide-preview).with-graph .temp-header {
+        width: 100% !important;
+        margin-bottom: 1.5rem !important;
+        display: flex;
+        justify-content: flex-start;
+    }
+    .temp-slide-layout:not(.temp-slide-preview).with-graph .temp-logo {
+        width: 25% !important;
+        max-width: 320px !important;
+        margin: 0 !important;
+    }
+    .temp-slide-layout:not(.temp-slide-preview).with-graph .temp-grid {
+        width: 42% !important;
+        flex-direction: column !important;
+        gap: 2.5rem !important;
+        padding: 0 !important;
+        max-width: none !important;
+    }
+    .temp-slide-layout:not(.temp-slide-preview).with-graph .temp-card {
+        padding: 2.5rem 3rem !important;
+        width: 100% !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        border-radius: 24px !important;
+    }
+    .temp-slide-layout:not(.temp-slide-preview).with-graph .temp-label {
+        font-size: 1.5rem !important;
+        margin: 0 !important;
+        text-align: left !important;
+    }
+    .temp-slide-layout:not(.temp-slide-preview).with-graph .temp-value {
+        font-size: 5rem !important;
+    }
+    .temp-slide-layout:not(.temp-slide-preview).with-graph .temp-unit {
+        font-size: 2.5rem !important;
+    }
+    .temp-slide-layout:not(.temp-slide-preview).with-graph .temp-graph-container {
+        display: flex !important;
+        width: 53% !important;
+        height: 600px !important;
+        padding: 2rem !important;
+    }
+
+    /* 2. Layout when Graph is Disabled (Enlarged Widescreen Display) */
+    .temp-slide-layout:not(.temp-slide-preview):not(.with-graph) {
+        padding: 6rem 4rem !important;
+    }
+    .temp-slide-layout:not(.temp-slide-preview):not(.with-graph) .temp-logo {
+        max-width: 600px !important;
+        margin-bottom: 3.5rem !important;
+    }
+    .temp-slide-layout:not(.temp-slide-preview):not(.with-graph) .temp-grid {
+        max-width: 1300px !important;
+        gap: 5rem !important;
+    }
+    .temp-slide-layout:not(.temp-slide-preview):not(.with-graph) .temp-card {
+        padding: 4.5rem 3rem !important;
+        border-radius: 36px !important;
+    }
+    .temp-slide-layout:not(.temp-slide-preview):not(.with-graph) .temp-label {
+        font-size: 1.7rem !important;
+        margin-bottom: 2.5rem !important;
+    }
+    .temp-slide-layout:not(.temp-slide-preview):not(.with-graph) .temp-value {
+        font-size: 7.5rem !important;
+    }
+    .temp-slide-layout:not(.temp-slide-preview):not(.with-graph) .temp-unit {
+        font-size: 3.8rem !important;
+    }
+}

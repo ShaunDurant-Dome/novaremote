@@ -944,10 +944,11 @@
             }
 
             // 4. Update Screen coordinates / Global Configs
+            const activeScreen = state.screens[activeScreenId] || {};
             document.getElementById('screenX').value = state.screenConfig.x;
             document.getElementById('screenY').value = state.screenConfig.y;
-            document.getElementById('screenWidth').value = state.screenConfig.width;
-            document.getElementById('screenHeight').value = state.screenConfig.height;
+            document.getElementById('screenWidth').value = activeScreen.width !== undefined ? activeScreen.width : state.screenConfig.width;
+            document.getElementById('screenHeight').value = activeScreen.height !== undefined ? activeScreen.height : state.screenConfig.height;
             document.getElementById('domeApiUrl').value = state.domeManagementApiUrl || '';
 
             // 5. Update Screen Controls & Playlists
@@ -1157,9 +1158,8 @@
  
             // Scale preview container aspect ratio to match active screen's configured resolution
             const previewContainer = document.querySelector('.screen-preview-container');
-            const config = state.screenConfig || { width: 960, height: 192 };
-            const width = config.width || 960;
-            const height = config.height || 192;
+            const width = screen.width || 960;
+            const height = screen.height || 192;
             if (previewContainer) {
                 previewContainer.style.aspectRatio = `${width}/${height}`;
             }
@@ -1343,9 +1343,15 @@
 
         function launchPlayer() {
             let x = 1920, y = 0, width = 1920, height = 1080;
+            const activeScreen = globalState && globalState.screens ? globalState.screens[activeScreenId] : null;
             if (globalState && globalState.screenConfig) {
                 x = globalState.screenConfig.x || x;
                 y = globalState.screenConfig.y || y;
+            }
+            if (activeScreen) {
+                width = activeScreen.width || width;
+                height = activeScreen.height || height;
+            } else if (globalState && globalState.screenConfig) {
                 width = globalState.screenConfig.width || width;
                 height = globalState.screenConfig.height || height;
             }

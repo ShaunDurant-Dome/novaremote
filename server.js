@@ -92,6 +92,14 @@ function loadState() {
             for (let sid in state.screens) {
                 state.screens[sid].isPlaying = false;
                 
+                // Migrate per-screen resolution properties
+                if (state.screens[sid].width === undefined) {
+                    state.screens[sid].width = state.screenConfig ? state.screenConfig.width : (sid === 'default' ? 960 : 1920);
+                }
+                if (state.screens[sid].height === undefined) {
+                    state.screens[sid].height = state.screenConfig ? state.screenConfig.height : (sid === 'default' ? 192 : 1080);
+                }
+
                 const defaultDays = {};
                 for (let i = 0; i < 7; i++) {
                     defaultDays[i] = { enabled: true, onTime: '22:00', offTime: '08:00' };
@@ -144,8 +152,11 @@ function saveState() {
 // Ensure a screen exists in state
 function ensureScreenExists(screenId) {
     if (!state.screens[screenId]) {
+        const isBigLED = (screenId === 'default');
         state.screens[screenId] = {
             name: screenId.charAt(0).toUpperCase() + screenId.slice(1) + " Screen",
+            width: isBigLED ? 960 : 1920,
+            height: isBigLED ? 192 : 1080,
             playlist: [],
             currentIndex: -1,
             isPlaying: false,
@@ -190,11 +201,15 @@ function broadcastGlobalState() {
 
 function broadcastScreenState(screenId) {
     ensureScreenExists(screenId);
+    const screen = state.screens[screenId];
     const playerMessage = JSON.stringify({ 
         type: 'STATE_UPDATE', 
         screenId, 
-        state: state.screens[screenId],
-        screenConfig: state.screenConfig 
+        state: screen,
+        screenConfig: {
+            width: screen.width || 960,
+            height: screen.height || 192
+        }
     });
     
     wss.clients.forEach(client => {
@@ -704,11 +719,15 @@ wss.on('connection', (ws, req) => {
     if (screenId === 'admin') {
         ws.send(JSON.stringify({ type: 'GLOBAL_STATE_UPDATE', state }));
     } else {
+        const screen = state.screens[screenId];
         ws.send(JSON.stringify({ 
             type: 'STATE_UPDATE', 
             screenId, 
-            state: state.screens[screenId],
-            screenConfig: state.screenConfig 
+            state: screen,
+            screenConfig: {
+                width: screen.width || 960,
+                height: screen.height || 192
+            }
         }));
     }
 
@@ -776,12 +795,11 @@ wss.on('connection', (ws, req) => {
                     broadcastScreenState(sid);
                     break;
                 case 'UPDATE_SCREEN_CONFIG':
-                    state.screenConfig = { ...state.screenConfig, ...data.config };
+                    screen.width = data.config.width || screen.width;
+                    screen.height = data.config.height || screen.height;
                     saveState();
                     broadcastGlobalState();
-                    for (let screenKey in state.screens) {
-                        broadcastScreenState(screenKey);
-                    }
+                    broadcastScreenState(sid);
                     break;
                 case 'UPDATE_DURATION':
                     const item = screen.playlist.find(p => p.id === data.id);
@@ -869,8 +887,10 @@ wss.on('connection', (ws, req) => {
                     const targetSid = data.targetScreenId || 'default';
                     const { exec } = require('child_process');
                     if (controlAction === 'launch') {
-                        const config = state.screenConfig || {};
-                        const url = `http://localhost:${PORT}/player.html?screenId=${targetSid}&width=${config.width || 960}&height=${config.height || 192}`;
+                        const targetScreen = state.screens[targetSid] || {};
+                        const configWidth = targetScreen.width || (state.screenConfig ? state.screenConfig.width : 960);
+                        const configHeight = targetScreen.height || (state.screenConfig ? state.screenConfig.height : 192);
+                        const url = `http://localhost:${PORT}/player.html?screenId=${targetSid}&width=${configWidth}&height=${configHeight}`;
                         console.log(`[REMOTE] Launching player browser for screen "${targetSid}" at: ${url}`);
                         exec(`start chrome --start-fullscreen "${url}"`, (err) => {
                             if (err) {
