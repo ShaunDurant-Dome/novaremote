@@ -803,8 +803,10 @@
                             tempEl.classList.add('with-graph');
                             if (graphContainer) graphContainer.style.display = 'flex';
                             
-                            // Initial fetch & draw
-                            fetchAndDrawGraph(hh);
+                            // Initial fetch & draw (deferred to let browser apply layout dimensions)
+                            setTimeout(() => {
+                                fetchAndDrawGraph(hh);
+                            }, 100);
                             
                             // Refresh graph every minute
                             historyFetchInterval = setInterval(() => fetchAndDrawGraph(hh), 60000);
