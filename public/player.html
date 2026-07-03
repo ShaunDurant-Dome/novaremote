@@ -283,6 +283,11 @@
         let currentItemFilename = null;
         let disconnectTime = null;
         
+        // Detect subpath prefix globally (e.g. /digital/)
+        const pathParts = window.location.pathname.split('/');
+        const pathPrefix = pathParts.slice(0, -1).filter(p => p && p !== 'player.html' && p !== 'index.html').join('/');
+        const prefixStr = pathPrefix ? '/' + pathPrefix : '';
+        
         // Active item configuration trackers
         let currentItemId = null;
         let currentBgTheme = null;
@@ -326,10 +331,6 @@
             const urlParams = new URLSearchParams(window.location.search);
             const screenId = urlParams.get('screenId') || 'default';
             
-            // Handle subpath proxies (like /digital/)
-            const pathParts = window.location.pathname.split('/');
-            const pathPrefix = pathParts.slice(0, -1).filter(p => p && p !== 'player.html' && p !== 'index.html').join('/');
-            const prefixStr = pathPrefix ? '/' + pathPrefix : '';
             const wsUrl = `${proto}//${window.location.host}${prefixStr}/?screenId=${screenId}`;
             
             console.log(`Connecting to WebSocket at: ${wsUrl}`);
@@ -377,7 +378,7 @@
         function prefetchMedia(playlist) {
             playlist.forEach(item => {
                 if (item.filename && item.type !== 'temp') {
-                    const fileUrl = `/uploads/${item.filename}`;
+                    const fileUrl = `${prefixStr}/uploads/${item.filename}`;
                     if (!prefetchedUrls.has(fileUrl)) {
                         prefetchedUrls.add(fileUrl);
                         console.log(`[Prefetch] Pre-downloading: ${fileUrl}`);
@@ -390,7 +391,7 @@
         }
 
         function fetchTemps() {
-            fetch('/api/temps')
+            fetch(`${prefixStr}/api/temps`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.outdoor !== undefined && data.outdoor !== null) {
@@ -411,7 +412,7 @@
 
         function fetchAndDrawGraph(historyHours) {
             const hh = historyHours || 24;
-            fetch('/api/temps/history')
+            fetch(`${prefixStr}/api/temps/history`)
                 .then(res => res.json())
                 .then(data => {
                     const pointsCount = hh * 6;
@@ -627,7 +628,7 @@
             // Verify if there is media to display
             if (state.currentIndex >= 0 && state.currentIndex < state.playlist.length) {
                 const item = state.playlist[state.currentIndex];
-                const mediaUrl = `/uploads/${item.filename}`;
+                const mediaUrl = `${prefixStr}/uploads/${item.filename}`;
  
                 if (item.type === 'image') {
                     // Hide other containers

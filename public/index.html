@@ -431,7 +431,8 @@
                             <small style="display: block; margin-top: 0.35rem; color: var(--text-muted); font-size: 0.75rem; line-height: 1.3;">
                                 1. Go to <a href="https://developer.spotify.com/dashboard" target="_blank" style="color: var(--primary); text-decoration: underline;">Spotify Developer Dashboard</a>.<br>
                                 2. Create an App. Add Redirect URI:<br><code style="background: rgba(0,0,0,0.3); padding: 2px 4px; border-radius: 4px; font-size: 0.75rem; word-break: break-all; display: block; margin: 4px 0;">https://portal.thedomenamibia.com/digital/</code>
-                                3. Copy the Client ID and Client Secret, paste them here, and click Connect.
+                                3. Copy the Client ID and Client Secret, paste them here, and click Connect.<br>
+                                <strong style="color: #ff9f43;">⚠️ Separate Account Tip:</strong> If you want to connect a different Spotify account for this screen, you <strong>MUST</strong> log out of <a href="https://spotify.com" target="_blank" style="color: var(--primary); text-decoration: underline;">spotify.com</a> in this browser first before clicking Connect, otherwise Spotify will automatically link your active login.
                             </small>
                         </div>
                         <button class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.5rem; font-size: 0.85rem;" onclick="connectSpotify()">Connect Spotify</button>
@@ -458,6 +459,12 @@
                             <select id="spotifyDeviceSelector" class="select-styled" style="width: 100%; min-width: 0; padding: 0.4rem 0.8rem; font-size: 0.8rem;" onchange="spotifyTransferPlayback(this.value)">
                                 <option>Loading devices...</option>
                             </select>
+                        </div>
+
+                        <div style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.25rem;">
+                            <small style="color: var(--text-muted); font-size: 0.75rem; line-height: 1.35;">
+                                💡 <strong>Different Account?</strong> If this screen shows the wrong account, click <strong>Disconnect</strong>. Then open an Incognito/Private browser window (or log out of <a href="https://spotify.com" target="_blank" style="color: var(--primary); text-decoration: underline;">spotify.com</a>) and connect your other account.
+                            </small>
                         </div>
 
                         <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;">
