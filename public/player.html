@@ -831,6 +831,22 @@
 
         // Initialize connection
         connectWebSocket();
+
+        // Manage diagnostic overlay visibility (hide in preview, fade out in play mode)
+        const diagOverlay = document.getElementById('diagOverlay');
+        if (isPreview) {
+            if (diagOverlay) diagOverlay.style.display = 'none';
+        } else {
+            setTimeout(() => {
+                if (diagOverlay) {
+                    diagOverlay.style.transition = 'opacity 1.5s ease';
+                    diagOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        diagOverlay.style.display = 'none';
+                    }, 1500);
+                }
+            }, 8000); // Fade out after 8 seconds
+        }
     </script>
 </body>
 </html>
