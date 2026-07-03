@@ -22,6 +22,11 @@
         <!-- Blackout Screen Overlay -->
         <div id="blackout" class="player-blackout"></div>
 
+        <!-- Diagnostic Overlay (Subtle text in bottom-right corner) -->
+        <div id="diagOverlay" style="position: absolute; bottom: 8px; right: 8px; font-family: sans-serif; font-size: 0.65rem; color: rgba(255,255,255,0.15); z-index: 10000; pointer-events: none; text-shadow: 1px 1px 1px rgba(0,0,0,0.8);">
+            [Screen: <span id="diagScreenId">loading</span> | WS: <span id="diagWsStatus">connecting</span>]
+        </div>
+
         <!-- Media containers -->
         <img id="imgContainer" class="player-media" style="display: none;">
         <video id="vidContainer" class="player-media" style="display: none;" autoplay muted></video>
@@ -282,6 +287,7 @@
         let currentPlaylistIndex = -1;
         let currentItemFilename = null;
         let disconnectTime = null;
+        let screenId = 'default';
         
         // Detect subpath prefix globally (e.g. /digital/)
         const pathParts = window.location.pathname.split('/');
@@ -329,8 +335,12 @@
             const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             // Parse screenId from URL query parameters
             const urlParams = new URLSearchParams(window.location.search);
-            const screenId = urlParams.get('screenId') || 'default';
+            screenId = urlParams.get('screenId') || 'default';
             
+            // Update diagnostic overlay Screen ID
+            const diagScreen = document.getElementById('diagScreenId');
+            if (diagScreen) diagScreen.innerText = screenId;
+
             const wsUrl = `${proto}//${window.location.host}${prefixStr}/?screenId=${screenId}`;
             
             console.log(`Connecting to WebSocket at: ${wsUrl}`);
@@ -338,6 +348,11 @@
 
             ws.onopen = () => {
                 console.log(`Player connected to server for screenId: ${screenId}`);
+                const diagWs = document.getElementById('diagWsStatus');
+                if (diagWs) {
+                    diagWs.innerText = 'Connected';
+                    diagWs.style.color = 'rgba(0, 255, 135, 0.5)';
+                }
                 if (disconnectTime && Date.now() - disconnectTime > 20000) {
                     console.log('Connection was lost for more than 20s. Reloading page to ensure latest assets...');
                     window.location.reload();
@@ -348,6 +363,11 @@
 
             ws.onclose = () => {
                 console.log('Player connection lost. Reconnecting...');
+                const diagWs = document.getElementById('diagWsStatus');
+                if (diagWs) {
+                    diagWs.innerText = 'Disconnected';
+                    diagWs.style.color = 'rgba(255, 75, 75, 0.5)';
+                }
                 if (!disconnectTime) {
                     disconnectTime = Date.now();
                 }

@@ -883,6 +883,7 @@ wss.on('connection', (ws, req) => {
                         tempItem.historyHours = data.historyHours !== undefined ? parseInt(data.historyHours) : (tempItem.historyHours || 24);
                         tempItem.bgTheme = data.bgTheme !== undefined ? data.bgTheme : (tempItem.bgTheme || 'dome');
                     }
+                    saveState();
                     broadcastScreenState(sid);
                     break;
                 case 'ADD_LIBRARY_ITEM_TO_PLAYLIST':

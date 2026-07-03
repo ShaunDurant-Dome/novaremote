@@ -296,9 +296,14 @@
             <div>
                 <!-- Screen Control -->
                 <div class="panel" id="screenControlPanel">
-                    <div class="panel-header">
-                        <h2 class="panel-title" id="controlPanelTitle">Screen Control</h2>
-                        <span id="playingItemName" style="font-size: 0.85rem; color: var(--primary); font-weight: 500;">No media playing</span>
+                    <div class="panel-header" style="flex-direction: column; align-items: flex-start; gap: 0.25rem;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                            <h2 class="panel-title" id="controlPanelTitle">Screen Control</h2>
+                            <span id="playingItemName" style="font-size: 0.85rem; color: var(--primary); font-weight: 500;">No media playing</span>
+                        </div>
+                        <div id="screenUrlDisplay" style="font-size: 0.72rem; color: var(--text-muted); font-family: monospace; word-break: break-all; margin-top: 0.25rem; background: rgba(0,0,0,0.25); padding: 0.35rem 0.5rem; border-radius: 6px; width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,0.03);">
+                            TV URL: <span id="tvScreenUrl" style="color: var(--primary); font-weight: bold;">loading...</span>
+                        </div>
                     </div>
 
                     <div class="control-bar">
@@ -979,6 +984,12 @@
         function renderScreenControls(state, activeScreens = []) {
             ensureActiveScreenExistsInUIState(state);
             const screen = state.screens[activeScreenId];
+
+            const tvUrlSpan = document.getElementById('tvScreenUrl');
+            if (tvUrlSpan) {
+                const screenUrl = `${window.location.origin}${prefixStr}/player.html?screenId=${activeScreenId}`;
+                tvUrlSpan.innerText = screenUrl;
+            }
 
             const isActive = activeScreens.includes(activeScreenId);
             document.getElementById('controlPanelTitle').innerHTML = `${screen.name} Control <span style="font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 4px; margin-left: 0.5rem; background: ${isActive ? 'rgba(0, 255, 135, 0.15)' : 'rgba(255, 75, 75, 0.15)'}; color: ${isActive ? '#00ff87' : '#ff4b4b'}">${isActive ? '🟢 Connected' : '🔴 Offline'}</span>`;
