@@ -88,6 +88,15 @@ function loadState() {
         try {
             const data = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
             state = { ...state, ...data };
+            
+            // Migrate all screen keys to lowercase and clean them
+            const migratedScreens = {};
+            for (let sid in state.screens) {
+                const cleanedSid = sid.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+                migratedScreens[cleanedSid] = state.screens[sid];
+            }
+            state.screens = migratedScreens;
+
             // Stop playback on start for all screens to be safe
             for (let sid in state.screens) {
                 state.screens[sid].isPlaying = false;
@@ -744,7 +753,8 @@ async function spotifyServerAction(screenId, action) {
 wss.on('connection', (ws, req) => {
     // Parse screenId from URL query string
     const urlParams = new URL(req.url, 'http://localhost');
-    const screenId = urlParams.searchParams.get('screenId') || 'default';
+    const rawScreenId = urlParams.searchParams.get('screenId') || 'default';
+    const screenId = rawScreenId.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
     
     ws.screenId = screenId;
     ensureScreenExists(screenId);
@@ -777,7 +787,7 @@ wss.on('connection', (ws, req) => {
             const data = JSON.parse(messageString);
             
             // If the message is from Admin panel, it targets a specific screen
-            const sid = data.screenId || screenId;
+            const sid = (data.screenId || screenId).toLowerCase().trim().replace(/[^a-z0-9]/g, '');
             ensureScreenExists(sid);
             const screen = state.screens[sid];
 
