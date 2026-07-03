@@ -714,8 +714,8 @@ input:checked + .slider:before {
 }
 
 .temp-logo {
-    width: 65vw;
-    max-width: 500px;
+    width: 45%;
+    max-width: 320px;
     height: auto;
     object-fit: contain;
     filter: drop-shadow(0 0 15px rgba(255,255,255,0.2));
@@ -899,8 +899,8 @@ input:checked + .slider:before {
     }
     
     .temp-logo {
-        width: 80vw !important; /* Larger logo on portrait screens */
-        max-width: 450px !important;
+        width: 75% !important; /* Larger logo on portrait screens */
+        max-width: 400px !important;
         margin-bottom: 2rem !important;
     }
 }
@@ -1139,16 +1139,16 @@ input:checked + .slider:before {
     max-width: none !important;
 }
 .temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-card {
-    padding: 1.25rem 2rem !important;
+    padding: 1rem 1.75rem !important;
     width: 100% !important;
-    flex-direction: row !important;
-    justify-content: space-between !important;
-    align-items: center !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
     border-radius: 20px !important;
 }
 .temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-label {
-    font-size: 1.2rem !important;
-    margin: 0 !important;
+    font-size: 1.15rem !important;
+    margin: 0 0 0.35rem 0 !important;
     text-align: left !important;
 }
 .temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-value {
@@ -1181,10 +1181,14 @@ input:checked + .slider:before {
     }
     .temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-card {
         padding: 2.5rem 3rem !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
         border-radius: 24px !important;
     }
     .temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-label {
         font-size: 1.6rem !important;
+        margin: 0 !important;
     }
     .temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-value {
         font-size: 6.5rem !important;
@@ -1203,6 +1207,7 @@ input:checked + .slider:before {
     padding: 3rem 4rem !important;
 }
 .temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-logo {
+    width: 50% !important;
     max-width: 450px !important;
     margin-bottom: 2rem !important;
 }
