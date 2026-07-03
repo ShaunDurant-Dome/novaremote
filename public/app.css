@@ -1190,3 +1190,94 @@ input:checked + .slider:before {
 .temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-unit {
     font-size: 3.8rem !important;
 }
+
+/* Widescreen Portrait 1080x1920 TV Layouts (excluding mini dashboard preview) */
+
+/* 1. Layout when Graph is Active (Cards side-by-side, graph stacked below) */
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait.with-graph {
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    padding: 6rem 3rem !important;
+    gap: 4rem !important;
+}
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait.with-graph .temp-header {
+    width: 100% !important;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0 !important;
+}
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait.with-graph .temp-logo {
+    width: 60% !important;
+    max-width: 450px !important;
+}
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait.with-graph .temp-grid {
+    width: 100% !important;
+    flex-direction: row !important;
+    gap: 2.5rem !important;
+    padding: 0 !important;
+    max-width: 960px !important;
+}
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait.with-graph .temp-card {
+    padding: 3.5rem 2rem !important;
+    border-radius: 24px !important;
+}
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait.with-graph .temp-label {
+    font-size: 1.3rem !important;
+    margin-bottom: 1.5rem !important;
+}
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait.with-graph .temp-value {
+    font-size: 5.5rem !important;
+}
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait.with-graph .temp-unit {
+    font-size: 2.8rem !important;
+}
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait.with-graph .temp-graph-container {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 960px !important;
+    height: 520px !important;
+    padding: 2rem !important;
+}
+
+/* 2. Layout when Graph is Disabled (Cards stacked vertically to fill the tall screen) */
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait:not(.with-graph) {
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    padding: 8rem 4rem !important;
+    align-items: center !important;
+}
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait:not(.with-graph) .temp-header {
+    width: 100% !important;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem !important;
+}
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait:not(.with-graph) .temp-logo {
+    width: 70% !important;
+    max-width: 550px !important;
+}
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait:not(.with-graph) .temp-grid {
+    width: 100% !important;
+    flex-direction: column !important;
+    gap: 4rem !important;
+    padding: 0 !important;
+    max-width: 750px !important;
+    flex: 1;
+    justify-content: center;
+}
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait:not(.with-graph) .temp-card {
+    padding: 5rem 3rem !important;
+    width: 100% !important;
+    border-radius: 36px !important;
+    flex: 0 1 auto !important;
+}
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait:not(.with-graph) .temp-label {
+    font-size: 1.7rem !important;
+    margin-bottom: 2rem !important;
+}
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait:not(.with-graph) .temp-value {
+    font-size: 7.5rem !important;
+}
+.temp-slide-layout:not(.temp-slide-preview).layout-portrait:not(.with-graph) .temp-unit {
+    font-size: 3.8rem !important;
+}

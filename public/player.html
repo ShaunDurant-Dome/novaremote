@@ -81,11 +81,23 @@
             }
 
             const hVal = parseInt(height);
+            const wVal = parseInt(width);
             const tempContainer = document.getElementById('tempContainer');
             if (hVal >= 500) {
-                if (tempContainer) tempContainer.classList.add('layout-widescreen');
+                if (tempContainer) {
+                    if (wVal >= hVal) {
+                        tempContainer.classList.add('layout-widescreen');
+                        tempContainer.classList.remove('layout-portrait');
+                    } else {
+                        tempContainer.classList.add('layout-portrait');
+                        tempContainer.classList.remove('layout-widescreen');
+                    }
+                }
             } else {
-                if (tempContainer) tempContainer.classList.remove('layout-widescreen');
+                if (tempContainer) {
+                    tempContainer.classList.remove('layout-widescreen');
+                    tempContainer.classList.remove('layout-portrait');
+                }
             }
             if (hVal < 500) {
                 styleOverrideElement = document.createElement('style');
@@ -256,6 +268,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const screenW = urlParams.get('width');
         const screenH = urlParams.get('height');
+        const isPreview = urlParams.get('preview') === '1';
         if (screenW && screenH) {
             applyDimensions(screenW, screenH);
         }
@@ -292,19 +305,19 @@
         vidEl.onended = () => {
             clearTimeout(videoSafetyTimer);
             videoSafetyTimer = null;
-            sendAction('NEXT');
+            if (!isPreview) sendAction('NEXT');
         };
 
         vidEl.onerror = () => {
             console.error('[PLAYER] Video playback error, skipping...');
             clearTimeout(videoSafetyTimer);
             videoSafetyTimer = null;
-            sendAction('NEXT');
+            if (!isPreview) sendAction('NEXT');
         };
 
         imgEl.onerror = () => {
             console.error('[PLAYER] Image loading error, skipping...');
-            sendAction('NEXT');
+            if (!isPreview) sendAction('NEXT');
         };
 
         function connectWebSocket() {
@@ -627,7 +640,7 @@
                     imgEl.style.display = 'block';
  
                     // Slideshow timer for images
-                    if (state.isPlaying && !state.isBlackout) {
+                    if (state.isPlaying && !state.isBlackout && !isPreview) {
                         if (imageTimer === null) {
                             const durationMs = (item.duration || 10) * 1000;
                             imageTimer = setTimeout(() => {
@@ -646,7 +659,7 @@
                     imgEl.removeAttribute('src');
                     tempEl.style.display = 'none';
  
-                    if (vidEl.src.endsWith(item.filename) && vidEl.ended && state.isPlaying && !state.isBlackout) {
+                    if (vidEl.src.endsWith(item.filename) && vidEl.ended && state.isPlaying && !state.isBlackout && !isPreview) {
                         console.log('[PLAYER] Video already ended while offline. Requesting NEXT...');
                         clearTimeout(videoSafetyTimer);
                         videoSafetyTimer = null;
@@ -661,6 +674,7 @@
                         // Set up safety timer once metadata loads or immediately as fallback
                         const setSafetyTimer = (duration) => {
                             clearTimeout(videoSafetyTimer);
+                            if (isPreview) return; // Do not schedule safety timer in preview
                             const finalDuration = duration || item.duration || 15;
                             videoSafetyTimer = setTimeout(() => {
                                 console.warn('[PLAYER] Video safety timeout. Skipping...');
@@ -684,7 +698,7 @@
                     // Play/Pause sync
                     if (state.isPlaying && !state.isBlackout) {
                         // Re-start safety timer if it was cleared and we are resuming
-                        if (!videoSafetyTimer) {
+                        if (!videoSafetyTimer && !isPreview) {
                             const duration = vidEl.duration || item.duration || 15;
                             videoSafetyTimer = setTimeout(() => {
                                 console.warn('[PLAYER] Video safety timeout. Skipping...');
@@ -766,7 +780,7 @@
                     }
  
                     // Slideshow timer for temperatures
-                    if (state.isPlaying && !state.isBlackout) {
+                    if (state.isPlaying && !state.isBlackout && !isPreview) {
                         if (imageTimer === null) {
                             const durationMs = (item.duration || 15) * 1000;
                             imageTimer = setTimeout(() => {

@@ -384,29 +384,8 @@
                             <span>No Active Playback</span>
                         </div>
                         
-                        <img id="previewImage" class="screen-preview" style="display: none;">
-                        <video id="previewVideo" class="screen-preview" style="display: none;" autoplay muted loop></video>
-                        
-                        <!-- Mini Temp Slide Preview -->
-                        <div id="previewTemp" class="temp-slide-layout temp-slide-preview" style="display: none; height: 100%; width: 100%;">
-                            <div class="temp-header">
-                                <img src="/logo_white.png" class="temp-logo temp-preview-logo" alt="The Dome">
-                            </div>
-                            <div class="temp-grid temp-preview-grid">
-                                <div class="temp-card temp-preview-card outdoor-card">
-                                    <div class="temp-label temp-preview-label">Outdoor</div>
-                                    <div class="temp-value temp-preview-value">
-                                        <span id="previewOutdoorVal">--</span><span class="temp-unit temp-preview-unit">°C</span>
-                                    </div>
-                                </div>
-                                <div class="temp-card temp-preview-card hall-card">
-                                    <div class="temp-label temp-preview-label">Main Hall</div>
-                                    <div class="temp-value temp-preview-value">
-                                        <span id="previewHallVal">--</span><span class="temp-unit temp-preview-unit">°C</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- 100% Accurate Player Screen iFrame Preview -->
+                        <iframe id="screenPreviewIframe" class="screen-preview" style="display: none; border: none; width: 100%; height: 100%; border-radius: 12px; pointer-events: none;" src="about:blank" allow="autoplay"></iframe>
 
                         <!-- Ticker Preview Overlay -->
                         <div class="ticker-preview-container" id="previewTicker">
@@ -865,15 +844,7 @@
             }
         }
 
-        function fetchPreviewTemps() {
-            fetch('/api/temps')
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('previewOutdoorVal').innerText = parseFloat(data.outdoor).toFixed(1);
-                    document.getElementById('previewHallVal').innerText = parseFloat(data.mainHall).toFixed(1);
-                })
-                .catch(err => console.error('Error previewing temps:', err));
-        }
+
 
         function updateUI(state) {
             globalState = state;
@@ -1150,9 +1121,7 @@
             });
 
             // Update Live Preview Area
-            const imgPreview = document.getElementById('previewImage');
-            const vidPreview = document.getElementById('previewVideo');
-            const tempPreview = document.getElementById('previewTemp');
+            const iframe = document.getElementById('screenPreviewIframe');
             const placeholder = document.getElementById('previewPlaceholder');
             const nameLabel = document.getElementById('playingItemName');
  
@@ -1168,64 +1137,19 @@
                 const currentItem = screen.playlist[screen.currentIndex];
                 nameLabel.innerText = `Playing: ${currentItem.name}`;
                 placeholder.style.display = 'none';
-                
-                if (currentItem.type === 'image') {
-                    vidPreview.style.display = 'none';
-                    vidPreview.pause();
-                    tempPreview.style.display = 'none';
-                    
-                    imgPreview.src = `/uploads/${currentItem.filename}`;
-                    imgPreview.style.display = 'block';
-                } else if (currentItem.type === 'video') {
-                    imgPreview.style.display = 'none';
-                    imgPreview.removeAttribute('src');
-                    tempPreview.style.display = 'none';
-                    
-                    const mediaUrl = `/uploads/${currentItem.filename}`;
-                    if (vidPreview.src !== window.location.origin + mediaUrl) {
-                        vidPreview.src = mediaUrl;
-                    }
-                    vidPreview.style.display = 'block';
-                    if (screen.isPlaying && !screen.isBlackout) {
-                        vidPreview.play();
-                    } else {
-                        vidPreview.pause();
-                    }
-                    vidPreview.volume = screen.volume;
-                } else if (currentItem.type === 'temp') {
-                    imgPreview.style.display = 'none';
-                    imgPreview.removeAttribute('src');
-                    vidPreview.style.display = 'none';
-                    vidPreview.pause();
-                    
-                    // Set dynamic labels in preview
-                    tempPreview.querySelector('.outdoor-card .temp-label').innerText = currentItem.label1 || 'Outdoor';
-                    tempPreview.querySelector('.hall-card .temp-label').innerText = currentItem.label2 || 'Main Hall';
-                    
-                    // Reset classes and apply active theme
-                    tempPreview.className = 'temp-slide-layout temp-slide-preview';
-                    const theme = currentItem.bgTheme || 'dome';
-                    tempPreview.classList.add(`theme-${theme}`);
  
-                    // Toggle bold font class
-                    if (currentItem.boldFont) {
-                        tempPreview.classList.add('bold-fonts');
-                    }
- 
-                    // Apply widescreen layout if screen height is under 350px
-                    if (height < 350) {
-                        tempPreview.classList.add('layout-horizontal');
-                    }
- 
-                    tempPreview.style.display = 'flex';
-                    fetchPreviewTemps();
+                const targetUrl = `/player.html?screenId=${activeScreenId}&width=${width}&height=${height}&preview=1`;
+                // Only update src if changed to prevent reloading of iframe on every state update tick
+                const currentSrc = iframe.getAttribute('src') || '';
+                const relativeUrl = window.location.origin + targetUrl;
+                if (iframe.src !== relativeUrl) {
+                    iframe.src = targetUrl;
                 }
+                iframe.style.display = 'block';
             } else {
                 nameLabel.innerText = 'No media playing';
-                imgPreview.style.display = 'none';
-                vidPreview.style.display = 'none';
-                vidPreview.pause();
-                tempPreview.style.display = 'none';
+                iframe.style.display = 'none';
+                iframe.src = 'about:blank';
                 placeholder.style.display = 'flex';
             }
         }
