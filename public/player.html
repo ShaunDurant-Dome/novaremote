@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NovaRemote LED Player</title>
-    <link rel="stylesheet" href="app.css?v=4">
+    <link rel="stylesheet" href="app.css?v=5">
     <style>
         html, body {
             margin: 0;
@@ -78,18 +78,27 @@
                 container.style.width = width + 'px';
                 container.style.height = height + 'px';
 
-                // Scale the container to fit the physical viewport width and height
-                const winW = window.innerWidth;
-                const winH = window.innerHeight;
-                const scale = Math.min(winW / width, winH / height);
+                if (screenId === 'default') {
+                    // Reset to original absolute positioning for Big LED Screen (no scaling/centering)
+                    container.style.transform = '';
+                    container.style.transformOrigin = '';
+                    container.style.left = '0px';
+                    container.style.top = '0px';
+                    container.style.position = 'absolute';
+                } else {
+                    // Scale other screens (like Hotel Screen) to fit the physical viewport width and height
+                    const winW = window.innerWidth;
+                    const winH = window.innerHeight;
+                    const scale = Math.min(winW / width, winH / height);
 
-                container.style.transform = `scale(${scale})`;
-                container.style.transformOrigin = 'top left';
+                    container.style.transform = `scale(${scale})`;
+                    container.style.transformOrigin = 'top left';
 
-                // Center the container vertically and horizontally
-                container.style.left = ((winW - width * scale) / 2) + 'px';
-                container.style.top = ((winH - height * scale) / 2) + 'px';
-                container.style.position = 'absolute';
+                    // Center the container vertically and horizontally
+                    container.style.left = ((winW - width * scale) / 2) + 'px';
+                    container.style.top = ((winH - height * scale) / 2) + 'px';
+                    container.style.position = 'absolute';
+                }
             }
 
             // Remove old override if exists to prevent duplication
