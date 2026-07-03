@@ -742,6 +742,13 @@
                         }
                         currentBoldFont = !!item.boldFont;
                     }
+
+                    if (tempFetchInterval === null) {
+                        tempEl.style.display = 'flex';
+                        fetchTemps();
+                        // Fetch fresh temperatures every 10 seconds while this slide is active
+                        tempFetchInterval = setInterval(fetchTemps, 10000);
+                    }
  
                     // Toggle graph layout / update intervals if changed
                     const graphContainer = document.getElementById('tempGraphContainer');
@@ -770,13 +777,6 @@
                         }
                         currentShowGraph = showGraph;
                         currentHistoryHours = hh;
-                    }
- 
-                    if (tempFetchInterval === null) {
-                        tempEl.style.display = 'flex';
-                        fetchTemps();
-                        // Fetch fresh temperatures every 10 seconds while this slide is active
-                        tempFetchInterval = setInterval(fetchTemps, 10000);
                     }
  
                     // Slideshow timer for temperatures

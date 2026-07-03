@@ -129,6 +129,13 @@ function loadState() {
                 if (state.screens[sid].lastScheduledState === undefined) {
                     state.screens[sid].lastScheduledState = null;
                 }
+                if (state.screens[sid].spotifyConfig === undefined) {
+                    if (sid === 'default' && state.spotifyConfig) {
+                        state.screens[sid].spotifyConfig = state.spotifyConfig;
+                    } else {
+                        state.screens[sid].spotifyConfig = null;
+                    }
+                }
             }
         } catch (e) {
             console.error('Error reading state file, using defaults.', e);
@@ -181,15 +188,30 @@ function ensureScreenExists(screenId) {
                     6: { enabled: true, onTime: '22:00', offTime: '08:00' }
                 }
             },
-            lastScheduledState: null
+            lastScheduledState: null,
+            spotifyConfig: null
         };
         saveState();
+        broadcastGlobalState();
     }
 }
 
 // Broadcast helper
 function broadcastGlobalState() {
-    const adminMessage = JSON.stringify({ type: 'GLOBAL_STATE_UPDATE', state });
+    const activeScreenIds = [];
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN && client.screenId && client.screenId !== 'admin') {
+            activeScreenIds.push(client.screenId);
+        }
+    });
+    // Remove duplicates (in case multiple browser tabs/TVs run the same screenId)
+    const uniqueActiveScreens = [...new Set(activeScreenIds)];
+
+    const adminMessage = JSON.stringify({ 
+        type: 'GLOBAL_STATE_UPDATE', 
+        state,
+        activeScreens: uniqueActiveScreens
+    });
     wss.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
             if (client.screenId === 'admin') {
@@ -480,10 +502,13 @@ app.delete('/api/library/:id', (req, res) => {
 
 // Spotify OAuth Endpoints
 app.post('/api/spotify/exchange', async (req, res) => {
-    const { code, client_id, client_secret, redirect_uri } = req.body;
+    const { code, client_id, client_secret, redirect_uri, screenId } = req.body;
     if (!code || !client_id || !client_secret || !redirect_uri) {
         return res.status(400).json({ error: 'Missing parameters' });
     }
+
+    const sid = screenId || 'default';
+    ensureScreenExists(sid);
 
     try {
         const authHeader = 'Basic ' + Buffer.from(client_id + ':' + client_secret).toString('base64');
@@ -503,17 +528,18 @@ app.post('/api/spotify/exchange', async (req, res) => {
 
         const data = await response.json();
         if (response.status === 200 && data.access_token) {
-            state.spotifyConfig = {
+            const currentConf = state.screens[sid].spotifyConfig;
+            state.screens[sid].spotifyConfig = {
                 accessToken: data.access_token,
-                refreshToken: data.refresh_token || (state.spotifyConfig ? state.spotifyConfig.refreshToken : ''),
+                refreshToken: data.refresh_token || (currentConf ? currentConf.refreshToken : ''),
                 tokenExpiry: Date.now() + (data.expires_in * 1000),
                 clientId: client_id,
                 clientSecret: client_secret,
-                wasPlayingBeforeBlackout: (state.spotifyConfig ? state.spotifyConfig.wasPlayingBeforeBlackout : false),
-                lastDeviceId: (state.spotifyConfig ? state.spotifyConfig.lastDeviceId : '')
+                wasPlayingBeforeBlackout: (currentConf ? currentConf.wasPlayingBeforeBlackout : false),
+                lastDeviceId: (currentConf ? currentConf.lastDeviceId : '')
             };
             saveState();
-            console.log('[SPOTIFY-SERVER] Successfully exchanged and saved Spotify config.');
+            console.log(`[SPOTIFY-SERVER] Successfully exchanged and saved Spotify config for screen: ${sid}`);
         }
         res.status(response.status).json(data);
     } catch (error) {
@@ -523,10 +549,13 @@ app.post('/api/spotify/exchange', async (req, res) => {
 });
 
 app.post('/api/spotify/refresh', async (req, res) => {
-    const { refresh_token, client_id, client_secret } = req.body;
+    const { refresh_token, client_id, client_secret, screenId } = req.body;
     if (!refresh_token || !client_id || !client_secret) {
         return res.status(400).json({ error: 'Missing parameters' });
     }
+
+    const sid = screenId || 'default';
+    ensureScreenExists(sid);
 
     try {
         const authHeader = 'Basic ' + Buffer.from(client_id + ':' + client_secret).toString('base64');
@@ -545,16 +574,17 @@ app.post('/api/spotify/refresh', async (req, res) => {
 
         const data = await response.json();
         if (response.status === 200 && data.access_token) {
-            state.spotifyConfig = {
-                ...state.spotifyConfig,
+            const currentConf = state.screens[sid].spotifyConfig;
+            state.screens[sid].spotifyConfig = {
+                ...currentConf,
                 accessToken: data.access_token,
-                refreshToken: data.refresh_token || state.spotifyConfig.refreshToken,
+                refreshToken: data.refresh_token || (currentConf ? currentConf.refreshToken : ''),
                 tokenExpiry: Date.now() + (data.expires_in * 1000),
                 clientId: client_id,
                 clientSecret: client_secret
             };
             saveState();
-            console.log('[SPOTIFY-SERVER] Successfully refreshed and saved Spotify config.');
+            console.log(`[SPOTIFY-SERVER] Successfully refreshed and saved Spotify config for screen: ${sid}`);
         }
         res.status(response.status).json(data);
     } catch (error) {
@@ -564,13 +594,15 @@ app.post('/api/spotify/refresh', async (req, res) => {
 });
 
 // Spotify Server-Side playback control helpers
-async function getOrRefreshSpotifyToken() {
-    if (!state.spotifyConfig || !state.spotifyConfig.refreshToken) return null;
-    const { accessToken, tokenExpiry, refreshToken, clientId, clientSecret } = state.spotifyConfig;
+async function getOrRefreshSpotifyToken(screenId) {
+    const sid = screenId || 'default';
+    const screen = state.screens[sid];
+    if (!screen || !screen.spotifyConfig || !screen.spotifyConfig.refreshToken) return null;
+    const { accessToken, tokenExpiry, refreshToken, clientId, clientSecret } = screen.spotifyConfig;
 
     // Check if expired or expiring within 60s
     if (Date.now() + 60000 > tokenExpiry) {
-        console.log('[SPOTIFY-SERVER] Token expiring soon. Refreshing on server...');
+        console.log(`[SPOTIFY-SERVER] Token expiring soon for screen ${sid}. Refreshing on server...`);
         try {
             const authHeader = 'Basic ' + Buffer.from(clientId + ':' + clientSecret).toString('base64');
             const params = new URLSearchParams();
@@ -588,46 +620,48 @@ async function getOrRefreshSpotifyToken() {
 
             if (response.status === 200) {
                 const data = await response.json();
-                state.spotifyConfig.accessToken = data.access_token;
-                state.spotifyConfig.tokenExpiry = Date.now() + (data.expires_in * 1000);
+                screen.spotifyConfig.accessToken = data.access_token;
+                screen.spotifyConfig.tokenExpiry = Date.now() + (data.expires_in * 1000);
                 if (data.refresh_token) {
-                    state.spotifyConfig.refreshToken = data.refresh_token;
+                    screen.spotifyConfig.refreshToken = data.refresh_token;
                 }
                 saveState();
-                console.log('[SPOTIFY-SERVER] Token refreshed successfully.');
-                return state.spotifyConfig.accessToken;
+                console.log(`[SPOTIFY-SERVER] Token refreshed successfully for screen ${sid}.`);
+                return screen.spotifyConfig.accessToken;
             } else {
-                console.error('[SPOTIFY-SERVER] Failed to refresh token. Status:', response.status);
+                console.error(`[SPOTIFY-SERVER] Failed to refresh token for screen ${sid}. Status:`, response.status);
                 return null;
             }
         } catch (error) {
-            console.error('[SPOTIFY-SERVER] Error refreshing token:', error);
+            console.error(`[SPOTIFY-SERVER] Error refreshing token for screen ${sid}:`, error);
             return null;
         }
     }
     return accessToken;
 }
 
-async function spotifyServerAction(action) {
-    if (!state.spotifyConfig) {
-        console.log('[SPOTIFY-SERVER] Spotify is not configured, skipping blackout action:', action);
+async function spotifyServerAction(screenId, action) {
+    const sid = screenId || 'default';
+    const screen = state.screens[sid];
+    if (!screen || !screen.spotifyConfig) {
+        console.log(`[SPOTIFY-SERVER] Spotify is not configured for screen ${sid}, skipping blackout action:`, action);
         return;
     }
-    const token = await getOrRefreshSpotifyToken();
+    const token = await getOrRefreshSpotifyToken(sid);
     if (!token) {
-        console.log('[SPOTIFY-SERVER] No valid token, cannot perform action:', action);
+        console.log(`[SPOTIFY-SERVER] No valid token for screen ${sid}, cannot perform action:`, action);
         return;
     }
 
     if (action === 'pause') {
-        console.log('[SPOTIFY-SERVER] Sending Pause request to Spotify...');
+        console.log(`[SPOTIFY-SERVER] Sending Pause request to Spotify for screen ${sid}...`);
         try {
             // First check if currently playing to decide whether to resume on wake
             const playingRes = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             let wasPlaying = false;
-            let currentDeviceId = state.spotifyConfig.lastDeviceId;
+            let currentDeviceId = screen.spotifyConfig.lastDeviceId;
 
             if (playingRes.status === 200) {
                 const playingData = await playingRes.json();
@@ -654,30 +688,30 @@ async function spotifyServerAction(action) {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            console.log('[SPOTIFY-SERVER] Pause response status:', pauseRes.status);
+            console.log(`[SPOTIFY-SERVER] Pause response status for screen ${sid}:`, pauseRes.status);
             // If it succeeds (204) OR if it was already playing according to API, mark wasPlaying as true
             const finalWasPlaying = (pauseRes.status === 204) || wasPlaying;
-            state.spotifyConfig.wasPlayingBeforeBlackout = finalWasPlaying;
+            screen.spotifyConfig.wasPlayingBeforeBlackout = finalWasPlaying;
             if (currentDeviceId) {
-                state.spotifyConfig.lastDeviceId = currentDeviceId;
+                screen.spotifyConfig.lastDeviceId = currentDeviceId;
             }
             saveState();
-            console.log(`[SPOTIFY-SERVER] Saved wasPlayingBeforeBlackout = ${finalWasPlaying}, deviceId = ${currentDeviceId}`);
+            console.log(`[SPOTIFY-SERVER] Screen ${sid} saved wasPlayingBeforeBlackout = ${finalWasPlaying}, deviceId = ${currentDeviceId}`);
         } catch (err) {
-            console.error('[SPOTIFY-SERVER] Error during auto-pause:', err);
+            console.error(`[SPOTIFY-SERVER] Error during auto-pause for screen ${sid}:`, err);
         }
     } else if (action === 'resume') {
-        if (!state.spotifyConfig.wasPlayingBeforeBlackout) {
-            console.log('[SPOTIFY-SERVER] Spotify was not playing before blackout, skipping resume.');
+        if (!screen.spotifyConfig.wasPlayingBeforeBlackout) {
+            console.log(`[SPOTIFY-SERVER] Spotify was not playing before blackout for screen ${sid}, skipping resume.`);
             return;
         }
 
-        console.log('[SPOTIFY-SERVER] Sending Resume request to Spotify...');
+        console.log(`[SPOTIFY-SERVER] Sending Resume request to Spotify for screen ${sid}...`);
         try {
-            const deviceId = state.spotifyConfig.lastDeviceId;
+            const deviceId = screen.spotifyConfig.lastDeviceId;
             let resumeRes;
             if (deviceId) {
-                console.log('[SPOTIFY-SERVER] Resuming on device ID:', deviceId);
+                console.log(`[SPOTIFY-SERVER] Resuming on device ID ${deviceId} for screen ${sid}...`);
                 // Call Transfer Playback with play = true to wake it up
                 resumeRes = await fetch('https://api.spotify.com/v1/me/player', {
                     method: 'PUT',
@@ -688,19 +722,19 @@ async function spotifyServerAction(action) {
                     body: JSON.stringify({ device_ids: [deviceId], play: true })
                 });
             } else {
-                console.log('[SPOTIFY-SERVER] Resuming on default active device...');
+                console.log(`[SPOTIFY-SERVER] Resuming on default active device for screen ${sid}...`);
                 resumeRes = await fetch('https://api.spotify.com/v1/me/player/play', {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
             }
-            console.log('[SPOTIFY-SERVER] Resume response status:', resumeRes.status);
+            console.log(`[SPOTIFY-SERVER] Resume response status for screen ${sid}:`, resumeRes.status);
             
             // Clean up wasPlaying flag
-            state.spotifyConfig.wasPlayingBeforeBlackout = false;
+            screen.spotifyConfig.wasPlayingBeforeBlackout = false;
             saveState();
         } catch (err) {
-            console.error('[SPOTIFY-SERVER] Error during auto-resume:', err);
+            console.error(`[SPOTIFY-SERVER] Error during auto-resume for screen ${sid}:`, err);
         }
     }
 }
@@ -714,10 +748,12 @@ wss.on('connection', (ws, req) => {
     
     ws.screenId = screenId;
     ensureScreenExists(screenId);
+    broadcastGlobalState();
 
     // Initial state push
     if (screenId === 'admin') {
-        ws.send(JSON.stringify({ type: 'GLOBAL_STATE_UPDATE', state }));
+        ws.send(JSON.stringify({ type: 'GLOBAL_STATE_UPDATE', state, activeScreens: [] })); // initial dummy
+        broadcastGlobalState(); // immediate full sync
     } else {
         const screen = state.screens[screenId];
         ws.send(JSON.stringify({ 
@@ -730,6 +766,11 @@ wss.on('connection', (ws, req) => {
             }
         }));
     }
+
+    ws.on('close', () => {
+        console.log(`[WS] Connection closed for screenId: ${screenId}`);
+        broadcastGlobalState();
+    });
 
     ws.on('message', (messageString) => {
         try {
@@ -782,12 +823,10 @@ wss.on('connection', (ws, req) => {
                 case 'SET_BLACKOUT':
                     screen.isBlackout = !!data.value;
                     broadcastScreenState(sid);
-                    if (sid === 'default') {
-                        if (screen.isBlackout) {
-                            spotifyServerAction('pause');
-                        } else {
-                            spotifyServerAction('resume');
-                        }
+                    if (screen.isBlackout) {
+                        spotifyServerAction(sid, 'pause');
+                    } else {
+                        spotifyServerAction(sid, 'resume');
                     }
                     break;
                 case 'UPDATE_TICKER':
@@ -931,17 +970,18 @@ wss.on('connection', (ws, req) => {
                     break;
                 case 'DELETE_SCREEN':
                     // Prevent deleting default screen
-                    if (data.targetScreenId && data.targetScreenId !== 'default') {
-                        delete state.screens[data.targetScreenId];
+                    const delId = data.id || data.targetScreenId;
+                    if (delId && delId !== 'default') {
+                        delete state.screens[delId];
                     }
                     break;
                 case 'SPOTIFY_SYNC_DEVICE':
-                    if (state.spotifyConfig) {
-                        state.spotifyConfig.lastDeviceId = data.deviceId;
+                    if (screen.spotifyConfig) {
+                        screen.spotifyConfig.lastDeviceId = data.deviceId;
                     }
                     break;
                 case 'SPOTIFY_DISCONNECT':
-                    state.spotifyConfig = null;
+                    screen.spotifyConfig = null;
                     break;
             }
             
@@ -1034,12 +1074,10 @@ setInterval(() => {
                     broadcastScreenState(sid);
                     
                     // Trigger Spotify server action on schedule-driven blackout change
-                    if (sid === 'default') {
-                        if (shouldBeBlackout) {
-                            spotifyServerAction('pause');
-                        } else {
-                            spotifyServerAction('resume');
-                        }
+                    if (shouldBeBlackout) {
+                        spotifyServerAction(sid, 'pause');
+                    } else {
+                        spotifyServerAction(sid, 'resume');
                     }
                 }
             }
