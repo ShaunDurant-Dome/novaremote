@@ -636,12 +636,13 @@
         let globalState = null;
         let activeScreenId = 'default';
 
+        // Detect subpath proxies globally (like /digital/)
+        const pathParts = window.location.pathname.split('/');
+        const pathPrefix = pathParts.slice(0, -1).filter(p => p && p !== 'player.html' && p !== 'index.html').join('/');
+        const prefixStr = pathPrefix ? '/' + pathPrefix : '';
+
         function connectWebSocket() {
             const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            // Register as admin to get global state updates
-            const pathParts = window.location.pathname.split('/');
-            const pathPrefix = pathParts.slice(0, -1).filter(p => p && p !== 'player.html' && p !== 'index.html').join('/');
-            const prefixStr = pathPrefix ? '/' + pathPrefix : '';
             const wsUrl = `${proto}//${window.location.host}${prefixStr}/?screenId=admin`;
             
             console.log(`Connecting to WebSocket at: ${wsUrl}`);
@@ -1138,7 +1139,7 @@
                 nameLabel.innerText = `Playing: ${currentItem.name}`;
                 placeholder.style.display = 'none';
  
-                const targetUrl = `/player.html?screenId=${activeScreenId}&width=${width}&height=${height}&preview=1`;
+                const targetUrl = `${prefixStr}/player.html?screenId=${activeScreenId}&width=${width}&height=${height}&preview=1`;
                 // Only update src if changed to prevent reloading of iframe on every state update tick
                 const currentSrc = iframe.getAttribute('src') || '';
                 const relativeUrl = window.location.origin + targetUrl;
@@ -1280,10 +1281,10 @@
                 height = globalState.screenConfig.height || height;
             }
             const options = `width=${width},height=${height},left=${x},top=${y},menubar=no,toolbar=no,location=no,status=no`;
-            const win = window.open(`/player.html?screenId=${activeScreenId}&width=${width}&height=${height}`, 'NovaRemotePlayer', options);
+            const win = window.open(`${prefixStr}/player.html?screenId=${activeScreenId}&width=${width}&height=${height}`, 'NovaRemotePlayer', options);
             if (!win) {
                 // Fallback if popup blocker is active
-                window.open(`/player.html?screenId=${activeScreenId}&width=${width}&height=${height}`, '_blank');
+                window.open(`${prefixStr}/player.html?screenId=${activeScreenId}&width=${width}&height=${height}`, '_blank');
             }
         }
 
