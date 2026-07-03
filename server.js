@@ -804,6 +804,14 @@ wss.on('connection', (ws, req) => {
                     }
                     broadcastScreenState(sid);
                     break;
+                case 'FORCE_RELOAD':
+                    const reloadMsg = JSON.stringify({ type: 'FORCE_RELOAD' });
+                    wss.clients.forEach(client => {
+                        if (client.readyState === WebSocket.OPEN && client.screenId === sid) {
+                            client.send(reloadMsg);
+                        }
+                    });
+                    break;
                 case 'PREV':
                     if (screen.playlist.length > 0) {
                         screen.currentIndex = (screen.currentIndex - 1 + screen.playlist.length) % screen.playlist.length;

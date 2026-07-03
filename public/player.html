@@ -364,6 +364,9 @@
                     if (data.state && data.state.playlist) {
                         prefetchMedia(data.state.playlist);
                     }
+                } else if (data.type === 'FORCE_RELOAD') {
+                    console.log('Received FORCE_RELOAD command. Reloading page...');
+                    window.location.reload(true);
                 }
             };
         }
