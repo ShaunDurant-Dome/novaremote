@@ -657,8 +657,6 @@ input:checked + .slider:before {
     top: 0;
     left: 0;
     z-index: 5;
-    background-size: 400% 400%;
-    animation: gradientShift 20s ease infinite;
 }
 
 /* Theme: Dome (Orange & Navy) */
@@ -737,12 +735,10 @@ input:checked + .slider:before {
 
 /* Liquid Glass Cards */
 .temp-card {
-    background: rgba(255, 255, 255, 0.035);
+    background: rgba(10, 15, 30, 0.85); /* High-performance translucent background instead of GPU-exhausting blurs */
     border: 1.5px solid rgba(255, 255, 255, 0.12);
     border-top: 2px solid rgba(255, 255, 255, 0.35);
     border-left: 2px solid rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(30px) saturate(200%);
-    -webkit-backdrop-filter: blur(30px) saturate(200%);
     border-radius: 28px;
     padding: 3rem 2rem;
     flex: 1;
@@ -1045,10 +1041,8 @@ input:checked + .slider:before {
 
 /* Graph container and chart styling */
 .temp-graph-container {
-    background: rgba(6, 9, 19, 0.45);
+    background: rgba(6, 9, 19, 0.85); /* High-performance translucent background instead of GPU-exhausting blurs */
     border: 1.5px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     border-radius: 20px;
     padding: 1rem 1.5rem;
     box-shadow: 
