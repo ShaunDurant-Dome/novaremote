@@ -33,16 +33,23 @@
 
         <!-- Dome Temperature Slide -->
         <div id="tempContainer" class="temp-slide-layout" style="display: none;">
-            <div class="temp-header">
-                <img src="/logo_white.png" class="temp-logo" alt="The Dome">
-            </div>
-            <div class="temp-grid">
+            <!-- Left Grid (Outdoor card by default, holds both when stacked in Option 2) -->
+            <div id="tempLeftGrid" class="temp-grid grid-left">
                 <div class="temp-card outdoor-card">
                     <div id="outdoorLabel" class="temp-label">Outdoor Temperature</div>
                     <div class="temp-value">
                         <span id="outdoorVal">--</span><span class="temp-unit">°C</span>
                     </div>
                 </div>
+            </div>
+
+            <!-- Centered Logo -->
+            <div class="temp-header">
+                <img src="/logo_white.png" class="temp-logo" alt="The Dome">
+            </div>
+
+            <!-- Right Grid (Main Hall card by default, hidden when stacked in Option 2) -->
+            <div id="tempRightGrid" class="temp-grid grid-right">
                 <div class="temp-card hall-card">
                     <div id="hallLabel" class="temp-label">Main Hall Temperature</div>
                     <div class="temp-value">
@@ -170,18 +177,16 @@
                             margin: 0 !important;
                         }
                         .temp-grid { 
-                            width: 70% !important; 
-                            flex-direction: row !important; 
-                            gap: 2rem !important; 
-                            justify-content: flex-end !important; 
+                            width: 35% !important; 
+                            display: flex !important;
+                            justify-content: center !important;
                             padding: 0 !important; 
                             margin: 0 !important; 
-                            max-width: none !important;
                         }
                         .temp-card { 
                             padding: 0.75rem 1.5rem !important; 
                             border-radius: 16px !important; 
-                            flex: 1 !important;
+                            width: 100% !important;
                             max-width: 240px !important;
                             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
                         }
@@ -208,13 +213,13 @@
                         
                         /* Graph layout overrides */
                         .temp-slide-layout.with-graph { flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 1rem 2rem !important; }
-                        .temp-slide-layout.with-graph .temp-header { width: 15% !important; margin: 0 !important; }
-                        .temp-slide-layout.with-graph .temp-logo { max-width: 130px !important; }
-                        .temp-slide-layout.with-graph .temp-grid { width: 32% !important; flex-direction: column !important; gap: 0.6rem !important; padding: 0 !important; margin: 0 !important; }
+                        .temp-slide-layout.with-graph .temp-grid.grid-left { width: 32% !important; flex-direction: column !important; gap: 0.6rem !important; display: flex !important; }
                         .temp-slide-layout.with-graph .temp-card { width: 100% !important; max-width: none !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 0.5rem 1.25rem !important; border-radius: 12px !important; }
                         .temp-slide-layout.with-graph .temp-label { font-size: 0.75rem !important; margin: 0 !important; text-align: left !important; }
                         .temp-slide-layout.with-graph .temp-value { font-size: 2.2rem !important; }
                         .temp-slide-layout.with-graph .temp-unit { font-size: 1.1rem !important; }
+                        .temp-slide-layout.with-graph .temp-header { width: 15% !important; margin: 0 !important; }
+                        .temp-slide-layout.with-graph .temp-logo { max-width: 130px !important; }
                         .temp-slide-layout.with-graph .temp-graph-container { display: flex !important; width: 48% !important; height: 210px !important; padding: 0.8rem 1rem !important; }
                     `;
                 } else {
@@ -224,33 +229,31 @@
                             flex-direction: row !important; 
                             justify-content: space-between !important; 
                             align-items: center !important; 
-                            padding: 0.5rem 2rem !important; 
+                            padding: 0.5rem 3.5rem !important; 
                         }
                         .temp-header { 
-                            width: 25% !important; 
+                            width: 30% !important; 
                             margin: 0 !important; 
                             display: flex !important; 
                             justify-content: center !important; 
                         }
                         .temp-logo { 
                             width: 100% !important; 
-                            max-width: 170px !important; 
+                            max-width: 220px !important; 
                             height: auto !important; 
                             margin: 0 !important;
                         }
                         .temp-grid { 
-                            width: 70% !important; 
-                            flex-direction: row !important; 
-                            gap: 1.25rem !important; 
-                            justify-content: flex-end !important; 
+                            width: 35% !important; 
+                            display: flex !important;
+                            justify-content: center !important;
                             padding: 0 !important; 
                             margin: 0 !important; 
-                            max-width: none !important;
                         }
                         .temp-card { 
                             padding: 0.4rem 1rem !important; 
                             border-radius: 12px !important; 
-                            flex: 1 !important;
+                            width: 100% !important;
                             max-width: 200px !important;
                             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5) !important;
                         }
@@ -277,13 +280,13 @@
                         
                         /* Graph layout overrides (LED Wall 960x192 stacked style) */
                         .temp-slide-layout.with-graph { flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 0.5rem 1.5rem !important; }
-                        .temp-slide-layout.with-graph .temp-header { width: 15% !important; margin: 0 !important; }
-                        .temp-slide-layout.with-graph .temp-logo { max-width: 110px !important; }
-                        .temp-slide-layout.with-graph .temp-grid { width: 32% !important; flex-direction: column !important; gap: 0.4rem !important; padding: 0 !important; margin: 0 !important; }
+                        .temp-slide-layout.with-graph .temp-grid.grid-left { width: 32% !important; flex-direction: column !important; gap: 0.4rem !important; display: flex !important; }
                         .temp-slide-layout.with-graph .temp-card { width: 100% !important; max-width: none !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 0.3rem 1rem !important; border-radius: 8px !important; }
                         .temp-slide-layout.with-graph .temp-label { font-size: 0.65rem !important; margin: 0 !important; text-align: left !important; }
                         .temp-slide-layout.with-graph .temp-value { font-size: 1.8rem !important; }
                         .temp-slide-layout.with-graph .temp-unit { font-size: 0.9rem !important; }
+                        .temp-slide-layout.with-graph .temp-header { width: 16% !important; margin: 0 !important; }
+                        .temp-slide-layout.with-graph .temp-logo { max-width: 110px !important; }
                         .temp-slide-layout.with-graph .temp-graph-container { display: flex !important; width: 48% !important; height: 165px !important; padding: 0.5rem 0.8rem !important; }
                     `;
                 }
@@ -808,9 +811,15 @@
                             historyFetchInterval = null;
                         }
  
+                        const leftGrid = document.getElementById('tempLeftGrid');
+                        const rightGrid = document.getElementById('tempRightGrid');
+                        const hallCard = document.querySelector('.hall-card');
+
                         if (showGraph) {
                             tempEl.classList.add('with-graph');
                             if (graphContainer) graphContainer.style.display = 'flex';
+                            if (rightGrid) rightGrid.style.display = 'none';
+                            if (leftGrid && hallCard) leftGrid.appendChild(hallCard);
                             
                             // Initial fetch & draw (deferred to let browser apply layout dimensions)
                             setTimeout(() => {
@@ -822,6 +831,10 @@
                         } else {
                             tempEl.classList.remove('with-graph');
                             if (graphContainer) graphContainer.style.display = 'none';
+                            if (rightGrid && hallCard) {
+                                rightGrid.appendChild(hallCard);
+                                rightGrid.style.display = 'flex';
+                            }
                         }
                         currentShowGraph = showGraph;
                         currentHistoryHours = hh;
