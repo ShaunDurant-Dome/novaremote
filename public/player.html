@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NovaRemote LED Player</title>
-    <link rel="stylesheet" href="app.css?v=7">
+    <link rel="stylesheet" href="app.css?v=8">
     <style>
         html, body {
             margin: 0;
@@ -817,8 +817,8 @@
 
                         if (showGraph) {
                             tempEl.classList.add('with-graph');
-                            if (graphContainer) graphContainer.style.display = 'flex';
-                            if (rightGrid) rightGrid.style.display = 'none';
+                            if (graphContainer) graphContainer.style.setProperty('display', 'flex', 'important');
+                            if (rightGrid) rightGrid.style.setProperty('display', 'none', 'important');
                             if (leftGrid && hallCard) leftGrid.appendChild(hallCard);
                             
                             // Initial fetch & draw (deferred to let browser apply layout dimensions)
@@ -830,10 +830,10 @@
                             historyFetchInterval = setInterval(() => fetchAndDrawGraph(hh), 60000);
                         } else {
                             tempEl.classList.remove('with-graph');
-                            if (graphContainer) graphContainer.style.display = 'none';
+                            if (graphContainer) graphContainer.style.setProperty('display', 'none', 'important');
                             if (rightGrid && hallCard) {
                                 rightGrid.appendChild(hallCard);
-                                rightGrid.style.display = 'flex';
+                                rightGrid.style.setProperty('display', 'flex', 'important');
                             }
                         }
                         currentShowGraph = showGraph;
