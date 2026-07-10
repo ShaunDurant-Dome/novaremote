@@ -701,6 +701,46 @@ input:checked + .slider:before {
     background: linear-gradient(-45deg, #11050e, #2e081c, #6c121e, #11050e);
 }
 
+/* Theme: Gym Motion Subtle */
+.temp-slide-layout.theme-gym-motion {
+    background-image: url('images/theme_gym_motion.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Theme: Gym Carbon Subtle */
+.temp-slide-layout.theme-gym-carbon {
+    background-image: url('images/theme_gym_carbon.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Theme: Gym Honeycomb Grid Subtle */
+.temp-slide-layout.theme-gym-grid {
+    background-image: url('images/theme_gym_grid.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Theme: Gym Laser Trails Subtle */
+.temp-slide-layout.theme-gym-laser {
+    background-image: url('images/theme_gym_laser.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Theme: Gym Fluid Waves Subtle */
+.temp-slide-layout.theme-gym-waves {
+    background-image: url('images/theme_gym_waves.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
 .temp-slide-preview {
     padding: 1.5rem 1rem !important;
 }
