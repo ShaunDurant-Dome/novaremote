@@ -860,9 +860,10 @@ wss.on('connection', (ws, req) => {
                     break;
                 case 'UPDATE_DURATION':
                     const item = screen.playlist.find(p => p.id === data.id);
-                    if (item && (item.type === 'image' || item.type === 'temp')) {
+                    if (item && (item.type === 'image' || item.type === 'temp' || item.type === 'welcome')) {
                         item.duration = Math.max(1, parseInt(data.duration) || 10);
                     }
+                    saveState();
                     broadcastScreenState(sid);
                     break;
                 case 'ADD_TEMP_SLIDE':
@@ -881,6 +882,7 @@ wss.on('connection', (ws, req) => {
                     if (screen.currentIndex === -1) {
                         screen.currentIndex = 0;
                     }
+                    saveState();
                     broadcastScreenState(sid);
                     break;
                 case 'UPDATE_TEMP_LABELS':
@@ -892,6 +894,41 @@ wss.on('connection', (ws, req) => {
                         tempItem.boldFont = data.boldFont !== undefined ? !!data.boldFont : tempItem.boldFont;
                         tempItem.historyHours = data.historyHours !== undefined ? parseInt(data.historyHours) : (tempItem.historyHours || 24);
                         tempItem.bgTheme = data.bgTheme !== undefined ? data.bgTheme : (tempItem.bgTheme || 'dome');
+                    }
+                    saveState();
+                    broadcastScreenState(sid);
+                    break;
+                case 'ADD_WELCOME_SLIDE':
+                    const newWelcome = {
+                        id: 'welcome-' + Date.now(),
+                        name: 'Conference Welcome',
+                        type: 'welcome',
+                        duration: parseInt(data.duration) || 15,
+                        title: 'WELCOME',
+                        subtitle: 'Effective Communicators',
+                        subSubtitle: 'Conference 2026',
+                        room: 'Swakop Room 4th Floor',
+                        leftDir: 'LIFT NORTH',
+                        rightDir: 'LIFT SOUTH',
+                        bgTheme: 'blue'
+                    };
+                    screen.playlist.push(newWelcome);
+                    if (screen.currentIndex === -1) {
+                        screen.currentIndex = 0;
+                    }
+                    saveState();
+                    broadcastScreenState(sid);
+                    break;
+                case 'UPDATE_WELCOME_SETTINGS':
+                    const welcomeItem = screen.playlist.find(p => p.id === data.id);
+                    if (welcomeItem && welcomeItem.type === 'welcome') {
+                        welcomeItem.title = data.title !== undefined ? data.title : (welcomeItem.title || 'WELCOME');
+                        welcomeItem.subtitle = data.subtitle !== undefined ? data.subtitle : (welcomeItem.subtitle || '');
+                        welcomeItem.subSubtitle = data.subSubtitle !== undefined ? data.subSubtitle : (welcomeItem.subSubtitle || '');
+                        welcomeItem.room = data.room !== undefined ? data.room : (welcomeItem.room || '');
+                        welcomeItem.leftDir = data.leftDir !== undefined ? data.leftDir : (welcomeItem.leftDir || '');
+                        welcomeItem.rightDir = data.rightDir !== undefined ? data.rightDir : (welcomeItem.rightDir || '');
+                        welcomeItem.bgTheme = data.bgTheme !== undefined ? data.bgTheme : (welcomeItem.bgTheme || 'blue');
                     }
                     saveState();
                     broadcastScreenState(sid);

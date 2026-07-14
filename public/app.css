@@ -1383,3 +1383,306 @@ input:checked + .slider:before {
 .temp-slide-layout:not(.temp-slide-preview).layout-portrait:not(.with-graph) .temp-unit {
     font-size: 3.8rem !important;
 }
+
+/* ==========================================================================
+   CONFERENCE WELCOME SLIDE STYLING & THEMES
+   ========================================================================== */
+
+.welcome-slide-layout {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 2.5rem 4rem;
+    overflow: hidden;
+    z-index: 5;
+    transition: all 0.5s ease-in-out;
+}
+
+/* 1. Themes */
+.theme-welcome-blue {
+    background: linear-gradient(135deg, #0b4c8a 0%, #062f54 100%);
+    color: #ffffff;
+}
+
+.theme-welcome-dark {
+    background: linear-gradient(135deg, #151824 0%, #0c0d14 100%);
+    color: #ffffff;
+    /* Subtle Hexagon Mesh */
+    background-image: 
+        radial-gradient(circle at 20% 30%, rgba(0, 210, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255, 123, 0, 0.05) 0%, transparent 50%),
+        linear-gradient(135deg, #151824 0%, #0c0d14 100%);
+}
+
+.theme-welcome-gold {
+    background: linear-gradient(135deg, #0f1422 0%, #06080e 100%);
+    color: #ffffff;
+    border: 3px solid rgba(212, 175, 55, 0.15);
+}
+
+.theme-welcome-gold .welcome-title,
+.theme-welcome-gold .welcome-room,
+.theme-welcome-gold .welcome-tagline-main,
+.theme-welcome-gold .welcome-arrow-wrapper {
+    color: #d4af37 !important;
+}
+
+/* 2. Header elements */
+.welcome-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 120px;
+}
+
+.welcome-header-left {
+    display: flex;
+    align-items: center;
+}
+
+.welcome-conf-svg {
+    width: 130px;
+    height: 98px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+}
+
+.welcome-header-right {
+    display: flex;
+    align-items: center;
+}
+
+.welcome-dome-logo {
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.12));
+}
+
+/* 3. Body text elements */
+.welcome-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 1.25rem;
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.welcome-title {
+    font-size: 5rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #f2a104;
+    letter-spacing: 4px;
+    margin: 0;
+    text-shadow: 0 4px 15px rgba(242, 161, 4, 0.25);
+    font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+.welcome-subtitle {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-align: center;
+    line-height: 1.2;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+.welcome-subsubtitle {
+    font-size: 2.6rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-align: center;
+    margin-top: -0.25rem;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+.welcome-room {
+    font-size: 2.2rem;
+    font-weight: 700;
+    font-style: italic;
+    color: #f2a104;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+    text-shadow: 0 0 10px rgba(242, 161, 4, 0.15);
+    font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+.welcome-room sup {
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    vertical-align: super;
+}
+
+/* 4. Footer elements */
+.welcome-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    border-top: 2px dashed rgba(255, 255, 255, 0.15);
+    padding-top: 1.5rem;
+    box-sizing: border-box;
+}
+
+.welcome-dir-container {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    color: #ffffff;
+    width: 30%;
+}
+
+.welcome-dir-container.left-dir {
+    justify-content: flex-start;
+}
+
+.welcome-dir-container.right-dir {
+    justify-content: flex-end;
+    flex-direction: row-reverse;
+}
+
+.welcome-arrow-wrapper {
+    color: #f2a104;
+    display: flex;
+    align-items: center;
+}
+
+.welcome-arrow-svg {
+    width: 90px;
+    height: 36px;
+    filter: drop-shadow(0 0 8px rgba(242, 161, 4, 0.4));
+}
+
+.welcome-dir-text {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #ffffff;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.welcome-tagline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 40%;
+}
+
+.welcome-tagline-main {
+    font-size: 1.3rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: #f2a104;
+    text-shadow: 0 0 8px rgba(242, 161, 4, 0.2);
+    font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+.welcome-tagline-sub {
+    font-size: 1.4rem;
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    color: #ffffff;
+    margin-top: -0.2rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+
+/* ==========================================================================
+   RESPONSIVE OVERRIDES FOR COMPACT LED WALL SCREENS (e.g. 960x192 height < 250px)
+   ========================================================================== */
+@media (max-height: 250px) {
+    .welcome-slide-layout {
+        padding: 0.25rem 2rem !important;
+    }
+    
+    .welcome-header {
+        height: 40px !important;
+    }
+    
+    .welcome-conf-svg {
+        width: 55px !important;
+        height: 40px !important;
+    }
+    
+    .welcome-dome-logo {
+        height: 32px !important;
+    }
+    
+    .welcome-body {
+        gap: 0.15rem !important;
+        margin: 0.15rem 0 !important;
+    }
+    
+    .welcome-title {
+        font-size: 1.7rem !important;
+        letter-spacing: 2px !important;
+    }
+    
+    .welcome-subtitle {
+        font-size: 1.1rem !important;
+        letter-spacing: 0.5px !important;
+    }
+    
+    .welcome-subsubtitle {
+        font-size: 0.95rem !important;
+        margin-top: -0.1rem !important;
+    }
+    
+    .welcome-room {
+        font-size: 0.9rem !important;
+        margin-top: 0.1rem !important;
+    }
+    
+    .welcome-room sup {
+        font-size: 0.6rem !important;
+    }
+    
+    .welcome-footer {
+        padding-top: 0.3rem !important;
+        border-top: 1px dashed rgba(255, 255, 255, 0.12) !important;
+    }
+    
+    .welcome-dir-container {
+        gap: 0.6rem !important;
+    }
+    
+    .welcome-arrow-svg {
+        width: 38px !important;
+        height: 14px !important;
+    }
+    
+    .welcome-dir-text {
+        font-size: 0.85rem !important;
+    }
+    
+    .welcome-tagline-main {
+        font-size: 0.65rem !important;
+        letter-spacing: 1px !important;
+    }
+    
+    .welcome-tagline-sub {
+        font-size: 0.7rem !important;
+        margin-top: -0.1rem !important;
+    }
+}
+

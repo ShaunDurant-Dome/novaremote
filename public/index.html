@@ -339,6 +339,7 @@
                         <h2 class="panel-title" id="activePlaylistTitle">Active Playlist</h2>
                         <div style="display: flex; gap: 0.5rem;">
                             <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: rgba(255,123,0,0.3); color: var(--primary);" onclick="addTempSlide()">📊 + Temp Slide</button>
+                            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: rgba(0,210,255,0.3); color: #00d2ff;" onclick="addWelcomeSlide()">👋 + Welcome Slide</button>
                             <span id="playlistCount" class="status-badge" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; height: auto;">0 items</span>
                         </div>
                     </div>
@@ -765,6 +766,10 @@
             sendAction('ADD_TEMP_SLIDE', { duration: 15 });
         }
 
+        function addWelcomeSlide() {
+            sendAction('ADD_WELCOME_SLIDE', { duration: 15 });
+        }
+
         function updateTicker() {
             const enabled = document.getElementById('tickerEnable').checked;
             const text = document.getElementById('tickerText').value;
@@ -1098,14 +1103,16 @@
                     mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;background:#151824;color:var(--secondary);font-size:1.5rem;">📹</div>`;
                 } else if (item.type === 'temp') {
                     mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;background:#151824;color:var(--primary);font-size:1.5rem;">📊</div>`;
+                } else if (item.type === 'welcome') {
+                    mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;background:#151824;color:#00d2ff;font-size:1.5rem;">👋</div>`;
                 }
 
                 let durationCtrl = '';
-                if (item.type === 'image' || item.type === 'temp') {
+                if (item.type === 'image' || item.type === 'temp' || item.type === 'welcome') {
                     durationCtrl = `
                         <div style="display:flex;align-items:center;gap:0.35rem;" onclick="event.stopPropagation()">
                             <span style="font-size:0.75rem;color:var(--text-muted)">Dur:</span>
-                            <input class="duration-input" type="number" min="1" max="3600" value="${item.duration || (item.type === 'temp' ? 15 : 10)}" 
+                            <input class="duration-input" type="number" min="1" max="3600" value="${item.duration || (item.type === 'temp' ? 15 : (item.type === 'welcome' ? 15 : 10))}" 
                                    onchange="updateDuration('${item.id}', this.value)">
                             <span style="font-size:0.75rem;color:var(--text-muted)">s</span>
                         </div>
@@ -1179,6 +1186,59 @@
                     `;
                 }
 
+                let welcomeCtrl = '';
+                if (item.type === 'welcome') {
+                    welcomeCtrl = `
+                        <div style="display:flex; flex-direction:column; gap:0.25rem; margin-top:0.35rem;" onclick="event.stopPropagation()">
+                            <div style="display:flex; align-items:center; gap:0.25rem;">
+                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Title:</span>
+                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                       type="text" value="${item.title || 'WELCOME'}" 
+                                       onchange="updateWelcomeSettings('${item.id}', this.value, null, null, null, null, null, null)">
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.25rem;">
+                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Sub 1:</span>
+                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                       type="text" value="${item.subtitle || ''}" 
+                                       onchange="updateWelcomeSettings('${item.id}', null, this.value, null, null, null, null, null)">
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.25rem;">
+                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Sub 2:</span>
+                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                       type="text" value="${item.subSubtitle || ''}" 
+                                       onchange="updateWelcomeSettings('${item.id}', null, null, this.value, null, null, null, null)">
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.25rem;">
+                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Room:</span>
+                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                       type="text" value="${item.room || ''}" 
+                                       onchange="updateWelcomeSettings('${item.id}', null, null, null, this.value, null, null, null)">
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.25rem;">
+                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Left Dir:</span>
+                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                       type="text" value="${item.leftDir || ''}" 
+                                       onchange="updateWelcomeSettings('${item.id}', null, null, null, null, this.value, null, null)">
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.25rem;">
+                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Right Dir:</span>
+                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                       type="text" value="${item.rightDir || ''}" 
+                                       onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, this.value, null)">
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.25rem;">
+                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Theme:</span>
+                                <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px; border-color: rgba(255,255,255,0.08);" 
+                                        onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, this.value)">
+                                    <option value="blue" ${(item.bgTheme == 'blue' || !item.bgTheme) ? 'selected' : ''}>Classic Blue</option>
+                                    <option value="dark" ${item.bgTheme == 'dark' ? 'selected' : ''}>Charcoal</option>
+                                    <option value="gold" ${item.bgTheme == 'gold' ? 'selected' : ''}>Gold Accent</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 itemDiv.innerHTML = `
                     ${mediaTag}
                     <div class="item-info">
@@ -1190,6 +1250,7 @@
                                 ${soundCtrl}
                             </div>
                             ${tempLabelsCtrl}
+                            ${welcomeCtrl}
                         </div>
                     </div>
                     <button class="btn-item-action delete" onclick="removePlaylistItem('${item.id}', event)" title="Remove from Playlist">❌</button>
@@ -1276,6 +1337,33 @@
                         showGraph: sg,
                         boldFont: bf,
                         historyHours: hh,
+                        bgTheme: theme
+                    });
+                }
+            }
+        }
+
+        function updateWelcomeSettings(id, title, subtitle, subSubtitle, room, leftDir, rightDir, bgTheme) {
+            if (!globalState) return;
+            const screen = globalState.screens[activeScreenId];
+            if (screen) {
+                const item = screen.playlist.find(p => p.id === id);
+                if (item) {
+                    const t = title !== null ? title : (item.title || 'WELCOME');
+                    const st = subtitle !== null ? subtitle : (item.subtitle || '');
+                    const sst = subSubtitle !== null ? subSubtitle : (item.subSubtitle || '');
+                    const rm = room !== null ? room : (item.room || '');
+                    const ld = leftDir !== null ? leftDir : (item.leftDir || '');
+                    const rd = rightDir !== null ? rightDir : (item.rightDir || '');
+                    const theme = bgTheme !== null ? bgTheme : (item.bgTheme || 'blue');
+                    sendAction('UPDATE_WELCOME_SETTINGS', {
+                        id,
+                        title: t,
+                        subtitle: st,
+                        subSubtitle: sst,
+                        room: rm,
+                        leftDir: ld,
+                        rightDir: rd,
                         bgTheme: theme
                     });
                 }
