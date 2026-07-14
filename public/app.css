@@ -1060,8 +1060,8 @@ input:checked + .slider:before {
 }
 
 /* 4. Dedicated Ticker Spacing Overrides */
-body.has-ticker .welcome-footer {
-    bottom: 13.5rem !important;
+body.has-ticker .welcome-slide-layout {
+    padding-bottom: 14rem !important;
 }
 
 body.has-ticker .temp-footer {
@@ -1445,12 +1445,13 @@ body.has-ticker .temp-footer {
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
+    align-items: center;
     box-sizing: border-box;
     position: absolute;
     top: 0;
     left: 0;
-    padding: 4rem 6rem 7rem 6rem;
+    padding: 4rem 6rem 5.5rem 6rem;
     overflow: hidden;
     z-index: 5;
     transition: all 0.5s ease-in-out;
@@ -1608,14 +1609,19 @@ body.has-ticker .temp-footer {
 
 /* 4. Footer elements */
 .welcome-footer {
-    position: absolute;
-    bottom: 5.5rem;
-    left: 6rem;
-    right: 6rem;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-top: auto;
     box-sizing: border-box;
+}
+
+.welcome-lifts-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 }
 
 .welcome-dir-container {
