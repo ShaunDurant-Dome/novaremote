@@ -945,6 +945,7 @@
                         }
                     }
                 } else if (item.type === 'welcome') {
+                    const hVal = parseInt(document.getElementById('playerContainer').style.height) || 0;
                     // Hide media elements
                     imgEl.style.display = 'none';
                     imgEl.removeAttribute('src');
