@@ -1073,6 +1073,23 @@ body.has-ticker .temp-footer {
     bottom: 12.5rem !important;
 }
 
+body.has-ticker .welcome-title {
+    font-size: 11.5rem !important;
+}
+
+body.has-ticker .welcome-subtitle {
+    font-size: 5.0rem !important;
+}
+
+body.has-ticker .welcome-subsubtitle {
+    font-size: 4.0rem !important;
+}
+
+body.has-ticker .welcome-room {
+    font-size: 3.4rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
 @keyframes marquee {
     0%   { transform: translate3d(0, 0, 0); }
     100% { transform: translate3d(-100%, 0, 0); }
@@ -1163,127 +1180,130 @@ body.has-ticker .temp-footer {
 
 /* 1. Layout when Graph is Active (Side-by-Side Widescreen Layout) */
 /* 1. Fail-safe Widescreen Row Layout for Temperature Screen */
-#tempContainer {
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 6rem 8rem !important;
-    box-sizing: border-box !important;
-}
+@media (orientation: landscape) {
+    #tempContainer {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 6rem 8rem !important;
+        box-sizing: border-box !important;
+    }
 
-#tempContainer .temp-header {
-    width: 24% !important;
-    margin: 0 !important;
-    display: flex !important;
-    justify-content: center !important;
-    order: 2 !important; /* Logo in the middle */
-}
+    #tempContainer .temp-header {
+        width: 24% !important;
+        margin: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        order: 2 !important; /* Logo in the middle */
+    }
 
-#tempContainer .temp-logo {
-    width: 100% !important;
-    max-width: 440px !important;
-    margin-bottom: 0 !important;
-}
+    #tempContainer .temp-logo {
+        width: 100% !important;
+        max-width: 440px !important;
+        margin-bottom: 0 !important;
+    }
 
-#tempContainer .temp-grid.grid-left {
-    width: 35% !important;
-    max-width: none !important;
-    display: flex !important;
-    justify-content: flex-start !important;
-    order: 1 !important; /* Outdoor card on the left */
-}
+    #tempContainer .temp-grid.grid-left {
+        width: 35% !important;
+        max-width: none !important;
+        display: flex !important;
+        justify-content: flex-start !important;
+        order: 1 !important; /* Outdoor card on the left */
+    }
 
-#tempContainer .temp-grid.grid-right {
-    width: 35% !important;
-    max-width: none !important;
-    display: flex !important;
-    justify-content: flex-end !important;
-    order: 3 !important; /* Main Hall card on the right */
-}
+    #tempContainer .temp-grid.grid-right {
+        width: 35% !important;
+        max-width: none !important;
+        display: flex !important;
+        justify-content: flex-end !important;
+        order: 3 !important; /* Main Hall card on the right */
+    }
 
-#tempContainer .temp-grid {
-    padding: 0 !important;
-    margin: 0 !important;
-    gap: 0 !important;
-    box-sizing: border-box !important;
-}
+    #tempContainer .temp-grid {
+        padding: 0 !important;
+        margin: 0 !important;
+        gap: 0 !important;
+        box-sizing: border-box !important;
+    }
 
-#tempContainer .temp-card {
-    width: 100% !important;
-    max-width: 600px !important;
-    padding: 5rem 4rem !important;
-    border-radius: 36px !important;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4) !important;
-    box-sizing: border-box !important;
-}
+    #tempContainer .temp-card {
+        width: 100% !important;
+        max-width: 600px !important;
+        padding: 5rem 4rem !important;
+        border-radius: 36px !important;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4) !important;
+        box-sizing: border-box !important;
+    }
 
-#tempContainer .temp-label {
-    font-size: 2.2rem !important;
-    margin-bottom: 2.5rem !important;
-}
+    #tempContainer .temp-label {
+        font-size: 2.2rem !important;
+        margin-bottom: 2.5rem !important;
+    }
 
-#tempContainer .temp-value {
-    font-size: 9.5rem !important;
-}
+    #tempContainer .temp-value {
+        font-size: 9.5rem !important;
+    }
 
-#tempContainer .temp-unit {
-    font-size: 4.8rem !important;
-}
+    #tempContainer .temp-unit {
+        font-size: 4.8rem !important;
+    }
 
-/* Overrides when Graph is Active on Widescreen */
-#tempContainer.with-graph {
-    padding: 4rem 5rem !important;
-}
+    /* Overrides when Graph is Active on Widescreen */
+    #tempContainer.with-graph {
+        padding: 4rem 5rem !important;
+    }
 
-#tempContainer.with-graph .temp-header {
-    width: 100% !important;
-    margin-bottom: 1.5rem !important;
-    justify-content: flex-start !important;
-    order: 1 !important; /* Logo spans top row */
-}
+    #tempContainer.with-graph .temp-header {
+        width: 100% !important;
+        margin-bottom: 1.5rem !important;
+        justify-content: flex-start !important;
+        order: 1 !important; /* Logo spans top row */
+    }
 
-#tempContainer.with-graph .temp-logo {
-    width: 30% !important;
-    max-width: 420px !important;
-}
+    #tempContainer.with-graph .temp-logo {
+        width: 30% !important;
+        max-width: 420px !important;
+    }
 
-#tempContainer.with-graph .temp-grid.grid-left {
-    width: 40% !important;
-    flex-direction: column !important;
-    gap: 2.5rem !important;
-    order: 2 !important; /* Cards on row 2, left */
-}
+    #tempContainer.with-graph .temp-grid.grid-left {
+        width: 40% !important;
+        flex-direction: column !important;
+        gap: 2.5rem !important;
+        order: 2 !important; /* Cards on row 2, left */
+    }
 
-#tempContainer.with-graph .temp-card {
-    padding: 2.5rem 3rem !important;
-    flex-direction: row !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    border-radius: 24px !important;
-    max-width: none !important;
-}
+    #tempContainer.with-graph .temp-card {
+        padding: 2.5rem 3rem !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        border-radius: 24px !important;
+        max-width: none !important;
+    }
 
-#tempContainer.with-graph .temp-label {
-    font-size: 1.6rem !important;
-    margin: 0 !important;
-}
+    #tempContainer.with-graph .temp-label {
+        font-size: 1.6rem !important;
+        margin: 0 !important;
+    }
 
-#tempContainer.with-graph .temp-value {
-    font-size: 6.5rem !important;
-}
+    #tempContainer.with-graph .temp-value {
+        font-size: 6.5rem !important;
+    }
 
-#tempContainer.with-graph .temp-unit {
-    font-size: 3rem !important;
-}
+    #tempContainer.with-graph .temp-unit {
+        font-size: 3rem !important;
+    }
 
-#tempContainer.with-graph .temp-graph-container {
-    display: flex !important;
-    width: 55% !important;
-    height: 600px !important;
-    padding: 2rem !important;
-    order: 3 !important; /* Graph on row 2, right */
-    box-sizing: border-box !important;
+    #tempContainer.with-graph .temp-graph-container {
+        display: flex !important;
+        width: 55% !important;
+        height: 600px !important;
+        padding: 2rem !important;
+        order: 3 !important; /* Graph on row 2, right */
+        box-sizing: border-box !important;
+    }
 }
 
 /* Widescreen Portrait 1080x1920 TV Layouts (excluding mini dashboard preview) */
