@@ -648,7 +648,8 @@ input:checked + .slider:before {
     width: 100%;
     height: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     padding: 4rem 2rem;
@@ -1061,11 +1062,15 @@ input:checked + .slider:before {
 
 /* 4. Dedicated Ticker Spacing Overrides */
 body.has-ticker .welcome-slide-layout {
-    padding-bottom: 14rem !important;
+    padding-bottom: 16.5rem !important;
+}
+
+body.has-ticker #tempContainer {
+    padding-bottom: 16.5rem !important;
 }
 
 body.has-ticker .temp-footer {
-    bottom: 6.5rem !important;
+    bottom: 12.5rem !important;
 }
 
 @keyframes marquee {
@@ -1157,192 +1162,128 @@ body.has-ticker .temp-footer {
 }
 
 /* 1. Layout when Graph is Active (Side-by-Side Widescreen Layout) */
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph {
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    padding: 2rem 3rem !important;
-    align-content: space-between;
-}
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-header {
-    width: 100% !important;
-    margin-bottom: 1rem !important;
-    display: flex;
-    justify-content: flex-start;
-    order: 1 !important;
-}
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-logo {
-    width: 25% !important;
-    max-width: 300px !important;
-    margin: 0 !important;
-}
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-grid {
-    width: 42% !important;
-    flex-direction: column !important;
-    gap: 1.25rem !important;
-    padding: 0 !important;
-    max-width: none !important;
-    order: 2 !important;
-}
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-card {
-    padding: 1rem 1.75rem !important;
-    width: 100% !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    align-items: flex-start !important;
-    border-radius: 20px !important;
-}
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-label {
-    font-size: 1.15rem !important;
-    margin: 0 0 0.35rem 0 !important;
-    text-align: left !important;
-}
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-value {
-    font-size: 4.5rem !important;
-}
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-unit {
-    font-size: 2.2rem !important;
-}
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-graph-container {
-    display: flex !important;
-    width: 53% !important;
-    height: 330px !important;
-    padding: 1.5rem !important;
-    order: 3 !important;
-}
-
-/* Widescreen Active Graph Enhancements for Large TVs (>= 800px height) */
-@media (min-height: 800px) {
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph {
-        padding: 4rem 5rem !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-header {
-        margin-bottom: 1.5rem !important;
-        order: 1 !important;
-        width: 100% !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-logo {
-        width: 30% !important;
-        max-width: 420px !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-grid {
-        gap: 2.5rem !important;
-        width: 40% !important;
-        order: 2 !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-card {
-        padding: 2.5rem 3rem !important;
-        flex-direction: row !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        border-radius: 24px !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-label {
-        font-size: 1.6rem !important;
-        margin: 0 !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-value {
-        font-size: 6.5rem !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-unit {
-        font-size: 3rem !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen.with-graph .temp-graph-container {
-        height: 600px !important;
-        padding: 2rem !important;
-        width: 55% !important;
-        order: 3 !important;
-    }
-}
-
-/* 2. Layout when Graph is Disabled (Enlarged Widescreen Display) */
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) {
+/* 1. Fail-safe Widescreen Row Layout for Temperature Screen */
+#tempContainer {
     flex-direction: row !important;
     flex-wrap: wrap !important;
     justify-content: space-between !important;
     align-items: center !important;
-    padding: 4rem 6rem !important;
+    padding: 6rem 8rem !important;
+    box-sizing: border-box !important;
 }
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-header {
-    width: 22% !important;
+
+#tempContainer .temp-header {
+    width: 24% !important;
     margin: 0 !important;
     display: flex !important;
     justify-content: center !important;
-    order: 2 !important;
+    order: 2 !important; /* Logo in the middle */
 }
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-logo {
+
+#tempContainer .temp-logo {
     width: 100% !important;
-    max-width: 320px !important;
+    max-width: 440px !important;
     margin-bottom: 0 !important;
 }
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-grid.grid-left {
-    width: 36% !important;
+
+#tempContainer .temp-grid.grid-left {
+    width: 35% !important;
     max-width: none !important;
     display: flex !important;
     justify-content: flex-start !important;
-    order: 1 !important;
+    order: 1 !important; /* Outdoor card on the left */
 }
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-grid.grid-right {
-    width: 36% !important;
+
+#tempContainer .temp-grid.grid-right {
+    width: 35% !important;
     max-width: none !important;
     display: flex !important;
     justify-content: flex-end !important;
-    order: 3 !important;
+    order: 3 !important; /* Main Hall card on the right */
 }
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-grid {
+
+#tempContainer .temp-grid {
     padding: 0 !important;
     margin: 0 !important;
     gap: 0 !important;
+    box-sizing: border-box !important;
 }
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-card {
+
+#tempContainer .temp-card {
     width: 100% !important;
-    max-width: 500px !important;
-    padding: 3rem 4rem !important;
-    border-radius: 28px !important;
+    max-width: 600px !important;
+    padding: 5rem 4rem !important;
+    border-radius: 36px !important;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4) !important;
+    box-sizing: border-box !important;
 }
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-label {
-    font-size: 1.5rem !important;
+
+#tempContainer .temp-label {
+    font-size: 2.2rem !important;
+    margin-bottom: 2.5rem !important;
+}
+
+#tempContainer .temp-value {
+    font-size: 9.5rem !important;
+}
+
+#tempContainer .temp-unit {
+    font-size: 4.8rem !important;
+}
+
+/* Overrides when Graph is Active on Widescreen */
+#tempContainer.with-graph {
+    padding: 4rem 5rem !important;
+}
+
+#tempContainer.with-graph .temp-header {
+    width: 100% !important;
     margin-bottom: 1.5rem !important;
+    justify-content: flex-start !important;
+    order: 1 !important; /* Logo spans top row */
 }
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-value {
-    font-size: 5.5rem !important;
+
+#tempContainer.with-graph .temp-logo {
+    width: 30% !important;
+    max-width: 420px !important;
 }
-.temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-unit {
+
+#tempContainer.with-graph .temp-grid.grid-left {
+    width: 40% !important;
+    flex-direction: column !important;
+    gap: 2.5rem !important;
+    order: 2 !important; /* Cards on row 2, left */
+}
+
+#tempContainer.with-graph .temp-card {
+    padding: 2.5rem 3rem !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    border-radius: 24px !important;
+    max-width: none !important;
+}
+
+#tempContainer.with-graph .temp-label {
+    font-size: 1.6rem !important;
+    margin: 0 !important;
+}
+
+#tempContainer.with-graph .temp-value {
+    font-size: 6.5rem !important;
+}
+
+#tempContainer.with-graph .temp-unit {
     font-size: 3rem !important;
 }
 
-/* Widescreen Disabled Graph Enhancements for Large TVs (>= 800px height) */
-@media (min-height: 800px) {
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) {
-        padding: 6rem 8rem !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-header {
-        width: 24% !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-logo {
-        max-width: 440px !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-grid.grid-left {
-        width: 35% !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-grid.grid-right {
-        width: 35% !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-card {
-        padding: 5rem 4rem !important;
-        border-radius: 36px !important;
-        max-width: 600px !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-label {
-        font-size: 2.2rem !important;
-        margin-bottom: 2.5rem !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-value {
-        font-size: 9.5rem !important;
-    }
-    .temp-slide-layout:not(.temp-slide-preview).layout-widescreen:not(.with-graph) .temp-unit {
-        font-size: 4.8rem !important;
-    }
+#tempContainer.with-graph .temp-graph-container {
+    display: flex !important;
+    width: 55% !important;
+    height: 600px !important;
+    padding: 2rem !important;
+    order: 3 !important; /* Graph on row 2, right */
+    box-sizing: border-box !important;
 }
 
 /* Widescreen Portrait 1080x1920 TV Layouts (excluding mini dashboard preview) */
