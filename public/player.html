@@ -859,13 +859,17 @@
                     document.getElementById('outdoorLabel').innerText = item.label1 || 'Outdoor Temperature';
                     document.getElementById('hallLabel').innerText = item.label2 || 'Main Hall Temperature';
  
-                    // Reset theme class names on tempEl if changed
+                    // Clean up theme and order classes to preserve widescreen/portrait classes
+                    tempEl.classList.forEach(cls => {
+                        if (cls.startsWith('theme-') || cls.startsWith('order-')) {
+                            tempEl.classList.remove(cls);
+                        }
+                    });
                     const theme = item.bgTheme || 'dome';
-                    if (currentBgTheme !== theme || hasItemChanged) {
-                        tempEl.className = 'temp-slide-layout';
-                        tempEl.classList.add(`theme-${theme}`);
-                        currentBgTheme = theme;
-                    }
+                    tempEl.classList.add(`theme-${theme}`);
+                    
+                    const layoutOrder = item.layoutOrder || 'outdoor-logo-hall';
+                    tempEl.classList.add(`order-${layoutOrder}`);
  
                     // Toggle bold font styling if changed
                     if (currentBoldFont !== !!item.boldFont || hasItemChanged) {
@@ -991,12 +995,39 @@
                         document.getElementById('welcomeRightDirContainer').style.display = 'none';
                     }
 
-                    // Apply Theme
+                    // Apply Theme and preserve compact classes
+                    welcomeEl.classList.forEach(cls => {
+                        if (cls.startsWith('theme-welcome-')) {
+                            welcomeEl.classList.remove(cls);
+                        }
+                    });
                     const theme = item.bgTheme || 'blue';
-                    if (currentBgTheme !== theme || hasItemChanged) {
-                        welcomeEl.className = 'welcome-slide-layout';
-                        welcomeEl.classList.add(`theme-welcome-${theme}`);
-                        currentBgTheme = theme;
+                    welcomeEl.classList.add(`theme-welcome-${theme}`);
+
+                    // Toggle Logo displays (TV screen only, i.e., hVal >= 500)
+                    const showDomeLogo = item.showDomeLogo !== false;
+                    const showConfLogo = item.showConfLogo !== false;
+                    const welcomeDomeImg = welcomeEl.querySelector('.welcome-dome-logo');
+                    const welcomeConfImg = document.getElementById('welcomeConfLogo');
+                    const welcomeHeader = welcomeEl.querySelector('.welcome-header');
+
+                    if (hVal >= 500) {
+                        if (welcomeDomeImg) welcomeDomeImg.style.display = showDomeLogo ? 'block' : 'none';
+                        if (welcomeConfImg) welcomeConfImg.style.display = showConfLogo ? 'block' : 'none';
+                        
+                        // Hide entire header and let content flow upwards if both are off
+                        if (welcomeHeader) {
+                            if (!showDomeLogo && !showConfLogo) {
+                                welcomeHeader.style.display = 'none';
+                            } else {
+                                welcomeHeader.style.display = 'flex';
+                            }
+                        }
+                    } else {
+                        // For LED Wall, always show both
+                        if (welcomeDomeImg) welcomeDomeImg.style.display = 'block';
+                        if (welcomeConfImg) welcomeConfImg.style.display = 'block';
+                        if (welcomeHeader) welcomeHeader.style.display = 'flex';
                     }
 
                     // Show Welcome Container

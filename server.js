@@ -894,6 +894,7 @@ wss.on('connection', (ws, req) => {
                         tempItem.boldFont = data.boldFont !== undefined ? !!data.boldFont : tempItem.boldFont;
                         tempItem.historyHours = data.historyHours !== undefined ? parseInt(data.historyHours) : (tempItem.historyHours || 24);
                         tempItem.bgTheme = data.bgTheme !== undefined ? data.bgTheme : (tempItem.bgTheme || 'dome');
+                        tempItem.layoutOrder = data.layoutOrder !== undefined ? data.layoutOrder : (tempItem.layoutOrder || 'outdoor-logo-hall');
                     }
                     saveState();
                     broadcastScreenState(sid);
@@ -929,6 +930,8 @@ wss.on('connection', (ws, req) => {
                         welcomeItem.leftDir = data.leftDir !== undefined ? data.leftDir : (welcomeItem.leftDir || '');
                         welcomeItem.rightDir = data.rightDir !== undefined ? data.rightDir : (welcomeItem.rightDir || '');
                         welcomeItem.bgTheme = data.bgTheme !== undefined ? data.bgTheme : (welcomeItem.bgTheme || 'blue');
+                        welcomeItem.showDomeLogo = data.showDomeLogo !== undefined ? !!data.showDomeLogo : (welcomeItem.showDomeLogo !== undefined ? welcomeItem.showDomeLogo : true);
+                        welcomeItem.showConfLogo = data.showConfLogo !== undefined ? !!data.showConfLogo : (welcomeItem.showConfLogo !== undefined ? welcomeItem.showConfLogo : true);
                     }
                     saveState();
                     broadcastScreenState(sid);

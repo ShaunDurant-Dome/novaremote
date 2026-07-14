@@ -1192,34 +1192,28 @@ input:checked + .slider:before {
         box-sizing: border-box !important;
     }
 
-    #tempContainer.layout-widescreen .temp-header {
-        width: 24% !important;
-        margin: 0 !important;
-        display: flex !important;
-        justify-content: center !important;
-        order: 2 !important; /* Logo in the middle */
-    }
-
     #tempContainer.layout-widescreen .temp-logo {
         width: 100% !important;
         max-width: 440px !important;
         margin-bottom: 0 !important;
     }
 
+    #tempContainer.layout-widescreen .temp-header {
+        width: 24% !important;
+        margin: 0 !important;
+        display: flex !important;
+    }
+
     #tempContainer.layout-widescreen .temp-grid.grid-left {
         width: 35% !important;
         max-width: none !important;
         display: flex !important;
-        justify-content: flex-start !important;
-        order: 1 !important; /* Outdoor card on the left */
     }
 
     #tempContainer.layout-widescreen .temp-grid.grid-right {
         width: 35% !important;
         max-width: none !important;
         display: flex !important;
-        justify-content: flex-end !important;
-        order: 3 !important; /* Main Hall card on the right */
     }
 
     #tempContainer.layout-widescreen .temp-grid {
@@ -1227,6 +1221,93 @@ input:checked + .slider:before {
         margin: 0 !important;
         gap: 0 !important;
         box-sizing: border-box !important;
+    }
+
+    /* Permutation 1: Outdoor - Logo - Main Hall (Default) */
+    #tempContainer.layout-widescreen.order-outdoor-logo-hall .temp-grid.grid-left,
+    #tempContainer.layout-widescreen:not([class*="order-"]) .temp-grid.grid-left {
+        order: 1 !important;
+        justify-content: flex-start !important;
+    }
+    #tempContainer.layout-widescreen.order-outdoor-logo-hall .temp-header,
+    #tempContainer.layout-widescreen:not([class*="order-"]) .temp-header {
+        order: 2 !important;
+        justify-content: center !important;
+    }
+    #tempContainer.layout-widescreen.order-outdoor-logo-hall .temp-grid.grid-right,
+    #tempContainer.layout-widescreen:not([class*="order-"]) .temp-grid.grid-right {
+        order: 3 !important;
+        justify-content: flex-end !important;
+    }
+
+    /* Permutation 2: Logo - Outdoor - Main Hall */
+    #tempContainer.layout-widescreen.order-logo-outdoor-hall .temp-header {
+        order: 1 !important;
+        justify-content: flex-start !important;
+    }
+    #tempContainer.layout-widescreen.order-logo-outdoor-hall .temp-grid.grid-left {
+        order: 2 !important;
+        justify-content: center !important;
+    }
+    #tempContainer.layout-widescreen.order-logo-outdoor-hall .temp-grid.grid-right {
+        order: 3 !important;
+        justify-content: flex-end !important;
+    }
+
+    /* Permutation 3: Outdoor - Main Hall - Logo */
+    #tempContainer.layout-widescreen.order-outdoor-hall-logo .temp-grid.grid-left {
+        order: 1 !important;
+        justify-content: flex-start !important;
+    }
+    #tempContainer.layout-widescreen.order-outdoor-hall-logo .temp-grid.grid-right {
+        order: 2 !important;
+        justify-content: center !important;
+    }
+    #tempContainer.layout-widescreen.order-outdoor-hall-logo .temp-header {
+        order: 3 !important;
+        justify-content: flex-end !important;
+    }
+
+    /* Permutation 4: Logo - Main Hall - Outdoor */
+    #tempContainer.layout-widescreen.order-logo-hall-outdoor .temp-header {
+        order: 1 !important;
+        justify-content: flex-start !important;
+    }
+    #tempContainer.layout-widescreen.order-logo-hall-outdoor .temp-grid.grid-right {
+        order: 2 !important;
+        justify-content: center !important;
+    }
+    #tempContainer.layout-widescreen.order-logo-hall-outdoor .temp-grid.grid-left {
+        order: 3 !important;
+        justify-content: flex-end !important;
+    }
+
+    /* Permutation 5: Main Hall - Logo - Outdoor */
+    #tempContainer.layout-widescreen.order-hall-logo-outdoor .temp-grid.grid-right {
+        order: 1 !important;
+        justify-content: flex-start !important;
+    }
+    #tempContainer.layout-widescreen.order-hall-logo-outdoor .temp-header {
+        order: 2 !important;
+        justify-content: center !important;
+    }
+    #tempContainer.layout-widescreen.order-hall-logo-outdoor .temp-grid.grid-left {
+        order: 3 !important;
+        justify-content: flex-end !important;
+    }
+
+    /* Permutation 6: Main Hall - Outdoor - Logo */
+    #tempContainer.layout-widescreen.order-hall-outdoor-logo .temp-grid.grid-right {
+        order: 1 !important;
+        justify-content: flex-start !important;
+    }
+    #tempContainer.layout-widescreen.order-hall-outdoor-logo .temp-grid.grid-left {
+        order: 2 !important;
+        justify-content: center !important;
+    }
+    #tempContainer.layout-widescreen.order-hall-outdoor-logo .temp-header {
+        order: 3 !important;
+        justify-content: flex-end !important;
     }
 
     #tempContainer.layout-widescreen .temp-card {

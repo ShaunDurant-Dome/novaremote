@@ -1177,7 +1177,7 @@
                             <div style="display:flex; align-items:center; gap:0.25rem;">
                                 <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Theme:</span>
                                 <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px; border-color: rgba(255,255,255,0.08);" 
-                                        onchange="updateTempSettings('${item.id}', null, null, null, null, null, this.value)">
+                                        onchange="updateTempSettings('${item.id}', null, null, null, null, null, this.value, null)">
                                     <option value="dome" ${(item.bgTheme == 'dome' || !item.bgTheme) ? 'selected' : ''}>Dome Theme</option>
                                     <option value="neon" ${item.bgTheme == 'neon' ? 'selected' : ''}>Neon Blue</option>
                                     <option value="cyberpunk" ${item.bgTheme == 'cyberpunk' ? 'selected' : ''}>Cyberpunk</option>
@@ -1191,14 +1191,26 @@
                                     <option value="gym-waves" ${item.bgTheme == 'gym-waves' ? 'selected' : ''}>Gym Waves (Dark)</option>
                                 </select>
                             </div>
+                            <div style="display:flex; align-items:center; gap:0.25rem;">
+                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Order (TV):</span>
+                                <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px; border-color: rgba(255,255,255,0.08);" 
+                                        onchange="updateTempSettings('${item.id}', null, null, null, null, null, null, this.value)">
+                                    <option value="outdoor-logo-hall" ${(item.layoutOrder == 'outdoor-logo-hall' || !item.layoutOrder) ? 'selected' : ''}>Outdoor - Logo - Hall</option>
+                                    <option value="logo-outdoor-hall" ${item.layoutOrder == 'logo-outdoor-hall' ? 'selected' : ''}>Logo - Outdoor - Hall</option>
+                                    <option value="outdoor-hall-logo" ${item.layoutOrder == 'outdoor-hall-logo' ? 'selected' : ''}>Outdoor - Hall - Logo</option>
+                                    <option value="logo-hall-outdoor" ${item.layoutOrder == 'logo-hall-outdoor' ? 'selected' : ''}>Logo - Hall - Outdoor</option>
+                                    <option value="hall-logo-outdoor" ${item.layoutOrder == 'hall-logo-outdoor' ? 'selected' : ''}>Hall - Logo - Outdoor</option>
+                                    <option value="hall-outdoor-logo" ${item.layoutOrder == 'hall-outdoor-logo' ? 'selected' : ''}>Hall - Outdoor - Logo</option>
+                                </select>
+                            </div>
                             <div style="display:flex; align-items:center; gap:0.75rem; margin-top:0.15rem;">
                                 <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
                                     <input type="checkbox" ${item.showGraph ? 'checked' : ''} 
-                                           onchange="updateTempSettings('${item.id}', null, null, this.checked, null, null, null)"> 📈 Graph
+                                           onchange="updateTempSettings('${item.id}', null, null, this.checked, null, null, null, null)"> 📈 Graph
                                 </label>
                                 <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
                                     <input type="checkbox" ${item.boldFont ? 'checked' : ''} 
-                                           onchange="updateTempSettings('${item.id}', null, null, null, this.checked, null, null)"> 🔤 Bold
+                                           onchange="updateTempSettings('${item.id}', null, null, null, this.checked, null, null, null)"> 🔤 Bold
                                 </label>
                             </div>
                         </div>
@@ -1254,6 +1266,16 @@
                                     <option value="dark" ${item.bgTheme == 'dark' ? 'selected' : ''}>Charcoal</option>
                                     <option value="gold" ${item.bgTheme == 'gold' ? 'selected' : ''}>Gold Accent</option>
                                 </select>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.75rem; margin-top:0.15rem;">
+                                <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                    <input type="checkbox" ${item.showDomeLogo !== false ? 'checked' : ''} 
+                                           onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, this.checked, null)"> Dome Logo
+                                </label>
+                                <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                    <input type="checkbox" ${item.showConfLogo !== false ? 'checked' : ''} 
+                                           onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, null, this.checked)"> Conf Logo
+                                </label>
                             </div>
                         </div>
                     `;
@@ -1338,7 +1360,7 @@
             sendAction('UPDATE_DURATION', { id, duration: val });
         }
 
-        function updateTempSettings(id, label1, label2, showGraph, boldFont, historyHours, bgTheme) {
+        function updateTempSettings(id, label1, label2, showGraph, boldFont, historyHours, bgTheme, layoutOrder) {
             if (!globalState) return;
             const screen = globalState.screens[activeScreenId];
             if (screen) {
@@ -1350,6 +1372,7 @@
                     const bf = boldFont !== null ? boldFont : !!item.boldFont;
                     const hh = historyHours !== null ? parseInt(historyHours) : (item.historyHours || 24);
                     const theme = bgTheme !== null ? bgTheme : (item.bgTheme || 'dome');
+                    const lo = layoutOrder !== null ? layoutOrder : (item.layoutOrder || 'outdoor-logo-hall');
                     sendAction('UPDATE_TEMP_LABELS', { 
                         id, 
                         label1: l1, 
@@ -1357,13 +1380,14 @@
                         showGraph: sg,
                         boldFont: bf,
                         historyHours: hh,
-                        bgTheme: theme
+                        bgTheme: theme,
+                        layoutOrder: lo
                     });
                 }
             }
         }
 
-        function updateWelcomeSettings(id, title, subtitle, subSubtitle, room, leftDir, rightDir, bgTheme) {
+        function updateWelcomeSettings(id, title, subtitle, subSubtitle, room, leftDir, rightDir, bgTheme, showDomeLogo, showConfLogo) {
             if (!globalState) return;
             const screen = globalState.screens[activeScreenId];
             if (screen) {
@@ -1376,6 +1400,8 @@
                     const ld = leftDir !== null ? leftDir : (item.leftDir || '');
                     const rd = rightDir !== null ? rightDir : (item.rightDir || '');
                     const theme = bgTheme !== null ? bgTheme : (item.bgTheme || 'blue');
+                    const sdl = showDomeLogo !== null ? showDomeLogo : (item.showDomeLogo !== false);
+                    const scl = showConfLogo !== null ? showConfLogo : (item.showConfLogo !== false);
                     sendAction('UPDATE_WELCOME_SETTINGS', {
                         id,
                         title: t,
@@ -1384,7 +1410,9 @@
                         room: rm,
                         leftDir: ld,
                         rightDir: rd,
-                        bgTheme: theme
+                        bgTheme: theme,
+                        showDomeLogo: sdl,
+                        showConfLogo: scl
                     });
                 }
             }
