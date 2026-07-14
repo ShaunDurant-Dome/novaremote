@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NovaRemote LED Player</title>
-    <link rel="stylesheet" href="app.css?v=8">
+    <link rel="stylesheet" href="app.css?v=9">
     <style>
         html, body {
             margin: 0;
@@ -838,7 +838,8 @@
                         vidEl.pause();
                         clearTimeout(videoSafetyTimer);
                         videoSafetyTimer = null;
-                                    } else if (item.type === 'temp') {
+                    }
+                } else if (item.type === 'temp') {
                     // Hide media elements
                     imgEl.style.display = 'none';
                     imgEl.removeAttribute('src');
