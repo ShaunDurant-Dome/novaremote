@@ -1231,7 +1231,8 @@
                                 <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Theme:</span>
                                 <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px; border-color: rgba(255,255,255,0.08);" 
                                         onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, this.value)">
-                                    <option value="blue" ${(item.bgTheme == 'blue' || !item.bgTheme) ? 'selected' : ''}>Classic Blue</option>
+                                    <option value="navy" ${(item.bgTheme == 'navy' || !item.bgTheme) ? 'selected' : ''}>Navy Blue</option>
+                                    <option value="blue" ${item.bgTheme == 'blue' ? 'selected' : ''}>Classic Blue</option>
                                     <option value="dark" ${item.bgTheme == 'dark' ? 'selected' : ''}>Charcoal</option>
                                     <option value="gold" ${item.bgTheme == 'gold' ? 'selected' : ''}>Gold Accent</option>
                                 </select>

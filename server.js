@@ -910,7 +910,7 @@ wss.on('connection', (ws, req) => {
                         room: 'Swakop Room 4th Floor',
                         leftDir: 'LIFT NORTH',
                         rightDir: 'LIFT SOUTH',
-                        bgTheme: 'blue'
+                        bgTheme: 'navy'
                     };
                     screen.playlist.push(newWelcome);
                     if (screen.currentIndex === -1) {

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NovaRemote LED Player</title>
-    <link rel="stylesheet" href="app.css?v=9">
+    <link rel="stylesheet" href="app.css?v=10">
     <style>
         html, body {
             margin: 0;
@@ -73,29 +73,13 @@
         <div id="welcomeContainer" class="welcome-slide-layout" style="display: none;">
             <!-- Header bar: Logo Left and Logo Right -->
             <div class="welcome-header">
-                <!-- Left: THE DOME CONFERENCE SVG logo -->
+                <!-- Left: THE DOME CONFERENCE logo image -->
                 <div class="welcome-header-left">
-                    <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="welcome-conf-svg">
-                        <!-- Three human silhouettes circle -->
-                        <circle cx="80" cy="40" r="22" stroke="white" stroke-width="2.5" fill="none"/>
-                        <!-- Left Person -->
-                        <circle cx="68" cy="38" r="4.5" fill="white"/>
-                        <path d="M60 49 C60 44 65 44 68 44 C71 44 76 44 76 49" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="white"/>
-                        <!-- Right Person -->
-                        <circle cx="92" cy="38" r="4.5" fill="white"/>
-                        <path d="M84 49 C84 44 89 44 92 44 C95 44 100 44 100 49" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="white"/>
-                        <!-- Middle Person -->
-                        <circle cx="80" cy="34" r="5" fill="white"/>
-                        <path d="M71 46 C71 40 76 40 80 40 C84 40 89 40 89 46" stroke="white" stroke-width="3" stroke-linecap="round" fill="white"/>
-                        
-                        <!-- Text -->
-                        <text x="80" y="82" fill="white" font-family="'Outfit', 'Inter', sans-serif" font-weight="bold" font-size="11" text-anchor="middle" letter-spacing="1">THE DOME</text>
-                        <text x="80" y="96" fill="white" font-family="'Outfit', 'Inter', sans-serif" font-weight="bold" font-size="10" text-anchor="middle" letter-spacing="0.5">CONFERENCE</text>
-                    </svg>
+                    <img src="logo_conference.png" class="welcome-conf-logo" alt="The Dome Conference">
                 </div>
                 <!-- Right: Standard white dome logo -->
                 <div class="welcome-header-right">
-                    <img src="/logo_white.png" class="welcome-dome-logo" alt="The Dome">
+                    <img src="logo_white.png" class="welcome-dome-logo" alt="The Dome">
                 </div>
             </div>
 
@@ -107,7 +91,7 @@
                 <div id="welcomeRoom" class="welcome-room">SWAKOP ROOM 4<sup>TH</sup> FLOOR</div>
             </div>
 
-            <!-- Footer area: directions and center badge -->
+            <!-- Footer area: directions -->
             <div class="welcome-footer">
                 <!-- Left Direction Arrow -->
                 <div class="welcome-dir-container left-dir" id="welcomeLeftDirContainer">
@@ -119,20 +103,14 @@
                     <span id="welcomeLeftDir" class="welcome-dir-text">LIFT NORTH</span>
                 </div>
 
-                <!-- Center Tagline -->
-                <div class="welcome-tagline">
-                    <div class="welcome-tagline-main">HIGH-PERFORMANCE</div>
-                    <div class="welcome-tagline-sub">Sport Centre</div>
-                </div>
-
                 <!-- Right Direction Arrow -->
                 <div class="welcome-dir-container right-dir" id="welcomeRightDirContainer">
+                    <span id="welcomeRightDir" class="welcome-dir-text">LIFT SOUTH</span>
                     <div class="welcome-arrow-wrapper">
                         <svg viewBox="0 0 100 40" class="welcome-arrow-svg">
                             <path d="M60 5 L90 20 L60 35 M90 20 L10 20" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                         </svg>
                     </div>
-                    <span id="welcomeRightDir" class="welcome-dir-text">LIFT SOUTH</span>
                 </div>
             </div>
         </div>
@@ -744,8 +722,11 @@
                 // Convert 1-10 speed to marquee animation duration
                 const animDuration = (35 - (state.ticker.speed * 3)) + 's';
                 tickerTextEl.style.animationDuration = animDuration;
+                
+                document.body.classList.add('has-ticker');
             } else {
                 tickerEl.style.display = 'none';
+                document.body.classList.remove('has-ticker');
             }
  
             // Verify if there is media to display
