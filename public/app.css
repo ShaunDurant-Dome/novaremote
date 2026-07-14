@@ -1183,7 +1183,7 @@ input:checked + .slider:before {
 /* 1. Layout when Graph is Active (Side-by-Side Widescreen Layout) */
 /* 1. Fail-safe Widescreen Row Layout for Temperature Screen */
 @media (orientation: landscape) and (min-height: 500px) {
-    #tempContainer {
+    #tempContainer.layout-widescreen {
         flex-direction: row !important;
         flex-wrap: wrap !important;
         justify-content: space-between !important;
@@ -1192,7 +1192,7 @@ input:checked + .slider:before {
         box-sizing: border-box !important;
     }
 
-    #tempContainer .temp-header {
+    #tempContainer.layout-widescreen .temp-header {
         width: 24% !important;
         margin: 0 !important;
         display: flex !important;
@@ -1200,13 +1200,13 @@ input:checked + .slider:before {
         order: 2 !important; /* Logo in the middle */
     }
 
-    #tempContainer .temp-logo {
+    #tempContainer.layout-widescreen .temp-logo {
         width: 100% !important;
         max-width: 440px !important;
         margin-bottom: 0 !important;
     }
 
-    #tempContainer .temp-grid.grid-left {
+    #tempContainer.layout-widescreen .temp-grid.grid-left {
         width: 35% !important;
         max-width: none !important;
         display: flex !important;
@@ -1214,7 +1214,7 @@ input:checked + .slider:before {
         order: 1 !important; /* Outdoor card on the left */
     }
 
-    #tempContainer .temp-grid.grid-right {
+    #tempContainer.layout-widescreen .temp-grid.grid-right {
         width: 35% !important;
         max-width: none !important;
         display: flex !important;
@@ -1222,14 +1222,14 @@ input:checked + .slider:before {
         order: 3 !important; /* Main Hall card on the right */
     }
 
-    #tempContainer .temp-grid {
+    #tempContainer.layout-widescreen .temp-grid {
         padding: 0 !important;
         margin: 0 !important;
         gap: 0 !important;
         box-sizing: border-box !important;
     }
 
-    #tempContainer .temp-card {
+    #tempContainer.layout-widescreen .temp-card {
         width: 100% !important;
         max-width: 600px !important;
         padding: 5rem 4rem !important;
@@ -1238,44 +1238,44 @@ input:checked + .slider:before {
         box-sizing: border-box !important;
     }
 
-    #tempContainer .temp-label {
+    #tempContainer.layout-widescreen .temp-label {
         font-size: 2.2rem !important;
         margin-bottom: 2.5rem !important;
     }
 
-    #tempContainer .temp-value {
+    #tempContainer.layout-widescreen .temp-value {
         font-size: 9.5rem !important;
     }
 
-    #tempContainer .temp-unit {
+    #tempContainer.layout-widescreen .temp-unit {
         font-size: 4.8rem !important;
     }
 
     /* Overrides when Graph is Active on Widescreen */
-    #tempContainer.with-graph {
+    #tempContainer.layout-widescreen.with-graph {
         padding: 4rem 5rem !important;
     }
 
-    #tempContainer.with-graph .temp-header {
+    #tempContainer.layout-widescreen.with-graph .temp-header {
         width: 100% !important;
         margin-bottom: 1.5rem !important;
         justify-content: flex-start !important;
         order: 1 !important; /* Logo spans top row */
     }
 
-    #tempContainer.with-graph .temp-logo {
+    #tempContainer.layout-widescreen.with-graph .temp-logo {
         width: 30% !important;
         max-width: 420px !important;
     }
 
-    #tempContainer.with-graph .temp-grid.grid-left {
+    #tempContainer.layout-widescreen.with-graph .temp-grid.grid-left {
         width: 40% !important;
         flex-direction: column !important;
         gap: 2.5rem !important;
         order: 2 !important; /* Cards on row 2, left */
     }
 
-    #tempContainer.with-graph .temp-card {
+    #tempContainer.layout-widescreen.with-graph .temp-card {
         padding: 2.5rem 3rem !important;
         flex-direction: row !important;
         justify-content: space-between !important;
@@ -1284,20 +1284,20 @@ input:checked + .slider:before {
         max-width: none !important;
     }
 
-    #tempContainer.with-graph .temp-label {
+    #tempContainer.layout-widescreen.with-graph .temp-label {
         font-size: 1.6rem !important;
         margin: 0 !important;
     }
 
-    #tempContainer.with-graph .temp-value {
+    #tempContainer.layout-widescreen.with-graph .temp-value {
         font-size: 6.5rem !important;
     }
 
-    #tempContainer.with-graph .temp-unit {
+    #tempContainer.layout-widescreen.with-graph .temp-unit {
         font-size: 3rem !important;
     }
 
-    #tempContainer.with-graph .temp-graph-container {
+    #tempContainer.layout-widescreen.with-graph .temp-graph-container {
         display: flex !important;
         width: 55% !important;
         height: 600px !important;
