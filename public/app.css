@@ -1503,7 +1503,7 @@ body.has-ticker .temp-footer {
 }
 
 .welcome-title {
-    font-size: 10.5rem;
+    font-size: 14.5rem;
     font-weight: 900;
     text-transform: uppercase;
     color: #f2a104;
@@ -1515,7 +1515,7 @@ body.has-ticker .temp-footer {
 }
 
 .welcome-subtitle {
-    font-size: 4.8rem;
+    font-size: 6.2rem;
     font-weight: 800;
     color: #ffffff;
     text-transform: uppercase;
@@ -1527,7 +1527,7 @@ body.has-ticker .temp-footer {
 }
 
 .welcome-subsubtitle {
-    font-size: 3.8rem;
+    font-size: 5.0rem;
     font-weight: 700;
     color: #ffffff;
     text-transform: uppercase;
@@ -1539,7 +1539,7 @@ body.has-ticker .temp-footer {
 }
 
 .welcome-room {
-    font-size: 3.2rem;
+    font-size: 4.2rem;
     font-weight: 800;
     font-style: italic;
     color: #f2a104;
@@ -1551,7 +1551,7 @@ body.has-ticker .temp-footer {
 }
 
 .welcome-room sup {
-    font-size: 1.7rem;
+    font-size: 2.0rem;
     text-transform: uppercase;
     vertical-align: super;
 }
@@ -1591,13 +1591,13 @@ body.has-ticker .temp-footer {
 }
 
 .welcome-arrow-svg {
-    width: 135px;
-    height: 54px;
+    width: 170px;
+    height: 68px;
     filter: drop-shadow(0 0 12px rgba(242, 161, 4, 0.55));
 }
 
 .welcome-dir-text {
-    font-size: 2.6rem;
+    font-size: 3.4rem;
     font-weight: 900;
     letter-spacing: 1.5px;
     text-transform: uppercase;
