@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NovaRemote LED Player</title>
-    <link rel="stylesheet" href="app.css?v=17">
+    <!-- Cache-busted stylesheet loader -->
+    <script>
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'app.css?v=' + Date.now();
+        document.head.appendChild(link);
+    </script>
     <style>
         html, body {
             margin: 0;
@@ -435,7 +441,9 @@
                 }
                 if (disconnectTime && Date.now() - disconnectTime > 20000) {
                     console.log('Connection was lost for more than 20s. Reloading page to ensure latest assets...');
-                    window.location.reload();
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('v', Date.now());
+                    window.location.href = url.toString();
                     return;
                 }
                 disconnectTime = null;
@@ -466,7 +474,9 @@
                     }
                 } else if (data.type === 'FORCE_RELOAD') {
                     console.log('Received FORCE_RELOAD command. Reloading page...');
-                    window.location.reload(true);
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('v', Date.now());
+                    window.location.href = url.toString();
                 }
             };
         }
