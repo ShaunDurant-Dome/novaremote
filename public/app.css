@@ -1061,7 +1061,7 @@ input:checked + .slider:before {
 
 /* 4. Dedicated Ticker Spacing Overrides */
 body.has-ticker .welcome-slide-layout {
-    padding-bottom: 9.5rem !important;
+    padding-bottom: 17.5rem !important;
 }
 
 body.has-ticker .temp-footer {
@@ -1407,7 +1407,7 @@ body.has-ticker .temp-footer {
     position: absolute;
     top: 0;
     left: 0;
-    padding: 4rem 6rem;
+    padding: 4rem 6rem 7rem 6rem;
     overflow: hidden;
     z-index: 5;
     transition: all 0.5s ease-in-out;

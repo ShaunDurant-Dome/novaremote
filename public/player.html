@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NovaRemote LED Player</title>
-    <link rel="stylesheet" href="app.css?v=11">
+    <link rel="stylesheet" href="app.css?v=13">
     <style>
         html, body {
             margin: 0;
@@ -934,7 +934,7 @@
 
                     // Populate text content
                     let titleText = item.title || 'WELCOME';
-                    titleText = titleText.replace(/^[•\s\-\*·•]+/, '');
+                    titleText = titleText.replace(/^[•\s\-\*·\.\u2022\u00b7\u2219\u25cf\u25e6·◦∙•●*.-]+/g, '');
                     welcomeTitleEl.innerText = titleText;
                     welcomeSubtitleEl.innerText = item.subtitle || '';
                     welcomeSubSubtitleEl.innerText = item.subSubtitle || '';
