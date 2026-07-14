@@ -1061,33 +1061,35 @@ input:checked + .slider:before {
 }
 
 /* 4. Dedicated Ticker Spacing Overrides */
-body.has-ticker .welcome-slide-layout {
-    padding-bottom: 16.5rem !important;
-}
+@media (min-height: 500px) {
+    body.has-ticker .welcome-slide-layout {
+        padding-bottom: 16.5rem !important;
+    }
 
-body.has-ticker #tempContainer {
-    padding-bottom: 16.5rem !important;
-}
+    body.has-ticker #tempContainer {
+        padding-bottom: 16.5rem !important;
+    }
 
-body.has-ticker .temp-footer {
-    bottom: 12.5rem !important;
-}
+    body.has-ticker .temp-footer {
+        bottom: 12.5rem !important;
+    }
 
-body.has-ticker .welcome-title {
-    font-size: 11.5rem !important;
-}
+    body.has-ticker .welcome-title {
+        font-size: 11.5rem !important;
+    }
 
-body.has-ticker .welcome-subtitle {
-    font-size: 5.0rem !important;
-}
+    body.has-ticker .welcome-subtitle {
+        font-size: 5.0rem !important;
+    }
 
-body.has-ticker .welcome-subsubtitle {
-    font-size: 4.0rem !important;
-}
+    body.has-ticker .welcome-subsubtitle {
+        font-size: 4.0rem !important;
+    }
 
-body.has-ticker .welcome-room {
-    font-size: 3.4rem !important;
-    margin-bottom: 1.5rem !important;
+    body.has-ticker .welcome-room {
+        font-size: 3.4rem !important;
+        margin-bottom: 1.5rem !important;
+    }
 }
 
 @keyframes marquee {
@@ -1180,7 +1182,7 @@ body.has-ticker .welcome-room {
 
 /* 1. Layout when Graph is Active (Side-by-Side Widescreen Layout) */
 /* 1. Fail-safe Widescreen Row Layout for Temperature Screen */
-@media (orientation: landscape) {
+@media (orientation: landscape) and (min-height: 500px) {
     #tempContainer {
         display: flex !important;
         flex-direction: row !important;
