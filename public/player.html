@@ -860,7 +860,8 @@
                     document.getElementById('hallLabel').innerText = item.label2 || 'Main Hall Temperature';
  
                     // Clean up theme and order classes to preserve widescreen/portrait classes
-                    tempEl.classList.forEach(cls => {
+                    // Convert DOMTokenList classList to Array for older browser compatibility
+                    Array.prototype.slice.call(tempEl.classList).forEach(cls => {
                         if (cls.startsWith('theme-') || cls.startsWith('order-')) {
                             tempEl.classList.remove(cls);
                         }
@@ -996,7 +997,8 @@
                     }
 
                     // Apply Theme and preserve compact classes
-                    welcomeEl.classList.forEach(cls => {
+                    // Convert DOMTokenList classList to Array for older browser compatibility
+                    Array.prototype.slice.call(welcomeEl.classList).forEach(cls => {
                         if (cls.startsWith('theme-welcome-')) {
                             welcomeEl.classList.remove(cls);
                         }
