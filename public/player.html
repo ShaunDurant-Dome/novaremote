@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NovaRemote LED Player</title>
-    <link rel="stylesheet" href="app.css?v=14">
+    <link rel="stylesheet" href="app.css?v=15">
     <style>
         html, body {
             margin: 0;
@@ -85,31 +85,33 @@
 
             <!-- Central Content Area -->
             <div class="welcome-body">
-                <h1 id="welcomeTitle" class="welcome-title">WELCOME</h1>
+                <div id="welcomeTitle" class="welcome-title">WELCOME</div>
                 <div id="welcomeSubtitle" class="welcome-subtitle">EFFECTIVE COMMUNICATORS</div>
                 <div id="welcomeSubSubtitle" class="welcome-subsubtitle">CONFERENCE 2026</div>
-                <div id="welcomeRoom" class="welcome-room">SWAKOP ROOM 4<sup>TH</sup> FLOOR</div>
             </div>
 
-            <!-- Footer area: directions -->
+            <!-- Footer area: directions and room -->
             <div class="welcome-footer">
-                <!-- Left Direction Arrow -->
-                <div class="welcome-dir-container left-dir" id="welcomeLeftDirContainer">
-                    <div class="welcome-arrow-wrapper">
-                        <svg viewBox="0 0 100 40" class="welcome-arrow-svg">
-                            <path d="M40 5 L10 20 L40 35 M10 20 L90 20" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                        </svg>
+                <div id="welcomeRoom" class="welcome-room">SWAKOP ROOM 4<sup>TH</sup> FLOOR</div>
+                <div class="welcome-lifts-row">
+                    <!-- Left Direction Arrow -->
+                    <div class="welcome-dir-container left-dir" id="welcomeLeftDirContainer">
+                        <div class="welcome-arrow-wrapper">
+                            <svg viewBox="0 0 100 40" class="welcome-arrow-svg">
+                                <path d="M40 5 L10 20 L40 35 M10 20 L90 20" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            </svg>
+                        </div>
+                        <span id="welcomeLeftDir" class="welcome-dir-text">LIFT NORTH</span>
                     </div>
-                    <span id="welcomeLeftDir" class="welcome-dir-text">LIFT NORTH</span>
-                </div>
 
-                <!-- Right Direction Arrow -->
-                <div class="welcome-dir-container right-dir" id="welcomeRightDirContainer">
-                    <span id="welcomeRightDir" class="welcome-dir-text">LIFT SOUTH</span>
-                    <div class="welcome-arrow-wrapper">
-                        <svg viewBox="0 0 100 40" class="welcome-arrow-svg">
-                            <path d="M60 5 L90 20 L60 35 M90 20 L10 20" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                        </svg>
+                    <!-- Right Direction Arrow -->
+                    <div class="welcome-dir-container right-dir" id="welcomeRightDirContainer">
+                        <span id="welcomeRightDir" class="welcome-dir-text">LIFT SOUTH</span>
+                        <div class="welcome-arrow-wrapper">
+                            <svg viewBox="0 0 100 40" class="welcome-arrow-svg">
+                                <path d="M60 5 L90 20 L60 35 M90 20 L10 20" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </div>
