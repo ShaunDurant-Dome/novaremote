@@ -1184,7 +1184,6 @@ input:checked + .slider:before {
 /* 1. Fail-safe Widescreen Row Layout for Temperature Screen */
 @media (orientation: landscape) and (min-height: 500px) {
     #tempContainer {
-        display: flex !important;
         flex-direction: row !important;
         flex-wrap: wrap !important;
         justify-content: space-between !important;
