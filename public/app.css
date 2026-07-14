@@ -1628,79 +1628,77 @@ input:checked + .slider:before {
 /* ==========================================================================
    RESPONSIVE OVERRIDES FOR COMPACT LED WALL SCREENS (e.g. 960x192 height < 250px)
    ========================================================================== */
-@media (max-height: 250px) {
-    .welcome-slide-layout {
-        padding: 0.25rem 2rem !important;
-    }
-    
-    .welcome-header {
-        height: 40px !important;
-    }
-    
-    .welcome-conf-svg {
-        width: 55px !important;
-        height: 40px !important;
-    }
-    
-    .welcome-dome-logo {
-        height: 32px !important;
-    }
-    
-    .welcome-body {
-        gap: 0.15rem !important;
-        margin: 0.15rem 0 !important;
-    }
-    
-    .welcome-title {
-        font-size: 1.7rem !important;
-        letter-spacing: 2px !important;
-    }
-    
-    .welcome-subtitle {
-        font-size: 1.1rem !important;
-        letter-spacing: 0.5px !important;
-    }
-    
-    .welcome-subsubtitle {
-        font-size: 0.95rem !important;
-        margin-top: -0.1rem !important;
-    }
-    
-    .welcome-room {
-        font-size: 0.9rem !important;
-        margin-top: 0.1rem !important;
-    }
-    
-    .welcome-room sup {
-        font-size: 0.6rem !important;
-    }
-    
-    .welcome-footer {
-        padding-top: 0.3rem !important;
-        border-top: 1px dashed rgba(255, 255, 255, 0.12) !important;
-    }
-    
-    .welcome-dir-container {
-        gap: 0.6rem !important;
-    }
-    
-    .welcome-arrow-svg {
-        width: 38px !important;
-        height: 14px !important;
-    }
-    
-    .welcome-dir-text {
-        font-size: 0.85rem !important;
-    }
-    
-    .welcome-tagline-main {
-        font-size: 0.65rem !important;
-        letter-spacing: 1px !important;
-    }
-    
-    .welcome-tagline-sub {
-        font-size: 0.7rem !important;
-        margin-top: -0.1rem !important;
-    }
+.layout-compact .welcome-slide-layout {
+    padding: 0.25rem 2rem !important;
+}
+
+.layout-compact .welcome-header {
+    height: 40px !important;
+}
+
+.layout-compact .welcome-conf-svg {
+    width: 55px !important;
+    height: 40px !important;
+}
+
+.layout-compact .welcome-dome-logo {
+    height: 32px !important;
+}
+
+.layout-compact .welcome-body {
+    gap: 0.15rem !important;
+    margin: 0.15rem 0 !important;
+}
+
+.layout-compact .welcome-title {
+    font-size: 1.7rem !important;
+    letter-spacing: 2px !important;
+}
+
+.layout-compact .welcome-subtitle {
+    font-size: 1.1rem !important;
+    letter-spacing: 0.5px !important;
+}
+
+.layout-compact .welcome-subsubtitle {
+    font-size: 0.95rem !important;
+    margin-top: -0.1rem !important;
+}
+
+.layout-compact .welcome-room {
+    font-size: 0.9rem !important;
+    margin-top: 0.1rem !important;
+}
+
+.layout-compact .welcome-room sup {
+    font-size: 0.6rem !important;
+}
+
+.layout-compact .welcome-footer {
+    padding-top: 0.3rem !important;
+    border-top: 1px dashed rgba(255, 255, 255, 0.12) !important;
+}
+
+.layout-compact .welcome-dir-container {
+    gap: 0.6rem !important;
+}
+
+.layout-compact .welcome-arrow-svg {
+    width: 38px !important;
+    height: 14px !important;
+}
+
+.layout-compact .welcome-dir-text {
+    font-size: 0.85rem !important;
+}
+
+.layout-compact .welcome-tagline-main {
+    font-size: 0.65rem !important;
+    letter-spacing: 1px !important;
+}
+
+.layout-compact .welcome-tagline-sub {
+    font-size: 0.7rem !important;
+    margin-top: -0.1rem !important;
 }
 

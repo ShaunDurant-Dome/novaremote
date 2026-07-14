@@ -139,6 +139,13 @@
                 container.style.width = width + 'px';
                 container.style.height = height + 'px';
 
+                const hVal = parseInt(height);
+                if (hVal < 250) {
+                    container.classList.add('layout-compact');
+                } else {
+                    container.classList.remove('layout-compact');
+                }
+
                 if (screenId === 'default') {
                     // Reset to original absolute positioning for Big LED Screen (no scaling/centering)
                     container.style.transform = '';
