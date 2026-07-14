@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NovaRemote LED Player</title>
-    <link rel="stylesheet" href="app.css?v=13">
+    <link rel="stylesheet" href="app.css?v=14">
     <style>
         html, body {
             margin: 0;
@@ -722,6 +722,13 @@
                 // Convert 1-10 speed to marquee animation duration
                 const animDuration = (35 - (state.ticker.speed * 3)) + 's';
                 tickerTextEl.style.animationDuration = animDuration;
+                
+                // Set Ticker Font Size dynamically
+                let fs = '2.5rem';
+                if (state.ticker.fontSize === 'small') fs = '1.8rem';
+                else if (state.ticker.fontSize === 'large') fs = '3.8rem';
+                else if (state.ticker.fontSize === 'xlarge') fs = '5.0rem';
+                tickerTextEl.style.fontSize = fs;
                 
                 document.body.classList.add('has-ticker');
             } else {

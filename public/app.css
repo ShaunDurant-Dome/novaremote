@@ -1060,8 +1060,8 @@ input:checked + .slider:before {
 }
 
 /* 4. Dedicated Ticker Spacing Overrides */
-body.has-ticker .welcome-slide-layout {
-    padding-bottom: 17.5rem !important;
+body.has-ticker .welcome-footer {
+    bottom: 13.5rem !important;
 }
 
 body.has-ticker .temp-footer {
@@ -1514,6 +1514,11 @@ body.has-ticker .temp-footer {
     line-height: 1.05;
 }
 
+.welcome-title::before {
+    display: none !important;
+    content: none !important;
+}
+
 .welcome-subtitle {
     font-size: 6.2rem;
     font-weight: 800;
@@ -1558,14 +1563,16 @@ body.has-ticker .temp-footer {
 
 /* 4. Footer elements */
 .welcome-footer {
+    position: absolute;
+    bottom: 5.5rem;
+    left: 6rem;
+    right: 6rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
     border-top: 3px dashed rgba(255, 255, 255, 0.15);
     padding-top: 2rem;
     box-sizing: border-box;
-    margin-top: auto;
 }
 
 .welcome-dir-container {
