@@ -1332,9 +1332,8 @@
                 const targetUrl = `${prefixStr}/player.html?screenId=${activeScreenId}&width=${width}&height=${height}&preview=1`;
                 // Only update src if changed to prevent reloading of iframe on every state update tick
                 const currentSrc = iframe.getAttribute('src') || '';
-                const relativeUrl = window.location.origin + targetUrl;
-                if (iframe.src !== relativeUrl) {
-                    iframe.src = targetUrl;
+                if (currentSrc !== targetUrl) {
+                    iframe.setAttribute('src', targetUrl);
                 }
                 iframe.style.display = 'block';
             } else {
