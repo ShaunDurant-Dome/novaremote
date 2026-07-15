@@ -1316,24 +1316,34 @@ input:checked + .slider:before {
 
     #tempContainer.layout-widescreen .temp-card {
         width: 100% !important;
-        max-width: 600px !important;
-        padding: 4rem 3.5rem !important;
+        max-width: 520px !important;
+        height: 440px !important;
+        padding: 4rem 3rem !important;
         border-radius: 36px !important;
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4) !important;
         box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        align-items: center !important;
     }
 
     #tempContainer.layout-widescreen .temp-label {
-        font-size: 2rem !important;
-        margin-bottom: 2rem !important;
+        font-size: 2.2rem !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        height: 5.5rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     #tempContainer.layout-widescreen .temp-value {
-        font-size: 8rem !important;
+        font-size: 7.2rem !important;
     }
 
     #tempContainer.layout-widescreen .temp-unit {
-        font-size: 4rem !important;
+        font-size: 3.6rem !important;
     }
 
     /* Overrides when Graph is Active on Widescreen */
