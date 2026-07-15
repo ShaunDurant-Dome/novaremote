@@ -1246,37 +1246,43 @@ input:checked + .slider:before {
         width: 100% !important;
         max-width: 650px !important;
         height: 140px !important;
-        padding: 1.5rem 4rem !important;
+        padding: 1.5rem 3.5rem !important;
         border-radius: 24px !important;
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4) !important;
         box-sizing: border-box !important;
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: space-between !important;
+        display: grid !important;
+        grid-template-columns: 42% 58% !important;
         align-items: center !important;
     }
 
     #tempContainer.layout-widescreen .temp-label {
+        grid-column: 1 !important;
         font-size: 2.2rem !important;
         margin: 0 !important;
-        line-height: 1.2 !important;
+        line-height: 1.15 !important;
         text-align: left !important;
         height: auto !important;
         display: block !important;
+        color: var(--text-muted) !important;
     }
 
     #tempContainer.layout-widescreen .temp-value-wrapper {
+        grid-column: 2 !important;
         display: flex !important;
         align-items: baseline !important;
-        gap: 0.2rem !important;
+        justify-content: flex-start !important;
+        gap: 0.15rem !important;
+        padding-left: 1.5rem !important;
     }
 
     #tempContainer.layout-widescreen .temp-value {
-        font-size: 5.5rem !important;
+        font-size: 5.8rem !important;
+        line-height: 1 !important;
     }
 
     #tempContainer.layout-widescreen .temp-unit {
         font-size: 2.8rem !important;
+        line-height: 1 !important;
     }
 
     /* Layout order permutations mapping for 2-column Grid */
@@ -1335,13 +1341,18 @@ input:checked + .slider:before {
     }
 
     #tempContainer.layout-widescreen.with-graph .temp-card {
-        padding: 1.5rem 3rem !important;
+        grid-template-columns: 42% 58% !important;
+        padding: 1rem 2.5rem !important;
         height: 130px !important;
         max-width: none !important;
     }
 
     #tempContainer.layout-widescreen.with-graph .temp-label {
         font-size: 1.8rem !important;
+    }
+
+    #tempContainer.layout-widescreen.with-graph .temp-value-wrapper {
+        padding-left: 1rem !important;
     }
 
     #tempContainer.layout-widescreen.with-graph .temp-value {
