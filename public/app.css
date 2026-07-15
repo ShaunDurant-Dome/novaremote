@@ -1246,12 +1246,12 @@ input:checked + .slider:before {
         width: 100% !important;
         max-width: 650px !important;
         height: 140px !important;
-        padding: 1.5rem 3.5rem !important;
+        padding: 1.5rem 3rem !important;
         border-radius: 24px !important;
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4) !important;
         box-sizing: border-box !important;
         display: grid !important;
-        grid-template-columns: 42% 58% !important;
+        grid-template-columns: 32% 68% !important;
         align-items: center !important;
     }
 
@@ -1272,16 +1272,16 @@ input:checked + .slider:before {
         align-items: baseline !important;
         justify-content: flex-start !important;
         gap: 0.15rem !important;
-        padding-left: 1.5rem !important;
+        padding-left: 1.2rem !important;
     }
 
     #tempContainer.layout-widescreen .temp-value {
-        font-size: 5.8rem !important;
+        font-size: 5.2rem !important;
         line-height: 1 !important;
     }
 
     #tempContainer.layout-widescreen .temp-unit {
-        font-size: 2.8rem !important;
+        font-size: 2.6rem !important;
         line-height: 1 !important;
     }
 
@@ -1341,8 +1341,8 @@ input:checked + .slider:before {
     }
 
     #tempContainer.layout-widescreen.with-graph .temp-card {
-        grid-template-columns: 42% 58% !important;
-        padding: 1rem 2.5rem !important;
+        grid-template-columns: 32% 68% !important;
+        padding: 1rem 2rem !important;
         height: 130px !important;
         max-width: none !important;
     }
@@ -1352,15 +1352,15 @@ input:checked + .slider:before {
     }
 
     #tempContainer.layout-widescreen.with-graph .temp-value-wrapper {
-        padding-left: 1rem !important;
+        padding-left: 0.8rem !important;
     }
 
     #tempContainer.layout-widescreen.with-graph .temp-value {
-        font-size: 4.8rem !important;
+        font-size: 4.5rem !important;
     }
 
     #tempContainer.layout-widescreen.with-graph .temp-unit {
-        font-size: 2.4rem !important;
+        font-size: 2.2rem !important;
     }
 
     #tempContainer.layout-widescreen.with-graph .temp-graph-container {
