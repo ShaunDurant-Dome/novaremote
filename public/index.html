@@ -1511,11 +1511,17 @@
                 y = 0;
             }
 
+            const targetUrl = `${prefixStr}/player.html?screenId=${activeScreenId}&width=${width}&height=${height}`;
             const options = `width=${width},height=${height},left=${x},top=${y},menubar=no,toolbar=no,location=no,status=no`;
-            const win = window.open(`${prefixStr}/player.html?screenId=${activeScreenId}&width=${width}&height=${height}`, 'NovaRemotePlayer', options);
-            if (!win) {
-                // Fallback if popup blocker is active
-                window.open(`${prefixStr}/player.html?screenId=${activeScreenId}&width=${width}&height=${height}`, '_blank');
+            
+            try {
+                const win = window.open(targetUrl, '_blank', options);
+                if (!win) {
+                    window.open(targetUrl, '_blank');
+                }
+            } catch (e) {
+                console.error('[DASHBOARD] launchPlayer failed, opening in new tab:', e);
+                window.open(targetUrl, '_blank');
             }
         }
 

@@ -373,7 +373,8 @@
         let currentPlaylistIndex = -1;
         let currentItemFilename = null;
         let disconnectTime = null;
-        let screenId = 'default';
+        const urlParams = new URLSearchParams(window.location.search);
+        let screenId = urlParams.get('screenId') || 'default';
         
         // Detect subpath prefix globally (e.g. /digital/)
         const pathParts = window.location.pathname.split('/');
@@ -424,11 +425,26 @@
             if (!isPreview) sendAction('NEXT');
         };
 
+        function fetchState() {
+            fetch(`${prefixStr}/api/state`)
+                .then(res => res.json())
+                .then(data => {
+                    const screenState = data.screens ? data.screens[screenId] : null;
+                    if (screenState) {
+                        const width = screenState.width || (screenId === 'default' ? (data.screenConfig?.width || 955) : 1920);
+                        const height = screenState.height || (screenId === 'default' ? (data.screenConfig?.height || 192) : 1080);
+                        applyDimensions(width, height);
+                        updatePlayer(screenState);
+                        if (screenState.playlist) {
+                            prefetchMedia(screenState.playlist);
+                        }
+                    }
+                })
+                .catch(err => console.warn('[PLAYER] Error polling state:', err));
+        }
+
         function connectWebSocket() {
             const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            // Parse screenId from URL query parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            screenId = urlParams.get('screenId') || 'default';
             
             // Update diagnostic overlay Screen ID
             const diagScreen = document.getElementById('diagScreenId');
@@ -1064,7 +1080,16 @@
         }
 
         // Initialize connection
+        fetchState();
         connectWebSocket();
+
+        // HTTP polling fallback if WebSocket is blocked or disconnected
+        setInterval(() => {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                console.log('[PLAYER] WebSocket not active, polling state via HTTP...');
+                fetchState();
+            }
+        }, 5000);
 
         // Listen for window resize to adjust scaling dynamically
         window.addEventListener('resize', () => {
