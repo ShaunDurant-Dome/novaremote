@@ -1386,6 +1386,16 @@ input:checked + .slider:before {
         order: 3 !important; /* Graph on row 2, right */
         box-sizing: border-box !important;
     }
+
+    #tempContainer.layout-widescreen .temp-footer {
+        position: absolute !important;
+        bottom: 3.5rem !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: auto !important;
+        text-align: center !important;
+        margin: 0 !important;
+    }
 }
 
 /* Widescreen Portrait 1080x1920 TV Layouts (excluding mini dashboard preview) */

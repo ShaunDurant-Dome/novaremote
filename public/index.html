@@ -1493,16 +1493,25 @@
             let x = 1920, y = 0, width = 1920, height = 1080;
             const activeScreen = globalState && globalState.screens ? globalState.screens[activeScreenId] : null;
             if (globalState && globalState.screenConfig) {
-                x = globalState.screenConfig.x || x;
-                y = globalState.screenConfig.y || y;
+                x = (globalState.screenConfig.x !== undefined && globalState.screenConfig.x !== null) ? globalState.screenConfig.x : x;
+                y = (globalState.screenConfig.y !== undefined && globalState.screenConfig.y !== null) ? globalState.screenConfig.y : y;
             }
             if (activeScreen) {
-                width = activeScreen.width || width;
-                height = activeScreen.height || height;
+                width = activeScreen.width || (activeScreenId === 'default' ? (globalState.screenConfig.width || 955) : 1920);
+                height = activeScreen.height || (activeScreenId === 'default' ? (globalState.screenConfig.height || 192) : 1080);
             } else if (globalState && globalState.screenConfig) {
-                width = globalState.screenConfig.width || width;
-                height = globalState.screenConfig.height || height;
+                width = activeScreenId === 'default' ? (globalState.screenConfig.width || width) : width;
+                height = activeScreenId === 'default' ? (globalState.screenConfig.height || height) : height;
             }
+            
+            // Clamp off-screen positions to main monitor for single-monitor PCs
+            if (window.screen && window.screen.width && x >= window.screen.width) {
+                x = 0;
+            }
+            if (window.screen && window.screen.height && y >= window.screen.height) {
+                y = 0;
+            }
+
             const options = `width=${width},height=${height},left=${x},top=${y},menubar=no,toolbar=no,location=no,status=no`;
             const win = window.open(`${prefixStr}/player.html?screenId=${activeScreenId}&width=${width}&height=${height}`, 'NovaRemotePlayer', options);
             if (!win) {
