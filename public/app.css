@@ -20,6 +20,10 @@
     --text-dark: #000000;
 }
 
+html {
+    font-size: 16px !important;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -1188,7 +1192,7 @@ input:checked + .slider:before {
         flex-wrap: wrap !important;
         justify-content: space-between !important;
         align-items: center !important;
-        padding: 6rem 8rem !important;
+        padding: 4rem 6rem !important;
         box-sizing: border-box !important;
     }
 
@@ -1313,23 +1317,23 @@ input:checked + .slider:before {
     #tempContainer.layout-widescreen .temp-card {
         width: 100% !important;
         max-width: 600px !important;
-        padding: 5rem 4rem !important;
+        padding: 4rem 3.5rem !important;
         border-radius: 36px !important;
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4) !important;
         box-sizing: border-box !important;
     }
 
     #tempContainer.layout-widescreen .temp-label {
-        font-size: 2.2rem !important;
-        margin-bottom: 2.5rem !important;
+        font-size: 2rem !important;
+        margin-bottom: 2rem !important;
     }
 
     #tempContainer.layout-widescreen .temp-value {
-        font-size: 9.5rem !important;
+        font-size: 8rem !important;
     }
 
     #tempContainer.layout-widescreen .temp-unit {
-        font-size: 4.8rem !important;
+        font-size: 4rem !important;
     }
 
     /* Overrides when Graph is Active on Widescreen */
