@@ -1267,7 +1267,7 @@
                                     <option value="gold" ${item.bgTheme == 'gold' ? 'selected' : ''}>Gold Accent</option>
                                 </select>
                             </div>
-                            <div style="display:flex; align-items:center; gap:0.75rem; margin-top:0.15rem;">
+                            <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-top:0.25rem;">
                                 <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
                                     <input type="checkbox" ${item.showDomeLogo !== false ? 'checked' : ''} 
                                            onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, this.checked, null, null)"> Dome Logo
@@ -1278,7 +1278,7 @@
                                 </label>
                                 <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
                                     <input type="checkbox" ${item.showArrows !== false ? 'checked' : ''} 
-                                           onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, null, null, this.checked)"> Direction Arrows
+                                           onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, null, null, this.checked)"> Arrows
                                 </label>
                             </div>
                         </div>
