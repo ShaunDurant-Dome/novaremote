@@ -81,7 +81,7 @@
             <div class="welcome-header">
                 <!-- Left: THE DOME CONFERENCE logo image -->
                 <div class="welcome-header-left">
-                    <img src="logo_conference.png" class="welcome-conf-logo" alt="The Dome Conference">
+                    <img src="logo_conference.png" id="welcomeConfLogo" class="welcome-conf-logo" alt="The Dome Conference">
                 </div>
                 <!-- Right: Standard white dome logo -->
                 <div class="welcome-header-right">
@@ -1026,7 +1026,7 @@
                     const showDomeLogo = item.showDomeLogo !== false;
                     const showConfLogo = item.showConfLogo !== false;
                     const welcomeDomeImg = welcomeEl.querySelector('.welcome-dome-logo');
-                    const welcomeConfImg = document.getElementById('welcomeConfLogo');
+                    const welcomeConfImg = welcomeEl.querySelector('.welcome-conf-logo') || document.getElementById('welcomeConfLogo');
                     const welcomeHeader = welcomeEl.querySelector('.welcome-header');
 
                     if (hVal >= 500) {
