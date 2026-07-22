@@ -1270,11 +1270,15 @@
                             <div style="display:flex; align-items:center; gap:0.75rem; margin-top:0.15rem;">
                                 <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
                                     <input type="checkbox" ${item.showDomeLogo !== false ? 'checked' : ''} 
-                                           onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, this.checked, null)"> Dome Logo
+                                           onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, this.checked, null, null)"> Dome Logo
                                 </label>
                                 <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
                                     <input type="checkbox" ${item.showConfLogo !== false ? 'checked' : ''} 
-                                           onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, null, this.checked)"> Conf Logo
+                                           onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, null, this.checked, null)"> Conf Logo
+                                </label>
+                                <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                    <input type="checkbox" ${item.showArrows !== false ? 'checked' : ''} 
+                                           onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, null, null, this.checked)"> Direction Arrows
                                 </label>
                             </div>
                         </div>
@@ -1386,7 +1390,7 @@
             }
         }
 
-        function updateWelcomeSettings(id, title, subtitle, subSubtitle, room, leftDir, rightDir, bgTheme, showDomeLogo, showConfLogo) {
+        function updateWelcomeSettings(id, title, subtitle, subSubtitle, room, leftDir, rightDir, bgTheme, showDomeLogo, showConfLogo, showArrows) {
             if (!globalState) return;
             const screen = globalState.screens[activeScreenId];
             if (screen) {
@@ -1401,6 +1405,7 @@
                     const theme = bgTheme !== null ? bgTheme : (item.bgTheme || 'blue');
                     const sdl = showDomeLogo !== null ? showDomeLogo : (item.showDomeLogo !== false);
                     const scl = showConfLogo !== null ? showConfLogo : (item.showConfLogo !== false);
+                    const sa = showArrows !== null ? showArrows : (item.showArrows !== false);
                     sendAction('UPDATE_WELCOME_SETTINGS', {
                         id,
                         title: t,
@@ -1411,7 +1416,8 @@
                         rightDir: rd,
                         bgTheme: theme,
                         showDomeLogo: sdl,
-                        showConfLogo: scl
+                        showConfLogo: scl,
+                        showArrows: sa
                     });
                 }
             }

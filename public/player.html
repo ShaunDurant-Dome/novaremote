@@ -1048,6 +1048,13 @@
                         if (welcomeHeader) welcomeHeader.style.display = 'flex';
                     }
 
+                    // Toggle Direction Arrow SVGs
+                    const showArrows = item.showArrows !== false;
+                    const arrowWrappers = welcomeEl.querySelectorAll('.welcome-arrow-wrapper');
+                    arrowWrappers.forEach(arr => {
+                        arr.style.display = showArrows ? 'flex' : 'none';
+                    });
+
                     // Show Welcome Container
                     welcomeEl.style.display = 'flex';
 

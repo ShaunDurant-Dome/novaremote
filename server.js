@@ -932,6 +932,7 @@ wss.on('connection', (ws, req) => {
                         welcomeItem.bgTheme = data.bgTheme !== undefined ? data.bgTheme : (welcomeItem.bgTheme || 'blue');
                         welcomeItem.showDomeLogo = data.showDomeLogo !== undefined ? !!data.showDomeLogo : (welcomeItem.showDomeLogo !== undefined ? welcomeItem.showDomeLogo : true);
                         welcomeItem.showConfLogo = data.showConfLogo !== undefined ? !!data.showConfLogo : (welcomeItem.showConfLogo !== undefined ? welcomeItem.showConfLogo : true);
+                        welcomeItem.showArrows = data.showArrows !== undefined ? !!data.showArrows : (welcomeItem.showArrows !== undefined ? welcomeItem.showArrows : true);
                     }
                     saveState();
                     broadcastScreenState(sid);
