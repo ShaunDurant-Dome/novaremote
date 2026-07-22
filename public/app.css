@@ -1605,7 +1605,7 @@ input:checked + .slider:before {
 }
 
 .welcome-dome-logo {
-    height: 105px !important;
+    height: 175px !important;
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.12));
