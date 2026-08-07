@@ -431,6 +431,11 @@
                     <div class="saved-playlists-list" id="savedPlaylistsList">
                         <!-- List populated dynamically -->
                     </div>
+                    <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; gap: 0.5rem; justify-content: space-between;">
+                        <button class="btn btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; flex: 1;" onclick="exportStateJson()" title="Download offline state file to upload to live server">📥 Export (.json)</button>
+                        <button class="btn btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; flex: 1;" onclick="triggerImportStateJson()" title="Import layouts exported from another server">📤 Import (.json)</button>
+                        <input type="file" id="importStateFileInput" style="display: none;" accept=".json" onchange="handleImportStateFile(event)">
+                    </div>
                 </div>
 
                 <!-- Spotify Remote Control -->
@@ -914,6 +919,42 @@
         }
 
 
+
+        function exportStateJson() {
+            window.location.href = `${prefixStr}/api/export-state`;
+        }
+
+        function triggerImportStateJson() {
+            document.getElementById('importStateFileInput').click();
+        }
+
+        function handleImportStateFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const jsonData = JSON.parse(e.target.result);
+                    fetch(`${prefixStr}/api/import-state`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(jsonData)
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Offline layouts imported successfully!');
+                        } else {
+                            alert('Import failed: ' + (data.error || 'Unknown error'));
+                        }
+                    })
+                    .catch(err => alert('Error importing layouts: ' + err.message));
+                } catch (err) {
+                    alert('Invalid JSON file format.');
+                }
+            };
+            reader.readAsText(file);
+        }
 
         function updateUI(state, activeScreens = []) {
             globalState = state;

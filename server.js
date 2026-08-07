@@ -442,6 +442,50 @@ app.delete('/api/playlists/:name', (req, res) => {
     res.json({ success: true, savedPlaylists: state.savedPlaylists });
 });
 
+// Export state JSON endpoint
+app.get('/api/export-state', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename=novaremote-state.json');
+    res.send(JSON.stringify(state, null, 2));
+});
+
+// Import state JSON endpoint
+app.post('/api/import-state', (req, res) => {
+    try {
+        const importedData = req.body;
+        if (!importedData || typeof importedData !== 'object') {
+            return res.status(400).json({ error: 'Invalid JSON state payload' });
+        }
+        
+        if (importedData.screens) {
+            state.screens = { ...state.screens, ...importedData.screens };
+        }
+        if (Array.isArray(importedData.savedPlaylists)) {
+            state.savedPlaylists = importedData.savedPlaylists;
+        }
+        if (Array.isArray(importedData.mediaLibrary)) {
+            const existingIds = new Set(state.mediaLibrary.map(m => m.id));
+            importedData.mediaLibrary.forEach(m => {
+                if (!existingIds.has(m.id)) {
+                    state.mediaLibrary.push(m);
+                }
+            });
+        }
+        if (importedData.screenConfig) {
+            state.screenConfig = { ...state.screenConfig, ...importedData.screenConfig };
+        }
+        
+        saveState();
+        broadcastGlobalState();
+        for (let sid in state.screens) {
+            broadcastScreenState(sid);
+        }
+        res.json({ success: true, state });
+    } catch (e) {
+        res.status(500).json({ error: 'Failed to import state: ' + e.message });
+    }
+});
+
 // File Upload endpoint (adds to Global Media Library)
 app.post('/api/upload', upload.single('file'), (req, res) => {
     if (!req.file) {
