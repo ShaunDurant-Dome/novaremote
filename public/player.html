@@ -20,12 +20,11 @@
             background-color: #000;
             overflow: hidden;
             cursor: none; /* Hide cursor on the LED screen */
-            perspective: 1200px;
         }
         @keyframes slideFadeIn {
             0% {
                 opacity: 0;
-                transform: scale(1.02);
+                transform: scale(1.015);
             }
             100% {
                 opacity: 1;
@@ -35,24 +34,12 @@
         @keyframes slide3DDepthIn {
             0% {
                 opacity: 0;
-                transform: perspective(1000px) rotateX(6deg) translateZ(-120px) scale(0.94);
-                filter: blur(12px) brightness(1.2);
+                transform: scale(0.985);
+                filter: blur(4px);
             }
             100% {
                 opacity: 1;
-                transform: perspective(1000px) rotateX(0deg) translateZ(0px) scale(1.0);
-                filter: blur(0px) brightness(1.0);
-            }
-        }
-        @keyframes slide3DFlipIn {
-            0% {
-                opacity: 0;
-                transform: perspective(1200px) rotateY(-18deg) translateZ(-90px);
-                filter: blur(6px);
-            }
-            100% {
-                opacity: 1;
-                transform: perspective(1200px) rotateY(0deg) translateZ(0px);
+                transform: scale(1.00);
                 filter: blur(0px);
             }
         }
@@ -60,14 +47,7 @@
             animation: slideFadeIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
         .slide-3d-depth {
-            animation: slide3DDepthIn 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            transform-style: preserve-3d;
-            backface-visibility: hidden;
-        }
-        .slide-3d-flip {
-            animation: slide3DFlipIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-            transform-style: preserve-3d;
-            backface-visibility: hidden;
+            animation: slide3DDepthIn 0.5s ease-out forwards;
         }
     </style>
 </head>
