@@ -620,6 +620,7 @@
         }
 
         function sendAction(type, payload = {}) {
+            if (isPreview) return;
             if (ws && ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({ type, ...payload }));
             }

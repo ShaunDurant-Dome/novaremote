@@ -934,11 +934,15 @@ wss.on('connection', (ws, req) => {
                     broadcastGlobalState();
                     break;
                 case 'NEXT':
-                    if (screen.playlist.length > 0) {
-                        screen.currentIndex = (screen.currentIndex + 1) % screen.playlist.length;
+                    const nowNext = Date.now();
+                    if (!screen.lastNextTime || (nowNext - screen.lastNextTime > 2500) || data.force) {
+                        screen.lastNextTime = nowNext;
+                        if (screen.playlist.length > 0) {
+                            screen.currentIndex = (screen.currentIndex + 1) % screen.playlist.length;
+                        }
+                        broadcastScreenState(sid);
+                        broadcastGlobalState();
                     }
-                    broadcastScreenState(sid);
-                    broadcastGlobalState();
                     break;
                 case 'FORCE_RELOAD':
                     const reloadMsg = JSON.stringify({ type: 'FORCE_RELOAD' });
@@ -949,11 +953,15 @@ wss.on('connection', (ws, req) => {
                     });
                     break;
                 case 'PREV':
-                    if (screen.playlist.length > 0) {
-                        screen.currentIndex = (screen.currentIndex - 1 + screen.playlist.length) % screen.playlist.length;
+                    const nowPrev = Date.now();
+                    if (!screen.lastNextTime || (nowPrev - screen.lastNextTime > 2500) || data.force) {
+                        screen.lastNextTime = nowPrev;
+                        if (screen.playlist.length > 0) {
+                            screen.currentIndex = (screen.currentIndex - 1 + screen.playlist.length) % screen.playlist.length;
+                        }
+                        broadcastScreenState(sid);
+                        broadcastGlobalState();
                     }
-                    broadcastScreenState(sid);
-                    broadcastGlobalState();
                     break;
                 case 'SET_INDEX':
                     if (data.index >= 0 && data.index < screen.playlist.length) {
