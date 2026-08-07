@@ -167,6 +167,7 @@ function saveState() {
 
 // Ensure a screen exists in state
 function ensureScreenExists(screenId) {
+    if (!screenId || screenId === 'admin') return;
     if (!state.screens[screenId]) {
         const isBigLED = (screenId === 'default');
         state.screens[screenId] = {
@@ -286,11 +287,88 @@ app.use('/uploads', express.static(uploadsDir, {
     }
 }));
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: 0,
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+        }
+    }
+}));
+
+let cachedSwakopmundWeather = {
+    temp: 18.0,
+    humidity: '75%',
+    windSpeed: '12 kts SW',
+    fogStatus: 'Morning Fog Clearing',
+    uvIndex: 'UV 4 (Moderate)',
+    lastUpdated: Date.now()
+};
+
+function getCompassDirection(degrees) {
+    const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+    const index = Math.round((degrees % 360) / 22.5) % 16;
+    return directions[index];
+}
+
+function getWeatherStatusFromWmoCode(code) {
+    if (code === 45 || code === 48) return '☁️ Coastal Fog Warning';
+    if (code === 1 || code === 2 || code === 3) return '🌥️ Morning Fog Clearing';
+    if (code === 0) return '☀️ Clear Coastal Skies';
+    if (code >= 51 && code <= 67) return '🌧️ Coastal Drizzle';
+    if (code >= 80 && code <= 99) return '⛈️ Coastal Rain Warning';
+    return '⛅ Coastal Breeze';
+}
+
+async function fetchSwakopmundWeather() {
+    try {
+        const url = 'https://api.open-meteo.com/v1/forecast?latitude=-22.6784&longitude=14.5269&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,uv_index&wind_speed_unit=kn';
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.current) {
+                const curr = data.current;
+                const windDir = getCompassDirection(curr.wind_direction_10m || 0);
+                const speed = Math.round(curr.wind_speed_10m || 0);
+                const uv = parseFloat(curr.uv_index || 0).toFixed(1);
+                let uvLabel = 'Low';
+                if (uv >= 3 && uv <= 5) uvLabel = 'Moderate';
+                else if (uv >= 6 && uv <= 7) uvLabel = 'High';
+                else if (uv >= 8) uvLabel = 'Very High';
+
+                cachedSwakopmundWeather = {
+                    temp: curr.temperature_2m !== undefined ? curr.temperature_2m : 18.0,
+                    humidity: `${Math.round(curr.relative_humidity_2m || 75)}%`,
+                    windSpeed: `${speed} kts ${windDir}`,
+                    fogStatus: getWeatherStatusFromWmoCode(curr.weather_code || 0),
+                    uvIndex: `UV ${uv} (${uvLabel})`,
+                    lastUpdated: Date.now()
+                };
+                console.log('[WEATHER] Swakopmund live weather updated:', cachedSwakopmundWeather);
+            }
+        }
+    } catch (err) {
+        console.warn('[WEATHER] Could not fetch live Swakopmund weather from Open-Meteo, using fallback:', err.message);
+    }
+}
+
+// Fetch live Swakopmund weather every 10 minutes
+setInterval(fetchSwakopmundWeather, 10 * 60 * 1000);
+fetchSwakopmundWeather();
 
 // REST Endpoints
 app.get('/api/state', (req, res) => {
     res.json(state);
+});
+
+app.get('/api/swakopmund-weather', (req, res) => {
+    res.json(cachedSwakopmundWeather);
 });
 
 // Get temperatures endpoint
@@ -842,21 +920,25 @@ wss.on('connection', (ws, req) => {
                         screen.currentIndex = data.index;
                     }
                     broadcastScreenState(sid);
+                    broadcastGlobalState();
                     break;
                 case 'PAUSE':
                     screen.isPlaying = false;
                     broadcastScreenState(sid);
+                    broadcastGlobalState();
                     break;
                 case 'STOP':
                     screen.isPlaying = false;
                     screen.currentIndex = screen.playlist.length > 0 ? 0 : -1;
                     broadcastScreenState(sid);
+                    broadcastGlobalState();
                     break;
                 case 'NEXT':
                     if (screen.playlist.length > 0) {
                         screen.currentIndex = (screen.currentIndex + 1) % screen.playlist.length;
                     }
                     broadcastScreenState(sid);
+                    broadcastGlobalState();
                     break;
                 case 'FORCE_RELOAD':
                     const reloadMsg = JSON.stringify({ type: 'FORCE_RELOAD' });
@@ -871,20 +953,24 @@ wss.on('connection', (ws, req) => {
                         screen.currentIndex = (screen.currentIndex - 1 + screen.playlist.length) % screen.playlist.length;
                     }
                     broadcastScreenState(sid);
+                    broadcastGlobalState();
                     break;
                 case 'SET_INDEX':
                     if (data.index >= 0 && data.index < screen.playlist.length) {
                         screen.currentIndex = data.index;
                     }
                     broadcastScreenState(sid);
+                    broadcastGlobalState();
                     break;
                 case 'SET_VOLUME':
                     screen.volume = Math.max(0.0, Math.min(1.0, data.volume));
                     broadcastScreenState(sid);
+                    broadcastGlobalState();
                     break;
                 case 'SET_BLACKOUT':
                     screen.isBlackout = !!data.value;
                     broadcastScreenState(sid);
+                    broadcastGlobalState();
                     if (screen.isBlackout) {
                         spotifyServerAction(sid, 'pause');
                     } else {
@@ -894,6 +980,7 @@ wss.on('connection', (ws, req) => {
                 case 'UPDATE_TICKER':
                     screen.ticker = { ...screen.ticker, ...data.ticker };
                     broadcastScreenState(sid);
+                    broadcastGlobalState();
                     break;
                 case 'UPDATE_SCREEN_CONFIG':
                     screen.width = data.config.width || screen.width;
@@ -904,11 +991,86 @@ wss.on('connection', (ws, req) => {
                     break;
                 case 'UPDATE_DURATION':
                     const item = screen.playlist.find(p => p.id === data.id);
-                    if (item && (item.type === 'image' || item.type === 'temp' || item.type === 'welcome')) {
+                    if (item && (item.type === 'image' || item.type === 'temp' || item.type === 'welcome' || item.type === 'live_info' || item.type === 'coastal_weather')) {
                         item.duration = Math.max(1, parseInt(data.duration) || 10);
                     }
                     saveState();
                     broadcastScreenState(sid);
+                    broadcastGlobalState();
+                    break;
+                case 'ADD_LIVE_INFO_SLIDE':
+                    const newLiveInfo = {
+                        id: 'liveinfo-' + Date.now(),
+                        name: 'Live Clock & Outdoor Temp',
+                        type: 'live_info',
+                        duration: parseInt(data.duration) || 15,
+                        showLogo: true,
+                        showTime: true,
+                        showDate: true,
+                        showTemp: true,
+                        bgTheme: 'gym_motion'
+                    };
+                    screen.playlist.push(newLiveInfo);
+                    if (screen.currentIndex === -1) {
+                        screen.currentIndex = 0;
+                    }
+                    saveState();
+                    broadcastScreenState(sid);
+                    broadcastGlobalState();
+                    break;
+                case 'UPDATE_LIVE_INFO_SETTINGS':
+                    const infoItem = screen.playlist.find(p => p.id === data.id);
+                    if (infoItem && infoItem.type === 'live_info') {
+                        infoItem.showLogo = data.showLogo !== undefined ? !!data.showLogo : (infoItem.showLogo !== undefined ? infoItem.showLogo : true);
+                        infoItem.showTime = data.showTime !== undefined ? !!data.showTime : (infoItem.showTime !== undefined ? infoItem.showTime : true);
+                        infoItem.showDate = data.showDate !== undefined ? !!data.showDate : (infoItem.showDate !== undefined ? infoItem.showDate : true);
+                        infoItem.showTemp = data.showTemp !== undefined ? !!data.showTemp : (infoItem.showTemp !== undefined ? infoItem.showTemp : true);
+                        infoItem.bgTheme = data.bgTheme !== undefined ? data.bgTheme : (infoItem.bgTheme || 'gym_motion');
+                    }
+                    saveState();
+                    broadcastScreenState(sid);
+                    broadcastGlobalState();
+                    break;
+                case 'ADD_COASTAL_WEATHER_SLIDE':
+                    const newCoastalWeather = {
+                        id: 'coastal-' + Date.now(),
+                        name: 'Coastal Weather & Wind Tracker',
+                        type: 'coastal_weather',
+                        duration: parseInt(data.duration) || 15,
+                        fogStatus: 'Morning Fog Clearing',
+                        windSpeed: '14 kts SSW',
+                        humidity: '78%',
+                        uvIndex: 'UV 4 (Moderate)',
+                        showWind: true,
+                        showFog: true,
+                        showHumidity: true,
+                        showUv: true,
+                        bgTheme: 'ocean_motion'
+                    };
+                    screen.playlist.push(newCoastalWeather);
+                    if (screen.currentIndex === -1) {
+                        screen.currentIndex = 0;
+                    }
+                    saveState();
+                    broadcastScreenState(sid);
+                    broadcastGlobalState();
+                    break;
+                case 'UPDATE_COASTAL_WEATHER_SETTINGS':
+                    const coastalItem = screen.playlist.find(p => p.id === data.id);
+                    if (coastalItem && coastalItem.type === 'coastal_weather') {
+                        if (data.fogStatus !== undefined && data.fogStatus !== null) coastalItem.fogStatus = data.fogStatus;
+                        if (data.windSpeed !== undefined && data.windSpeed !== null) coastalItem.windSpeed = data.windSpeed;
+                        if (data.humidity !== undefined && data.humidity !== null) coastalItem.humidity = data.humidity;
+                        if (data.uvIndex !== undefined && data.uvIndex !== null) coastalItem.uvIndex = data.uvIndex;
+                        if (data.showWind !== undefined && data.showWind !== null) coastalItem.showWind = !!data.showWind;
+                        if (data.showFog !== undefined && data.showFog !== null) coastalItem.showFog = !!data.showFog;
+                        if (data.showHumidity !== undefined && data.showHumidity !== null) coastalItem.showHumidity = !!data.showHumidity;
+                        if (data.showUv !== undefined && data.showUv !== null) coastalItem.showUv = !!data.showUv;
+                        if (data.bgTheme !== undefined && data.bgTheme !== null) coastalItem.bgTheme = data.bgTheme;
+                    }
+                    saveState();
+                    broadcastScreenState(sid);
+                    broadcastGlobalState();
                     break;
                 case 'ADD_TEMP_SLIDE':
                     const newTemp = {
@@ -928,6 +1090,7 @@ wss.on('connection', (ws, req) => {
                     }
                     saveState();
                     broadcastScreenState(sid);
+                    broadcastGlobalState();
                     break;
                 case 'UPDATE_TEMP_LABELS':
                     const tempItem = screen.playlist.find(p => p.id === data.id);
@@ -942,6 +1105,7 @@ wss.on('connection', (ws, req) => {
                     }
                     saveState();
                     broadcastScreenState(sid);
+                    broadcastGlobalState();
                     break;
                 case 'ADD_WELCOME_SLIDE':
                     const newWelcome = {
@@ -963,6 +1127,7 @@ wss.on('connection', (ws, req) => {
                     }
                     saveState();
                     broadcastScreenState(sid);
+                    broadcastGlobalState();
                     break;
                 case 'UPDATE_WELCOME_SETTINGS':
                     const welcomeItem = screen.playlist.find(p => p.id === data.id);
@@ -980,6 +1145,7 @@ wss.on('connection', (ws, req) => {
                     }
                     saveState();
                     broadcastScreenState(sid);
+                    broadcastGlobalState();
                     break;
                 case 'ADD_LIBRARY_ITEM_TO_PLAYLIST':
                     const libItem = state.mediaLibrary.find(l => l.id === data.libraryId);
@@ -995,7 +1161,9 @@ wss.on('connection', (ws, req) => {
                         if (screen.currentIndex === -1) {
                             screen.currentIndex = 0;
                         }
+                        saveState();
                         broadcastScreenState(sid);
+                        broadcastGlobalState();
                     }
                     break;
                 case 'REMOVE_PLAYLIST_ITEM':
@@ -1008,7 +1176,9 @@ wss.on('connection', (ws, req) => {
                         } else if (screen.currentIndex >= screen.playlist.length) {
                             screen.currentIndex = screen.playlist.length - 1;
                         }
+                        saveState();
                         broadcastScreenState(sid);
+                        broadcastGlobalState();
                     }
                     break;
                 case 'REORDER_PLAYLIST':
@@ -1019,7 +1189,9 @@ wss.on('connection', (ws, req) => {
                             if (pItem) reordered.push(pItem);
                         });
                         screen.playlist = reordered;
+                        saveState();
                         broadcastScreenState(sid);
+                        broadcastGlobalState();
                     }
                     break;
                 case 'SET_DOME_API_URL':

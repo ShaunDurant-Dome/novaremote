@@ -234,126 +234,208 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div style="display: flex; align-items: center; gap: 1.25rem;">
-                <img src="/logo_white.png" alt="The Dome" style="height: 45px; object-fit: contain; filter: brightness(1.2);">
-                <div style="border-left: 1px solid rgba(255, 255, 255, 0.1); padding-left: 1.25rem; display: flex; flex-direction: column; justify-content: center;">
-                    <h1 class="platform-title" style="font-size: 1.7rem; font-weight: 700; color: var(--text-main); background: none; -webkit-text-fill-color: var(--text-main); -webkit-background-clip: initial; display: flex; align-items: center; gap: 0; margin: 0;">The Dome Digital Platform</h1>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.1rem; font-weight: 500;">LED & Digital Signage Controller</p>
+    <div class="app-container">
+        <!-- Left Navigation Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <img src="/logo_white.png" alt="The Dome" class="sidebar-logo">
+                <div>
+                    <div class="sidebar-title">The Dome</div>
+                    <div class="sidebar-subtitle">Digital Signage</div>
                 </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 1rem;">
-                <a href="/novaremote-player.apk" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-color: rgba(255,123,0,0.3); color: var(--primary); text-decoration: none;" download>
-                    🤖 Download Android App
+
+            <!-- Sidebar Navigation Tabs -->
+            <nav class="sidebar-nav">
+                <button class="sidebar-btn active" id="btnTabControl" onclick="switchTab('control')">
+                    <span class="btn-icon">📺</span> <span>Control & Live View</span>
+                </button>
+                <button class="sidebar-btn" id="btnTabPlaylist" onclick="switchTab('playlist')">
+                    <span class="btn-icon">📑</span> <span>Playlist & Templates</span>
+                </button>
+                <button class="sidebar-btn" id="btnTabMedia" onclick="switchTab('media')">
+                    <span class="btn-icon">📁</span> <span>Media Library</span>
+                </button>
+                <button class="sidebar-btn" id="btnTabSaved" onclick="switchTab('saved')">
+                    <span class="btn-icon">💾</span> <span>Saved Layouts</span>
+                </button>
+                <button class="sidebar-btn" id="btnTabTicker" onclick="switchTab('ticker')">
+                    <span class="btn-icon">💬</span> <span>Ticker Overlay</span>
+                </button>
+                <button class="sidebar-btn" id="btnTabConfig" onclick="switchTab('config')">
+                    <span class="btn-icon">⚙️</span> <span>Screen Settings</span>
+                </button>
+            </nav>
+
+            <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1rem; margin-top: auto;">
+                <a href="/novaremote-player.apk" class="btn btn-secondary" style="width: 100%; justify-content: center; padding: 0.5rem; font-size: 0.78rem; border-color: rgba(255,123,0,0.3); color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 0.4rem;" download>
+                    🤖 Download TV APK
                 </a>
-                <div id="connectionStatus" class="status-badge">
-                    <span class="status-dot"></span>
-                    <span class="status-text">Connecting...</span>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="main-workspace">
+            <!-- Top Header Bar -->
+            <header class="top-header">
+                <div class="top-header-info" style="display: flex; align-items: center; gap: 0.85rem;">
+                    <div id="connectionStatus" class="status-badge">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Connecting...</span>
+                    </div>
+
+                    <!-- Active Screen Selector Pill -->
+                    <div style="display: flex; align-items: center; gap: 0.35rem; background: rgba(0, 210, 255, 0.1); border: 1px solid rgba(0, 210, 255, 0.3); border-radius: 999px; padding: 0.2rem 0.5rem 0.2rem 0.75rem;">
+                        <span style="font-size: 0.75rem; font-weight: 600; color: #00d2ff; white-space: nowrap;">Screen:</span>
+                        <select id="screenSelector" class="select-styled" style="background: transparent; border: none; color: #ffffff; font-size: 0.82rem; font-weight: 600; padding: 0.15rem 0.4rem; cursor: pointer; outline: none;" onchange="switchScreen(this.value)">
+                            <!-- Screens populated dynamically -->
+                        </select>
+                        <button class="btn btn-danger" id="btnDeleteScreen" style="padding: 0; border-radius: 50%; background: rgba(255,75,75,0.2); border: 1px solid rgba(255,75,75,0.4); color: #ff4b4b; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; font-size: 0.7rem;" onclick="deleteCurrentScreen()" title="Delete Current Screen">🗑️</button>
+                    </div>
+                </div>
+
+                <div class="top-header-actions">
+                    <button class="btn btn-secondary" onclick="sendAction('PREV')" title="Previous Slide">⏮ Prev</button>
+                    <button id="btnPlay" class="btn btn-primary" onclick="togglePlay()" title="Play / Pause">
+                        <span id="playIcon">▶</span> <span id="playText">Play</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="sendAction('NEXT')" title="Next Slide">⏭ Next</button>
+                    <button class="btn btn-secondary" style="border-color: rgba(0,255,135,0.4); color: #00ff87;" onclick="launchPlayer()" title="Open Player in New Tab">🖥️ Open Player</button>
+                </div>
+            </header>
+
+            <!-- Tab 1: Control & Live View -->
+            <div id="tab-control" class="tab-content active">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <!-- Control Panel Card -->
+                    <div class="panel">
+                        <div class="panel-header" style="flex-direction: column; align-items: flex-start; gap: 0.25rem;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                                <h2 class="panel-title" id="controlPanelTitle">Screen Control</h2>
+                                <span id="playingItemName" style="font-size: 0.85rem; color: var(--primary); font-weight: 500;">No media playing</span>
+                            </div>
+                            <div id="screenUrlDisplay" style="font-size: 0.72rem; color: var(--text-muted); font-family: monospace; word-break: break-all; margin-top: 0.25rem; background: rgba(0,0,0,0.25); padding: 0.35rem 0.5rem; border-radius: 6px; width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,0.03);">
+                                TV URL: <span id="tvScreenUrl" style="color: var(--primary); font-weight: bold;">loading...</span>
+                            </div>
+                        </div>
+
+                        <div class="control-bar" style="margin-top: 1.25rem;">
+                            <button class="btn btn-secondary" onclick="sendAction('PREV')">⏮ Prev</button>
+                            <button id="btnPlayCard" class="btn btn-primary" onclick="togglePlay()"><span id="playIcon2">▶</span> <span id="playText2">Play</span></button>
+                            <button class="btn btn-secondary" onclick="sendAction('NEXT')">⏭ Next</button>
+                            <button id="btnBlackout" class="btn btn-blackout" onclick="toggleBlackout()">⬛ Blackout</button>
+                        </div>
+
+                        <div class="volume-control" style="margin-top: 1.25rem;">
+                            <span style="font-size: 1.1rem;">🔊</span>
+                            <input id="volumeSlider" class="volume-slider" type="range" min="0" max="1" step="0.05" oninput="setVolume(this.value)">
+                            <span id="volumeVal" style="font-size: 0.85rem; color: var(--text-muted); width: 35px; text-align: right;">100%</span>
+                        </div>
+
+                        <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                            <button class="btn btn-secondary" style="flex: 1; padding: 0.5rem; font-size: 0.82rem; justify-content: center;" onclick="launchPlayer()">🖥️ Open TV Player Screen</button>
+                            <button class="btn btn-secondary" style="flex: 1; padding: 0.5rem; font-size: 0.82rem; justify-content: center; background: rgba(0,210,255,0.1); color: #00d2ff; border-color: rgba(0,210,255,0.2);" onclick="forceReloadScreen()">🔄 Reload TV Screen</button>
+                        </div>
+                    </div>
+
+                    <!-- Live Preview Monitor Card -->
+                    <div class="panel" id="livePreviewPanel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Live Preview Monitor</h2>
+                        </div>
+                        
+                        <div class="screen-preview-container" style="position: relative; width: 100%; height: 320px; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                            <div class="blackout-overlay" id="previewBlackout">
+                                DISPLAY BLACKOUT ACTIVE
+                            </div>
+                            <div class="preview-placeholder" id="previewPlaceholder">
+                                <span>📺</span>
+                                <span>No Active Playback</span>
+                            </div>
+                            
+                            <iframe id="screenPreviewIframe" class="screen-preview" style="display: none; border: none; width: 100%; height: 100%; border-radius: 12px; pointer-events: none;" src="about:blank" allow="autoplay"></iframe>
+
+                            <div class="ticker-preview-container" id="previewTicker">
+                                <span class="ticker-preview-text" id="previewTickerText"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </header>
 
-        <!-- Screen Selection and Creation Bar -->
-        <div class="screen-select-bar">
-            <span style="font-weight: 500; font-size: 1rem; color: var(--primary);">Active Screen:</span>
-            <select id="screenSelector" class="select-styled" onchange="switchScreen(this.value)">
-                <!-- Screens populated dynamically -->
-            </select>
-            <button class="btn btn-danger" id="btnDeleteScreen" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: #ff4b4b; border-color: #ff4b4b; cursor: pointer;" onclick="deleteCurrentScreen()">🗑️ Delete</button>
-            
-            <div style="flex-grow: 1;"></div>
-            
-            <!-- Add new screen form -->
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <input type="text" id="newScreenId" class="input-text" style="width: 180px; padding: 0.4rem 0.8rem; font-size: 0.85rem;" placeholder="e.g. hall, lobby, bar">
-                <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="createNewScreen()">➕ Add Screen</button>
+            <!-- Tab 2: Playlist & Templates -->
+            <div id="tab-playlist" class="tab-content">
+                <div class="panel" id="activePlaylistPanel">
+                    <div class="panel-header" style="flex-wrap: wrap; gap: 0.75rem;">
+                        <h2 class="panel-title" id="activePlaylistTitle">Active Playlist</h2>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: rgba(0,210,255,0.4); color: #00d2ff;" onclick="addCoastalWeatherSlide()">🌊 + Coastal Weather</button>
+                            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: rgba(0,255,135,0.3); color: #00ff87;" onclick="addLiveInfoSlide()">⏰ + Live Clock & Temp</button>
+                            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: rgba(255,123,0,0.3); color: var(--primary);" onclick="addTempSlide()">📊 + Temp Slide</button>
+                            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: rgba(0,210,255,0.3); color: #00d2ff;" onclick="addWelcomeSlide()">👋 + Welcome Slide</button>
+                            <select id="quickMediaSelector" class="select-styled" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: rgba(255,255,255,0.15); background: rgba(0,0,0,0.4); max-width: 220px;" onchange="if(this.value){ addLibraryItemToPlaylist(this.value); this.value=''; }">
+                                <option value="">📁 + Add Media File...</option>
+                            </select>
+                            <span id="playlistCount" class="status-badge" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; height: auto;">0 items</span>
+                        </div>
+                    </div>
+
+                    <div class="playlist-items" id="playlistItems" style="min-height: 250px;">
+                        <!-- Screen playlist items populated dynamically -->
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="layout-container">
-            <!-- Pane 1: Global Media Library -->
-            <div>
+            <!-- Tab 3: Media Library -->
+            <div id="tab-media" class="tab-content">
                 <div class="panel" id="mediaLibraryPanel">
                     <div class="panel-header">
                         <h2 class="panel-title">Media Library</h2>
                     </div>
                     
                     <!-- Uploader -->
-                    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" style="margin-bottom: 1.5rem;">
                         <span class="upload-icon">📤</span>
-                        <p class="upload-text" style="font-size: 0.8rem;">Drag files or click here</p>
+                        <p class="upload-text" style="font-size: 0.9rem; font-weight: 600;">Drag video/image files or click here to upload</p>
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Supported formats: MP4, PNG, JPG, WEBP</p>
                         <input type="file" id="fileInput" class="file-input" accept="video/mp4,image/*" multiple onchange="handleFileSelect(this)">
                     </div>
 
-                    <div class="playlist-items" id="libraryItems" style="max-height: 550px;">
+                    <div class="playlist-items" id="libraryItems" style="min-height: 200px;">
                         <!-- Library files populated dynamically -->
                     </div>
                 </div>
             </div>
 
-            <!-- Pane 2: Playback Control & Current Screen Playlist -->
-            <div>
-                <!-- Screen Control -->
-                <div class="panel" id="screenControlPanel">
-                    <div class="panel-header" style="flex-direction: column; align-items: flex-start; gap: 0.25rem;">
-                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                            <h2 class="panel-title" id="controlPanelTitle">Screen Control</h2>
-                            <span id="playingItemName" style="font-size: 0.85rem; color: var(--primary); font-weight: 500;">No media playing</span>
-                        </div>
-                        <div id="screenUrlDisplay" style="font-size: 0.72rem; color: var(--text-muted); font-family: monospace; word-break: break-all; margin-top: 0.25rem; background: rgba(0,0,0,0.25); padding: 0.35rem 0.5rem; border-radius: 6px; width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,0.03);">
-                            TV URL: <span id="tvScreenUrl" style="color: var(--primary); font-weight: bold;">loading...</span>
-                        </div>
-                    </div>
-
-                    <div class="control-bar">
-                        <button class="btn btn-secondary" onclick="sendAction('PREV')" title="Previous">
-                            <span class="btn-icon">⏮</span> Prev
-                        </button>
-                        <button id="btnPlay" class="btn btn-primary" onclick="togglePlay()" title="Play">
-                            <span class="btn-icon" id="playIcon">▶</span> <span id="playText">Play</span>
-                        </button>
-                        <button class="btn btn-secondary" onclick="sendAction('NEXT')" title="Next">
-                            <span class="btn-icon">⏭</span> Next
-                        </button>
-                        <button id="btnBlackout" class="btn btn-blackout" onclick="toggleBlackout()" title="Blackout Display">
-                            <span class="btn-icon">⬛</span> Blackout
-                        </button>
-                    </div>
-
-                    <div class="volume-control">
-                        <span style="font-size: 1.1rem;" title="Volume">🔊</span>
-                        <input id="volumeSlider" class="volume-slider" type="range" min="0" max="1" step="0.05" oninput="setVolume(this.value)">
-                        <span id="volumeVal" style="font-size: 0.85rem; color: var(--text-muted); width: 35px; text-align: right;">100%</span>
-                    </div>
-
-                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
-                        <button class="btn btn-secondary" style="flex: 1; padding: 0.4rem; font-size: 0.8rem; justify-content: center; height: auto;" onclick="launchPlayer()">🖥️ Open Preview Player</button>
-                        <button class="btn btn-secondary" style="flex: 1; padding: 0.4rem; font-size: 0.8rem; justify-content: center; height: auto; background: rgba(0,210,255,0.1); color: #00d2ff; border-color: rgba(0,210,255,0.2);" onclick="forceReloadScreen()">🔄 Reload TV Screen</button>
-                    </div>
-                    <a href="novaremote-player.apk" download class="btn btn-secondary" style="display: flex; align-items: center; justify-content: center; width: 100%; margin-top: 0.5rem; padding: 0.4rem; font-size: 0.8rem; height: auto; background: rgba(255,123,0,0.1); color: var(--primary); border-color: rgba(255,123,0,0.2); text-decoration: none;">🤖 Download TV app (APK)</a>
-                </div>
-
-                <!-- Screen Playlist -->
-                <div class="panel" id="activePlaylistPanel">
+            <!-- Tab 4: Saved Layouts -->
+            <div id="tab-saved" class="tab-content">
+                <div class="panel" id="savedPlaylistsPanel">
                     <div class="panel-header">
-                        <h2 class="panel-title" id="activePlaylistTitle">Active Playlist</h2>
+                        <h2 class="panel-title">Saved Playlists & Layout Management</h2>
                         <div style="display: flex; gap: 0.5rem;">
-                            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: rgba(255,123,0,0.3); color: var(--primary);" onclick="addTempSlide()">📊 + Temp Slide</button>
-                            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: rgba(0,210,255,0.3); color: #00d2ff;" onclick="addWelcomeSlide()">👋 + Welcome Slide</button>
-                            <span id="playlistCount" class="status-badge" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; height: auto;">0 items</span>
+                            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: rgba(0,210,255,0.4); color: #00d2ff;" onclick="exportStateJson()">📥 Export (.json)</button>
+                            <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: rgba(0,255,135,0.3); color: #00ff87;" onclick="triggerImportStateJson()">📤 Import (.json)</button>
+                            <input type="file" id="importStateFileInput" style="display: none;" accept=".json" onchange="handleImportStateFile(event)">
                         </div>
                     </div>
-
-                    <div class="playlist-items" id="playlistItems" style="max-height: 400px;">
-                        <!-- Screen playlist items populated dynamically -->
+                    <div style="margin-bottom: 1rem;">
+                        <label class="form-label" for="newPlaylistName">Save current screen layout:</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="newPlaylistName" class="input-text" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" placeholder="Playlist Name...">
+                            <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="saveCurrentPlaylist()">Save Layout</button>
+                        </div>
+                    </div>
+                    <div class="saved-playlists-list" id="savedPlaylistsList">
+                        <!-- List populated dynamically -->
                     </div>
                 </div>
+            </div>
 
-                <!-- Ticker Control Panel -->
-                <div class="panel" id="tickerPanel">
+            <!-- Tab 5: Ticker Overlay -->
+            <div id="tab-ticker" class="tab-content">
+                <div class="panel">
                     <div class="panel-header">
-                        <h2 class="panel-title">Scrolling Ticker Overlay</h2>
+                        <h2 class="panel-title">Scrolling Ticker Marquee Overlay</h2>
                         <div class="switch-container" style="margin-bottom: 0;">
                             <label class="switch">
                                 <input type="checkbox" id="tickerEnable" onchange="updateTicker()">
@@ -363,7 +445,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="tickerText">Ticker Message</label>
+                        <label class="form-label" for="tickerText">Ticker Announcement Message</label>
                         <input type="text" id="tickerText" class="input-text" placeholder="Type overlay message..." oninput="updateTicker()">
                     </div>
 
@@ -389,59 +471,12 @@
                 </div>
             </div>
 
-            <!-- Pane 3: Preview & Setup -->
-            <div>
-                <!-- Screen Preview -->
-                <div class="panel" id="livePreviewPanel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">Live Preview</h2>
-                    </div>
-                    
-                    <div class="screen-preview-container">
-                        <div class="blackout-overlay" id="previewBlackout">
-                            DISPLAY BLACKOUT ACTIVE
-                        </div>
-                        <div class="preview-placeholder" id="previewPlaceholder">
-                            <span>📺</span>
-                            <span>No Active Playback</span>
-                        </div>
-                        
-                        <!-- 100% Accurate Player Screen iFrame Preview -->
-                        <iframe id="screenPreviewIframe" class="screen-preview" style="display: none; border: none; width: 100%; height: 100%; border-radius: 12px; pointer-events: none;" src="about:blank" allow="autoplay"></iframe>
-
-                        <!-- Ticker Preview Overlay -->
-                        <div class="ticker-preview-container" id="previewTicker">
-                            <span class="ticker-preview-text" id="previewTickerText"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Saved Playlists -->
-                <div class="panel" id="savedPlaylistsPanel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">Saved Playlists</h2>
-                    </div>
-                    <div style="margin-bottom: 1rem;">
-                        <label class="form-label" for="newPlaylistName">Save current screen layout:</label>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <input type="text" id="newPlaylistName" class="input-text" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" placeholder="Playlist Name...">
-                            <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="saveCurrentPlaylist()">Save</button>
-                        </div>
-                    </div>
-                    <div class="saved-playlists-list" id="savedPlaylistsList">
-                        <!-- List populated dynamically -->
-                    </div>
-                    <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; gap: 0.5rem; justify-content: space-between;">
-                        <button class="btn btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; flex: 1;" onclick="exportStateJson()" title="Download offline state file to upload to live server">📥 Export (.json)</button>
-                        <button class="btn btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; flex: 1;" onclick="triggerImportStateJson()" title="Import layouts exported from another server">📤 Import (.json)</button>
-                        <input type="file" id="importStateFileInput" style="display: none;" accept=".json" onchange="handleImportStateFile(event)">
-                    </div>
-                </div>
-
+            <!-- Tab 6: Screen Settings & API -->
+            <div id="tab-config" class="tab-content">
                 <!-- Spotify Remote Control -->
                 <div class="panel" id="spotifyPanel">
                     <div class="panel-header">
-                        <h2 class="panel-title">🎵 Spotify Remote</h2>
+                        <h2 class="panel-title">🎵 Spotify Remote Integration</h2>
                         <span id="spotifyStatus" class="status-badge" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.04); color: var(--text-muted);">Disconnected</span>
                     </div>
 
@@ -500,171 +535,79 @@
                     </div>
                 </div>
 
-                <!-- Screen Coordinates Configuration -->
-                <div class="panel" id="ledSetupPanel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">LED Screen Setup</h2>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Position X</label>
-                            <input type="number" id="screenX" class="input-text" onchange="updateScreenConfig()">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                    <!-- Screen Resolution & Coordinates Setup -->
+                    <div class="panel" id="ledSetupPanel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">LED Screen Setup & Resolution</h2>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Position Y</label>
-                            <input type="number" id="screenY" class="input-text" onchange="updateScreenConfig()">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Width</label>
-                            <input type="number" id="screenWidth" class="input-text" onchange="updateScreenConfig()">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Height</label>
-                            <input type="number" id="screenHeight" class="input-text" onchange="updateScreenConfig()">
-                        </div>
-                    </div>
-
-                    <div class="form-group" style="margin-top: 1rem;">
-                        <label class="form-label" for="domeApiUrl">Dome Management API (Sensors)</label>
-                        <input type="text" id="domeApiUrl" class="input-text" placeholder="http://192.168.178.X/api/temps" onchange="updateDomeApiUrl()">
-                    </div>
-
-                    <div style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                        <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Host PC Player Controls</label>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button class="btn btn-primary" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; height: auto;" onclick="remoteControlPC('launch')">🚀 Launch Player</button>
-                            <button class="btn btn-danger" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; height: auto;" onclick="remoteControlPC('close')">🛑 Close Player</button>
-                        </div>
-                        <small style="display: block; margin-top: 0.4rem; color: var(--text-muted); font-size: 0.75rem; line-height: 1.2;">
-                            Launches or closes Chrome/Edge on the LED Controller PC remotely. Use this to reveal/access the desktop (e.g. for Spotify) without walking to the PC.
-                        </small>
-                    </div>
-
-                    <!-- Blackout Scheduler -->
-                    <div style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                        <div class="switch-container" style="margin-bottom: 0.75rem;">
-                            <label class="form-label" style="font-weight: 600; margin: 0;">⏱️ Blackout Schedule</label>
-                            <label class="switch">
-                                <input type="checkbox" id="scheduleEnable" onchange="updateBlackoutSchedule()">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div id="scheduleTimes" style="display: flex; flex-direction: column; gap: 0.4rem; transition: opacity 0.2s ease;">
-                            <!-- Column Headers -->
-                            <div style="display: flex; align-items: center; gap: 0.4rem; padding: 0.15rem 0.5rem; margin-bottom: 0.15rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.35rem;">
-                                <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-muted); min-width: 65px;">Day</span>
-                                <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
-                                    <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-muted); flex: 1; text-align: center; line-height: 1.1;">Blackout Start<br><span style="font-size: 0.55rem; font-weight: 400; color: rgba(255,255,255,0.4);">(Screen Off)</span></span>
-                                    <span style="font-size: 0.7rem; color: transparent; width: 12px; text-align: center;">to</span>
-                                    <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-muted); flex: 1; text-align: center; line-height: 1.1;">Blackout End<br><span style="font-size: 0.55rem; font-weight: 400; color: rgba(255,255,255,0.4);">(Screen On)</span></span>
-                                </div>
-                                <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-muted); width: 26px; text-align: center;">Copy</span>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Position X</label>
+                                <input type="number" id="screenX" class="input-text" onchange="updateScreenConfig()">
                             </div>
-                            <div id="scheduleDaysContainer" style="display: flex; flex-direction: column; gap: 0.35rem;">
-                                <!-- Mon -->
-                                <div class="schedule-day-row" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.02); padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
-                                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 500; min-width: 65px; cursor: pointer; user-select: none; margin: 0;">
-                                        <input type="checkbox" id="schedDayEnable_1" onchange="updateBlackoutSchedule()">
-                                        <span>Mon</span>
-                                    </label>
-                                    <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
-                                        <input type="time" id="schedDayOn_1" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
-                                        <span style="font-size: 0.7rem; color: var(--text-muted);">to</span>
-                                        <input type="time" id="schedDayOff_1" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
-                                    </div>
-                                    <button class="btn" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; height: auto; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1);" title="Copy this day's schedule to all other days" onclick="copyScheduleToAllDays(1, event)">📋</button>
-                                </div>
-                                <!-- Tue -->
-                                <div class="schedule-day-row" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.02); padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
-                                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 500; min-width: 65px; cursor: pointer; user-select: none; margin: 0;">
-                                        <input type="checkbox" id="schedDayEnable_2" onchange="updateBlackoutSchedule()">
-                                        <span>Tue</span>
-                                    </label>
-                                    <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
-                                        <input type="time" id="schedDayOn_2" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
-                                        <span style="font-size: 0.7rem; color: var(--text-muted);">to</span>
-                                        <input type="time" id="schedDayOff_2" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
-                                    </div>
-                                    <button class="btn" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; height: auto; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1);" title="Copy this day's schedule to all other days" onclick="copyScheduleToAllDays(2, event)">📋</button>
-                                </div>
-                                <!-- Wed -->
-                                <div class="schedule-day-row" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.02); padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
-                                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 500; min-width: 65px; cursor: pointer; user-select: none; margin: 0;">
-                                        <input type="checkbox" id="schedDayEnable_3" onchange="updateBlackoutSchedule()">
-                                        <span>Wed</span>
-                                    </label>
-                                    <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
-                                        <input type="time" id="schedDayOn_3" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
-                                        <span style="font-size: 0.7rem; color: var(--text-muted);">to</span>
-                                        <input type="time" id="schedDayOff_3" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
-                                    </div>
-                                    <button class="btn" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; height: auto; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1);" title="Copy this day's schedule to all other days" onclick="copyScheduleToAllDays(3, event)">📋</button>
-                                </div>
-                                <!-- Thu -->
-                                <div class="schedule-day-row" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.02); padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
-                                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 500; min-width: 65px; cursor: pointer; user-select: none; margin: 0;">
-                                        <input type="checkbox" id="schedDayEnable_4" onchange="updateBlackoutSchedule()">
-                                        <span>Thu</span>
-                                    </label>
-                                    <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
-                                        <input type="time" id="schedDayOn_4" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
-                                        <span style="font-size: 0.7rem; color: var(--text-muted);">to</span>
-                                        <input type="time" id="schedDayOff_4" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
-                                    </div>
-                                    <button class="btn" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; height: auto; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1);" title="Copy this day's schedule to all other days" onclick="copyScheduleToAllDays(4, event)">📋</button>
-                                </div>
-                                <!-- Fri -->
-                                <div class="schedule-day-row" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.02); padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
-                                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 500; min-width: 65px; cursor: pointer; user-select: none; margin: 0;">
-                                        <input type="checkbox" id="schedDayEnable_5" onchange="updateBlackoutSchedule()">
-                                        <span>Fri</span>
-                                    </label>
-                                    <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
-                                        <input type="time" id="schedDayOn_5" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
-                                        <span style="font-size: 0.7rem; color: var(--text-muted);">to</span>
-                                        <input type="time" id="schedDayOff_5" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
-                                    </div>
-                                    <button class="btn" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; height: auto; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1);" title="Copy this day's schedule to all other days" onclick="copyScheduleToAllDays(5, event)">📋</button>
-                                </div>
-                                <!-- Sat -->
-                                <div class="schedule-day-row" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.02); padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
-                                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 500; min-width: 65px; cursor: pointer; user-select: none; margin: 0;">
-                                        <input type="checkbox" id="schedDayEnable_6" onchange="updateBlackoutSchedule()">
-                                        <span>Sat</span>
-                                    </label>
-                                    <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
-                                        <input type="time" id="schedDayOn_6" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
-                                        <span style="font-size: 0.7rem; color: var(--text-muted);">to</span>
-                                        <input type="time" id="schedDayOff_6" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
-                                    </div>
-                                    <button class="btn" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; height: auto; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1);" title="Copy this day's schedule to all other days" onclick="copyScheduleToAllDays(6, event)">📋</button>
-                                </div>
-                                <!-- Sun -->
-                                <div class="schedule-day-row" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.02); padding: 0.35rem 0.5rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
-                                    <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 500; min-width: 65px; cursor: pointer; user-select: none; margin: 0;">
-                                        <input type="checkbox" id="schedDayEnable_0" onchange="updateBlackoutSchedule()">
-                                        <span>Sun</span>
-                                    </label>
-                                    <div style="display: flex; align-items: center; gap: 0.35rem; flex: 1;">
-                                        <input type="time" id="schedDayOn_0" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
-                                        <span style="font-size: 0.7rem; color: var(--text-muted);">to</span>
-                                        <input type="time" id="schedDayOff_0" class="input-text" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; height: auto; background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15);" onchange="updateBlackoutSchedule()">
-                                    </div>
-                                    <button class="btn" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; height: auto; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1);" title="Copy this day's schedule to all other days" onclick="copyScheduleToAllDays(0, event)">📋</button>
-                                </div>
+                            <div class="form-group">
+                                <label class="form-label">Position Y</label>
+                                <input type="number" id="screenY" class="input-text" onchange="updateScreenConfig()">
                             </div>
                         </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Width (px)</label>
+                                <input type="number" id="screenWidth" class="input-text" onchange="updateScreenConfig()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Height (px)</label>
+                                <input type="number" id="screenHeight" class="input-text" onchange="updateScreenConfig()">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label class="form-label" for="domeApiUrl">Dome Management API (Sensors)</label>
+                            <input type="text" id="domeApiUrl" class="input-text" placeholder="http://192.168.178.X/api/temps" onchange="updateDomeApiUrl()">
+                        </div>
+
+                        <div style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                            <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Host PC Player Controls</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-primary" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; height: auto;" onclick="remoteControlPC('launch')">🚀 Launch Player</button>
+                                <button class="btn btn-danger" style="flex: 1; padding: 0.5rem; font-size: 0.8rem; height: auto;" onclick="remoteControlPC('close')">🛑 Close Player</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Create New Screen Card -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Add New Screen Target</h2>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Screen Key Name</label>
+                            <input type="text" id="newScreenId" class="input-text" placeholder="e.g. hall, lobby, bar">
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="createNewScreen()">➕ Create Screen</button>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script>
+        function switchTab(tabId) {
+            const buttons = document.querySelectorAll('.sidebar-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            const activeBtn = document.getElementById(`btnTab${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if (targetTab) targetTab.classList.add('active');
+        }
         let ws;
         let globalState = null;
         let activeScreenId = 'default';
@@ -676,7 +619,19 @@
         const pathPrefix = pathParts.slice(0, -1).filter(p => p && p !== 'player.html' && p !== 'index.html').join('/');
         const prefixStr = pathPrefix ? '/' + pathPrefix : '';
 
+        function fetchState() {
+            fetch(`${prefixStr}/api/state`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.screens) {
+                        updateUI(data, currentActiveScreens || []);
+                    }
+                })
+                .catch(err => console.warn('[DASHBOARD] Error fetching state via HTTP:', err));
+        }
+
         function connectWebSocket() {
+            fetchState();
             const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${proto}//${window.location.host}${prefixStr}/?screenId=admin`;
             
@@ -818,18 +773,25 @@
         }
 
         function updateBlackoutSchedule() {
-            const enabled = document.getElementById('scheduleEnable').checked;
+            const schedEnable = document.getElementById('scheduleEnable');
+            const schedTimes = document.getElementById('scheduleTimes');
+            const enabled = schedEnable ? schedEnable.checked : false;
             
             // Toggle visual cues
-            document.getElementById('scheduleTimes').style.opacity = enabled ? '1' : '0.4';
-            document.getElementById('scheduleTimes').style.pointerEvents = enabled ? 'auto' : 'none';
+            if (schedTimes) {
+                schedTimes.style.opacity = enabled ? '1' : '0.4';
+                schedTimes.style.pointerEvents = enabled ? 'auto' : 'none';
+            }
             
             const days = {};
             for (let i = 0; i < 7; i++) {
+                const cb = document.getElementById(`schedDayEnable_${i}`);
+                const onInput = document.getElementById(`schedDayOn_${i}`);
+                const offInput = document.getElementById(`schedDayOff_${i}`);
                 days[i] = {
-                    enabled: document.getElementById(`schedDayEnable_${i}`).checked,
-                    onTime: document.getElementById(`schedDayOn_${i}`).value,
-                    offTime: document.getElementById(`schedDayOff_${i}`).value
+                    enabled: cb ? cb.checked : false,
+                    onTime: onInput ? onInput.value : '22:00',
+                    offTime: offInput ? offInput.value : '08:00'
                 };
             }
             
@@ -849,6 +811,76 @@
                 document.getElementById(`schedDayOff_${i}`).value = sourceOff;
             }
             updateBlackoutSchedule();
+        }
+
+        function addLiveInfoSlide() {
+            sendAction('ADD_LIVE_INFO_SLIDE', { duration: 15 });
+        }
+
+        function updateLiveInfoSettings(id, showLogo, showTime, showDate, showTemp, bgTheme) {
+            const payload = { id };
+            if (showLogo !== null && showLogo !== undefined) payload.showLogo = showLogo;
+            if (showTime !== null && showTime !== undefined) payload.showTime = showTime;
+            if (showDate !== null && showDate !== undefined) payload.showDate = showDate;
+            if (showTemp !== null && showTemp !== undefined) payload.showTemp = showTemp;
+            if (bgTheme) payload.bgTheme = bgTheme;
+
+            sendAction('UPDATE_LIVE_INFO_SETTINGS', payload);
+        }
+
+        function addCoastalWeatherSlide() {
+            sendAction('ADD_COASTAL_WEATHER_SLIDE', { duration: 15 });
+        }
+
+        function updateCoastalWeatherSettings(id, fogStatus, windSpeed, humidity, uvIndex, showFog, showWind, showHumidity, showUv, bgTheme) {
+            const payload = { id };
+            if (fogStatus !== null && fogStatus !== undefined) payload.fogStatus = fogStatus;
+            if (windSpeed !== null && windSpeed !== undefined) payload.windSpeed = windSpeed;
+            if (humidity !== null && humidity !== undefined) payload.humidity = humidity;
+            if (uvIndex !== null && uvIndex !== undefined) payload.uvIndex = uvIndex;
+            if (showFog !== null && showFog !== undefined) payload.showFog = showFog;
+            if (showWind !== null && showWind !== undefined) payload.showWind = showWind;
+            if (showHumidity !== null && showHumidity !== undefined) payload.showHumidity = showHumidity;
+            if (showUv !== null && showUv !== undefined) payload.showUv = showUv;
+            if (bgTheme) payload.bgTheme = bgTheme;
+
+            sendAction('UPDATE_COASTAL_WEATHER_SETTINGS', payload);
+        }
+
+        function updateDuration(id, duration) {
+            sendAction('UPDATE_DURATION', { id, duration });
+        }
+
+        function removePlaylistItem(id, event) {
+            if (event) event.stopPropagation();
+            sendAction('REMOVE_PLAYLIST_ITEM', { id });
+        }
+
+        function updateTempSettings(id, label1, label2, showGraph, boldFont, historyHours, bgTheme, layoutOrder) {
+            const payload = { id };
+            if (label1 !== null && label1 !== undefined) payload.label1 = label1;
+            if (label2 !== null && label2 !== undefined) payload.label2 = label2;
+            if (showGraph !== null && showGraph !== undefined) payload.showGraph = showGraph;
+            if (boldFont !== null && boldFont !== undefined) payload.boldFont = boldFont;
+            if (historyHours !== null && historyHours !== undefined) payload.historyHours = historyHours;
+            if (bgTheme) payload.bgTheme = bgTheme;
+            if (layoutOrder) payload.layoutOrder = layoutOrder;
+            sendAction('UPDATE_TEMP_LABELS', payload);
+        }
+
+        function updateWelcomeSettings(id, title, subtitle, subSubtitle, room, leftDir, rightDir, bgTheme, showDomeLogo, showConfLogo, showArrows) {
+            const payload = { id };
+            if (title !== null && title !== undefined) payload.title = title;
+            if (subtitle !== null && subtitle !== undefined) payload.subtitle = subtitle;
+            if (subSubtitle !== null && subSubtitle !== undefined) payload.subSubtitle = subSubtitle;
+            if (room !== null && room !== undefined) payload.room = room;
+            if (leftDir !== null && leftDir !== undefined) payload.leftDir = leftDir;
+            if (rightDir !== null && rightDir !== undefined) payload.rightDir = rightDir;
+            if (bgTheme) payload.bgTheme = bgTheme;
+            if (showDomeLogo !== null && showDomeLogo !== undefined) payload.showDomeLogo = showDomeLogo;
+            if (showConfLogo !== null && showConfLogo !== undefined) payload.showConfLogo = showConfLogo;
+            if (showArrows !== null && showArrows !== undefined) payload.showArrows = showArrows;
+            sendAction('UPDATE_WELCOME_SETTINGS', payload);
         }
 
         function updateVideoSound(id, sound) {
@@ -960,12 +992,25 @@
             globalState = state;
             currentActiveScreens = activeScreens;
 
+            if (state.screens && state.screens.admin) {
+                delete state.screens.admin;
+            }
+
+            if (!state.screens || Object.keys(state.screens).length === 0) {
+                return;
+            }
+
+            if (activeScreenId === 'admin' || !state.screens[activeScreenId]) {
+                const keys = Object.keys(state.screens).filter(k => k !== 'admin');
+                activeScreenId = keys.includes('default') ? 'default' : (keys[0] || 'default');
+            }
+
             // 1. Populate Screen Selector Dropdown
             const screenSelector = document.getElementById('screenSelector');
-            const currentSelected = screenSelector.value || activeScreenId;
             screenSelector.innerHTML = '';
             
             for (let sid in state.screens) {
+                if (sid === 'admin') continue;
                 const option = document.createElement('option');
                 option.value = sid;
                 const isActive = activeScreens.includes(sid);
@@ -976,10 +1021,21 @@
 
             // 2. Render Media Library (Pane 1)
             const libraryContainer = document.getElementById('libraryItems');
+            const quickMediaSelector = document.getElementById('quickMediaSelector');
             libraryContainer.innerHTML = '';
+            if (quickMediaSelector) {
+                quickMediaSelector.innerHTML = '<option value="">📁 + Add Media File...</option>';
+            }
             
             if (state.mediaLibrary && state.mediaLibrary.length > 0) {
                 state.mediaLibrary.forEach(item => {
+                    if (quickMediaSelector) {
+                        const opt = document.createElement('option');
+                        opt.value = item.id;
+                        opt.innerText = (item.type === 'video' ? '📹 ' : '🖼️ ') + item.name;
+                        quickMediaSelector.appendChild(opt);
+                    }
+
                     const row = document.createElement('div');
                     row.className = 'library-item';
                     
@@ -996,7 +1052,7 @@
                             <div style="font-size:0.85rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
                             <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">${item.type}</div>
                         </div>
-                        <button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;" onclick="addLibraryItemToPlaylist('${item.id}')">Add</button>
+                        <button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;" onclick="addLibraryItemToPlaylist('${item.id}')">➕ Add</button>
                         <button class="btn-item-action delete" style="margin-left:0.25rem;" onclick="deleteLibraryItem('${item.id}', event)">🗑</button>
                     `;
                     libraryContainer.appendChild(row);
@@ -1028,11 +1084,17 @@
 
             // 4. Update Screen coordinates / Global Configs
             const activeScreen = state.screens[activeScreenId] || {};
-            document.getElementById('screenX').value = state.screenConfig.x;
-            document.getElementById('screenY').value = state.screenConfig.y;
-            document.getElementById('screenWidth').value = activeScreen.width !== undefined ? activeScreen.width : state.screenConfig.width;
-            document.getElementById('screenHeight').value = activeScreen.height !== undefined ? activeScreen.height : state.screenConfig.height;
-            document.getElementById('domeApiUrl').value = state.domeManagementApiUrl || '';
+            const screenXEl = document.getElementById('screenX');
+            const screenYEl = document.getElementById('screenY');
+            const screenWEl = document.getElementById('screenWidth');
+            const screenHEl = document.getElementById('screenHeight');
+            const domeUrlEl = document.getElementById('domeApiUrl');
+
+            if (screenXEl && state.screenConfig) screenXEl.value = state.screenConfig.x !== undefined ? state.screenConfig.x : 0;
+            if (screenYEl && state.screenConfig) screenYEl.value = state.screenConfig.y !== undefined ? state.screenConfig.y : 0;
+            if (screenWEl) screenWEl.value = activeScreen.width !== undefined ? activeScreen.width : (state.screenConfig?.width || 960);
+            if (screenHEl) screenHEl.value = activeScreen.height !== undefined ? activeScreen.height : (state.screenConfig?.height || 192);
+            if (domeUrlEl) domeUrlEl.value = state.domeManagementApiUrl || '';
 
             // 5. Update Screen Controls & Playlists
             renderScreenControls(state, activeScreens);
@@ -1066,15 +1128,24 @@
             const playIcon = document.getElementById('playIcon');
             const playText = document.getElementById('playText');
             const btnPlay = document.getElementById('btnPlay');
+            const playIcon2 = document.getElementById('playIcon2');
+            const playText2 = document.getElementById('playText2');
+            const btnPlayCard = document.getElementById('btnPlayCard');
             
             if (screen.isPlaying) {
-                playIcon.innerText = '⏸';
-                playText.innerText = 'Pause';
-                btnPlay.style.background = 'linear-gradient(135deg, #00ff87, #00d2ff)';
+                if (playIcon) playIcon.innerText = '⏸';
+                if (playText) playText.innerText = 'Pause';
+                if (btnPlay) btnPlay.style.background = 'linear-gradient(135deg, #00ff87, #00d2ff)';
+                if (playIcon2) playIcon2.innerText = '⏸';
+                if (playText2) playText2.innerText = 'Pause';
+                if (btnPlayCard) btnPlayCard.style.background = 'linear-gradient(135deg, #00ff87, #00d2ff)';
             } else {
-                playIcon.innerText = '▶';
-                playText.innerText = 'Play';
-                btnPlay.style.background = 'linear-gradient(135deg, var(--primary), var(--secondary))';
+                if (playIcon) playIcon.innerText = '▶';
+                if (playText) playText.innerText = 'Play';
+                if (btnPlay) btnPlay.style.background = 'linear-gradient(135deg, var(--primary), var(--secondary))';
+                if (playIcon2) playIcon2.innerText = '▶';
+                if (playText2) playText2.innerText = 'Play';
+                if (btnPlayCard) btnPlayCard.style.background = 'linear-gradient(135deg, var(--primary), var(--secondary))';
             }
 
             // Update Blackout Button
@@ -1120,9 +1191,13 @@
 
             // Sync Blackout Schedule
             if (screen.blackoutSchedule) {
-                document.getElementById('scheduleEnable').checked = !!screen.blackoutSchedule.enabled;
-                document.getElementById('scheduleTimes').style.opacity = screen.blackoutSchedule.enabled ? '1' : '0.4';
-                document.getElementById('scheduleTimes').style.pointerEvents = screen.blackoutSchedule.enabled ? 'auto' : 'none';
+                const schedEnable = document.getElementById('scheduleEnable');
+                const schedTimes = document.getElementById('scheduleTimes');
+                if (schedEnable) schedEnable.checked = !!screen.blackoutSchedule.enabled;
+                if (schedTimes) {
+                    schedTimes.style.opacity = screen.blackoutSchedule.enabled ? '1' : '0.4';
+                    schedTimes.style.pointerEvents = screen.blackoutSchedule.enabled ? 'auto' : 'none';
+                }
                 
                 const days = screen.blackoutSchedule.days || {};
                 for (let i = 0; i < 7; i++) {
@@ -1149,200 +1224,286 @@
             playlistContainer.innerHTML = '';
             
             screen.playlist.forEach((item, index) => {
-                const isActive = index === screen.currentIndex;
-                const activeClass = isActive ? 'active' : '';
-                
-                const itemDiv = document.createElement('div');
-                itemDiv.className = `playlist-item ${activeClass}`;
-                itemDiv.onclick = () => sendAction('PLAY', { index });
+                try {
+                    const isActive = index === screen.currentIndex;
+                    const activeClass = isActive ? 'active' : '';
+                    
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = `playlist-item ${activeClass}`;
+                    itemDiv.onclick = () => sendAction('PLAY', { index });
 
-                let mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:#151824;">🖼</div>`;
-                if (item.type === 'image') {
-                    mediaTag = `<img src="/uploads/${item.filename}" class="item-thumb">`;
-                } else if (item.type === 'video') {
-                    mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;background:#151824;color:var(--secondary);font-size:1.5rem;">📹</div>`;
-                } else if (item.type === 'temp') {
-                    mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;background:#151824;color:var(--primary);font-size:1.5rem;">📊</div>`;
-                } else if (item.type === 'welcome') {
-                    mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;background:#151824;color:#00d2ff;font-size:1.5rem;">👋</div>`;
-                }
+                    let mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:#151824;">🖼</div>`;
+                    if (item.type === 'image') {
+                        mediaTag = `<img src="/uploads/${item.filename}" class="item-thumb">`;
+                    } else if (item.type === 'video') {
+                        mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;background:#151824;color:var(--secondary);font-size:1.5rem;">📹</div>`;
+                    } else if (item.type === 'temp') {
+                        mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;background:#151824;color:var(--primary);font-size:1.5rem;">📊</div>`;
+                    } else if (item.type === 'welcome') {
+                        mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;background:#151824;color:#00d2ff;font-size:1.5rem;">👋</div>`;
+                    } else if (item.type === 'live_info') {
+                        mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;background:#151824;color:#00ff87;font-size:1.5rem;">⏰</div>`;
+                    } else if (item.type === 'coastal_weather') {
+                        mediaTag = `<div class="item-thumb" style="display:flex;align-items:center;justify-content:center;background:#151824;color:#00d2ff;font-size:1.5rem;">🌊</div>`;
+                    }
 
-                let durationCtrl = '';
-                if (item.type === 'image' || item.type === 'temp' || item.type === 'welcome') {
-                    durationCtrl = `
-                        <div style="display:flex;align-items:center;gap:0.35rem;" onclick="event.stopPropagation()">
-                            <span style="font-size:0.75rem;color:var(--text-muted)">Dur:</span>
-                            <input class="duration-input" type="number" min="1" max="3600" value="${item.duration || (item.type === 'temp' ? 15 : (item.type === 'welcome' ? 15 : 10))}" 
-                                   onchange="updateDuration('${item.id}', this.value)">
-                            <span style="font-size:0.75rem;color:var(--text-muted)">s</span>
+                    let durationCtrl = '';
+                    if (item.type === 'image' || item.type === 'temp' || item.type === 'welcome' || item.type === 'live_info' || item.type === 'coastal_weather') {
+                        durationCtrl = `
+                            <div style="display:flex;align-items:center;gap:0.35rem;" onclick="event.stopPropagation()">
+                                <span style="font-size:0.75rem;color:var(--text-muted)">Dur:</span>
+                                <input class="duration-input" type="number" min="1" max="3600" value="${item.duration || 15}" 
+                                       onchange="updateDuration('${item.id}', this.value)">
+                                <span style="font-size:0.75rem;color:var(--text-muted)">s</span>
+                            </div>
+                        `;
+                    }
+
+                    let soundCtrl = '';
+                    if (item.type === 'video') {
+                        soundCtrl = `
+                            <label style="display:flex;align-items:center;gap:0.25rem;font-size:0.75rem;color:var(--text-muted);cursor:pointer;" onclick="event.stopPropagation()">
+                                <input type="checkbox" ${item.muted ? '' : 'checked'} 
+                                       onchange="updateVideoSound('${item.id}', this.checked)"> 🔊 Sound
+                            </label>
+                        `;
+                    }
+
+                    let tempLabelsCtrl = '';
+                    if (item.type === 'temp') {
+                        tempLabelsCtrl = `
+                            <div style="display:flex; flex-direction:column; gap:0.25rem; margin-top:0.35rem;" onclick="event.stopPropagation()">
+                                <div style="display:flex; align-items:center; gap:0.25rem;">
+                                    <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Label 1:</span>
+                                    <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                           type="text" value="${item.label1 || 'Outdoor Temperature'}" 
+                                           onchange="updateTempSettings('${item.id}', this.value, null, null, null, null, null)">
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.25rem;">
+                                    <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Label 2:</span>
+                                    <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                           type="text" value="${item.label2 || 'Main Hall Temperature'}" 
+                                           onchange="updateTempSettings('${item.id}', null, this.value, null, null, null, null)">
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.25rem;">
+                                    <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">History:</span>
+                                    <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px; border-color: rgba(255,255,255,0.08);" 
+                                            onchange="updateTempSettings('${item.id}', null, null, null, null, this.value, null)">
+                                        <option value="24" ${item.historyHours == 24 ? 'selected' : ''}>24 Hours</option>
+                                        <option value="12" ${item.historyHours == 12 ? 'selected' : ''}>12 Hours</option>
+                                        <option value="6" ${(item.historyHours == 6 || !item.historyHours) ? 'selected' : ''}>6 Hours</option>
+                                        <option value="3" ${item.historyHours == 3 ? 'selected' : ''}>3 Hours</option>
+                                    </select>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.25rem;">
+                                    <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Theme:</span>
+                                    <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px; border-color: rgba(255,255,255,0.08);" 
+                                            onchange="updateTempSettings('${item.id}', null, null, null, null, null, this.value, null)">
+                                        <option value="dome" ${(item.bgTheme == 'dome' || !item.bgTheme) ? 'selected' : ''}>Dome Theme</option>
+                                        <option value="neon" ${item.bgTheme == 'neon' ? 'selected' : ''}>Neon Blue</option>
+                                        <option value="cyberpunk" ${item.bgTheme == 'cyberpunk' ? 'selected' : ''}>Cyberpunk</option>
+                                        <option value="forest" ${item.bgTheme == 'forest' ? 'selected' : ''}>Forest Green</option>
+                                        <option value="dark" ${item.bgTheme == 'dark' ? 'selected' : ''}>Charcoal Dark</option>
+                                        <option value="sunset" ${item.bgTheme == 'sunset' ? 'selected' : ''}>Sunset Glow</option>
+                                        <option value="gym-motion" ${item.bgTheme == 'gym-motion' ? 'selected' : ''}>Gym Motion (Dark)</option>
+                                        <option value="gym-carbon" ${item.bgTheme == 'gym-carbon' ? 'selected' : ''}>Gym Carbon (Dark)</option>
+                                        <option value="gym-grid" ${item.bgTheme == 'gym-grid' ? 'selected' : ''}>Gym Grid (Dark)</option>
+                                        <option value="gym-laser" ${item.bgTheme == 'gym-laser' ? 'selected' : ''}>Gym Laser (Dark)</option>
+                                        <option value="gym-waves" ${item.bgTheme == 'gym-waves' ? 'selected' : ''}>Gym Waves (Dark)</option>
+                                    </select>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.25rem;">
+                                    <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Order (TV):</span>
+                                    <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px; border-color: rgba(255,255,255,0.08);" 
+                                            onchange="updateTempSettings('${item.id}', null, null, null, null, null, null, this.value)">
+                                        <option value="outdoor-logo-hall" ${(item.layoutOrder == 'outdoor-logo-hall' || !item.layoutOrder) ? 'selected' : ''}>Outdoor - Logo - Hall</option>
+                                        <option value="logo-outdoor-hall" ${item.layoutOrder == 'logo-outdoor-hall' ? 'selected' : ''}>Logo - Outdoor - Hall</option>
+                                        <option value="outdoor-hall-logo" ${item.layoutOrder == 'outdoor-hall-logo' ? 'selected' : ''}>Outdoor - Hall - Logo</option>
+                                        <option value="logo-hall-outdoor" ${item.layoutOrder == 'logo-hall-outdoor' ? 'selected' : ''}>Logo - Hall - Outdoor</option>
+                                        <option value="hall-logo-outdoor" ${item.layoutOrder == 'hall-logo-outdoor' ? 'selected' : ''}>Hall - Logo - Outdoor</option>
+                                        <option value="hall-outdoor-logo" ${item.layoutOrder == 'hall-outdoor-logo' ? 'selected' : ''}>Hall - Outdoor - Logo</option>
+                                    </select>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.75rem; margin-top:0.15rem;">
+                                    <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                        <input type="checkbox" ${item.showGraph ? 'checked' : ''} 
+                                               onchange="updateTempSettings('${item.id}', null, null, this.checked, null, null, null, null)"> 📈 Graph
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                        <input type="checkbox" ${item.boldFont ? 'checked' : ''} 
+                                               onchange="updateTempSettings('${item.id}', null, null, null, this.checked, null, null, null)"> 🔤 Bold
+                                    </label>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    let welcomeCtrl = '';
+                    if (item.type === 'welcome') {
+                        welcomeCtrl = `
+                            <div style="display:flex; flex-direction:column; gap:0.25rem; margin-top:0.35rem;" onclick="event.stopPropagation()">
+                                <div style="display:flex; align-items:center; gap:0.25rem;">
+                                    <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Title:</span>
+                                    <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                           type="text" value="${item.title || 'WELCOME'}" 
+                                           onchange="updateWelcomeSettings('${item.id}', this.value, null, null, null, null, null, null)">
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.25rem;">
+                                    <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Sub 1:</span>
+                                    <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                           type="text" value="${item.subtitle || ''}" 
+                                           onchange="updateWelcomeSettings('${item.id}', null, this.value, null, null, null, null, null)">
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.25rem;">
+                                    <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Sub 2:</span>
+                                    <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                           type="text" value="${item.subSubtitle || ''}" 
+                                           onchange="updateWelcomeSettings('${item.id}', null, null, this.value, null, null, null, null)">
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.25rem;">
+                                    <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Room:</span>
+                                    <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                           type="text" value="${item.room || ''}" 
+                                           onchange="updateWelcomeSettings('${item.id}', null, null, null, this.value, null, null, null)">
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.25rem;">
+                                    <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Left Dir:</span>
+                                    <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                           type="text" value="${item.leftDir || ''}" 
+                                           onchange="updateWelcomeSettings('${item.id}', null, null, null, null, this.value, null, null)">
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.25rem;">
+                                    <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Right Dir:</span>
+                                    <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
+                                           type="text" value="${item.rightDir || ''}" 
+                                           onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, this.value, null)">
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.25rem;">
+                                    <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Theme:</span>
+                                    <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px; border-color: rgba(255,255,255,0.08);" 
+                                            onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, this.value)">
+                                        <option value="navy" ${(item.bgTheme == 'navy' || !item.bgTheme) ? 'selected' : ''}>Navy Blue</option>
+                                        <option value="blue" ${item.bgTheme == 'blue' ? 'selected' : ''}>Classic Blue</option>
+                                        <option value="dark" ${item.bgTheme == 'dark' ? 'selected' : ''}>Charcoal</option>
+                                        <option value="gold" ${item.bgTheme == 'gold' ? 'selected' : ''}>Gold Accent</option>
+                                    </select>
+                                </div>
+                                <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-top:0.25rem;">
+                                    <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                        <input type="checkbox" ${item.showDomeLogo !== false ? 'checked' : ''} 
+                                               onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, this.checked, null, null)"> Dome Logo
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                        <input type="checkbox" ${item.showConfLogo !== false ? 'checked' : ''} 
+                                               onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, null, this.checked, null)"> Conf Logo
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                        <input type="checkbox" ${item.showArrows !== false ? 'checked' : ''} 
+                                               onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, null, null, this.checked)"> Arrows
+                                    </label>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    let liveInfoCtrl = '';
+                    if (item.type === 'live_info') {
+                        liveInfoCtrl = `
+                            <div style="display:flex; flex-direction:column; gap:0.25rem; margin-top:0.35rem;" onclick="event.stopPropagation()">
+                                <div style="display:flex; align-items:center; gap:0.25rem;">
+                                    <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Theme:</span>
+                                    <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:140px; border-color: rgba(255,255,255,0.08);" 
+                                            onchange="updateLiveInfoSettings('${item.id}', null, null, null, null, this.value)">
+                                        <option value="gym_motion" ${(item.bgTheme == 'gym_motion' || !item.bgTheme) ? 'selected' : ''}>Gym Motion (Dark)</option>
+                                        <option value="gym_carbon" ${item.bgTheme == 'gym_carbon' ? 'selected' : ''}>Gym Carbon (Dark)</option>
+                                        <option value="gym_grid" ${item.bgTheme == 'gym_grid' ? 'selected' : ''}>Gym Grid (Dark)</option>
+                                        <option value="gym_laser" ${item.bgTheme == 'gym_laser' ? 'selected' : ''}>Gym Laser (Dark)</option>
+                                        <option value="gym_waves" ${item.bgTheme == 'gym_waves' ? 'selected' : ''}>Gym Waves (Dark)</option>
+                                        <option value="dome" ${item.bgTheme == 'dome' ? 'selected' : ''}>Classic Dome</option>
+                                    </select>
+                                </div>
+                                <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.6rem; margin-top:0.25rem;">
+                                    <label style="display:flex; align-items:center; gap:0.2rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                        <input type="checkbox" ${item.showLogo !== false ? 'checked' : ''} 
+                                               onchange="updateLiveInfoSettings('${item.id}', this.checked, null, null, null, null)"> Dome Logo
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.2rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                        <input type="checkbox" ${item.showTime !== false ? 'checked' : ''} 
+                                               onchange="updateLiveInfoSettings('${item.id}', null, this.checked, null, null, null)"> Time
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.2rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                        <input type="checkbox" ${item.showDate !== false ? 'checked' : ''} 
+                                               onchange="updateLiveInfoSettings('${item.id}', null, null, this.checked, null, null)"> Date & Day
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.2rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                        <input type="checkbox" ${item.showTemp !== false ? 'checked' : ''} 
+                                               onchange="updateLiveInfoSettings('${item.id}', null, null, null, this.checked, null)"> Outdoor Temp
+                                    </label>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    let coastalWeatherCtrl = '';
+                    if (item.type === 'coastal_weather') {
+                        coastalWeatherCtrl = `
+                            <div style="display:flex; flex-direction:column; gap:0.25rem; margin-top:0.35rem;" onclick="event.stopPropagation()">
+                                <div style="display:flex; align-items:center; gap:0.25rem;">
+                                    <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Theme:</span>
+                                    <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:140px; border-color: rgba(255,255,255,0.08);" 
+                                            onchange="updateCoastalWeatherSettings('${item.id}', null, null, null, null, null, null, null, null, this.value)">
+                                        <option value="ocean_motion" ${(item.bgTheme == 'ocean_motion' || !item.bgTheme) ? 'selected' : ''}>Ocean Motion (Dark)</option>
+                                        <option value="coastal_mist" ${item.bgTheme == 'coastal_mist' ? 'selected' : ''}>Coastal Mist (Dark)</option>
+                                        <option value="atlantic_deep" ${item.bgTheme == 'atlantic_deep' ? 'selected' : ''}>Atlantic Deep (Dark)</option>
+                                        <option value="gym_carbon" ${item.bgTheme == 'gym_carbon' ? 'selected' : ''}>Gym Carbon (Dark)</option>
+                                        <option value="gym_laser" ${item.bgTheme == 'gym_laser' ? 'selected' : ''}>Gym Laser (Dark)</option>
+                                        <option value="dome" ${item.bgTheme == 'dome' ? 'selected' : ''}>Classic Dome</option>
+                                    </select>
+                                </div>
+                                <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.6rem; margin-top:0.25rem;">
+                                    <label style="display:flex; align-items:center; gap:0.2rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                        <input type="checkbox" ${item.showFog !== false ? 'checked' : ''} 
+                                               onchange="updateCoastalWeatherSettings('${item.id}', null, null, null, null, this.checked, null, null, null, null)"> Fog Alert
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.2rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                        <input type="checkbox" ${item.showWind !== false ? 'checked' : ''} 
+                                               onchange="updateCoastalWeatherSettings('${item.id}', null, null, null, null, null, this.checked, null, null, null)"> Wind Speed
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.2rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                        <input type="checkbox" ${item.showHumidity !== false ? 'checked' : ''} 
+                                               onchange="updateCoastalWeatherSettings('${item.id}', null, null, null, null, null, null, this.checked, null, null)"> Humidity
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.2rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
+                                        <input type="checkbox" ${item.showUv !== false ? 'checked' : ''} 
+                                               onchange="updateCoastalWeatherSettings('${item.id}', null, null, null, null, null, null, null, this.checked, null)"> UV Index
+                                    </label>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    itemDiv.innerHTML = `
+                        ${mediaTag}
+                        <div class="item-info">
+                            <div class="item-title" title="${item.name}">${item.name}</div>
+                            <div class="item-meta" style="flex-direction:column; align-items:flex-start; gap:0.25rem;">
+                                <div style="display:flex; align-items:center; gap:0.75rem; width:100%;">
+                                    <span class="item-type ${item.type}">${item.type}</span>
+                                    ${durationCtrl}
+                                    ${soundCtrl}
+                                </div>
+                                ${tempLabelsCtrl}
+                                ${welcomeCtrl}
+                                ${liveInfoCtrl}
+                                ${coastalWeatherCtrl}
+                            </div>
                         </div>
+                        <button class="btn-item-action delete" onclick="removePlaylistItem('${item.id}', event)" title="Remove from Playlist">❌</button>
                     `;
+                    playlistContainer.appendChild(itemDiv);
+                } catch (err) {
+                    console.error('[PLAYLIST RENDER ITEM ERROR]', item, err);
                 }
-
-                let soundCtrl = '';
-                if (item.type === 'video') {
-                    soundCtrl = `
-                        <label style="display:flex;align-items:center;gap:0.25rem;font-size:0.75rem;color:var(--text-muted);cursor:pointer;" onclick="event.stopPropagation()">
-                            <input type="checkbox" ${item.muted ? '' : 'checked'} 
-                                   onchange="updateVideoSound('${item.id}', this.checked)"> 🔊 Sound
-                        </label>
-                    `;
-                }
-
-                let tempLabelsCtrl = '';
-                if (item.type === 'temp') {
-                    tempLabelsCtrl = `
-                        <div style="display:flex; flex-direction:column; gap:0.25rem; margin-top:0.35rem;" onclick="event.stopPropagation()">
-                            <div style="display:flex; align-items:center; gap:0.25rem;">
-                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Label 1:</span>
-                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
-                                       type="text" value="${item.label1 || 'Outdoor Temperature'}" 
-                                       onchange="updateTempSettings('${item.id}', this.value, null, null, null, null, null)">
-                            </div>
-                            <div style="display:flex; align-items:center; gap:0.25rem;">
-                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Label 2:</span>
-                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
-                                       type="text" value="${item.label2 || 'Main Hall Temperature'}" 
-                                       onchange="updateTempSettings('${item.id}', null, this.value, null, null, null, null)">
-                            </div>
-                            <div style="display:flex; align-items:center; gap:0.25rem;">
-                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">History:</span>
-                                <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px; border-color: rgba(255,255,255,0.08);" 
-                                        onchange="updateTempSettings('${item.id}', null, null, null, null, this.value, null)">
-                                    <option value="24" ${item.historyHours == 24 ? 'selected' : ''}>24 Hours</option>
-                                    <option value="12" ${item.historyHours == 12 ? 'selected' : ''}>12 Hours</option>
-                                    <option value="6" ${(item.historyHours == 6 || !item.historyHours) ? 'selected' : ''}>6 Hours</option>
-                                    <option value="3" ${item.historyHours == 3 ? 'selected' : ''}>3 Hours</option>
-                                </select>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:0.25rem;">
-                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Theme:</span>
-                                <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px; border-color: rgba(255,255,255,0.08);" 
-                                        onchange="updateTempSettings('${item.id}', null, null, null, null, null, this.value, null)">
-                                    <option value="dome" ${(item.bgTheme == 'dome' || !item.bgTheme) ? 'selected' : ''}>Dome Theme</option>
-                                    <option value="neon" ${item.bgTheme == 'neon' ? 'selected' : ''}>Neon Blue</option>
-                                    <option value="cyberpunk" ${item.bgTheme == 'cyberpunk' ? 'selected' : ''}>Cyberpunk</option>
-                                    <option value="forest" ${item.bgTheme == 'forest' ? 'selected' : ''}>Forest Green</option>
-                                    <option value="dark" ${item.bgTheme == 'dark' ? 'selected' : ''}>Charcoal Dark</option>
-                                    <option value="sunset" ${item.bgTheme == 'sunset' ? 'selected' : ''}>Sunset Glow</option>
-                                    <option value="gym-motion" ${item.bgTheme == 'gym-motion' ? 'selected' : ''}>Gym Motion (Dark)</option>
-                                    <option value="gym-carbon" ${item.bgTheme == 'gym-carbon' ? 'selected' : ''}>Gym Carbon (Dark)</option>
-                                    <option value="gym-grid" ${item.bgTheme == 'gym-grid' ? 'selected' : ''}>Gym Grid (Dark)</option>
-                                    <option value="gym-laser" ${item.bgTheme == 'gym-laser' ? 'selected' : ''}>Gym Laser (Dark)</option>
-                                    <option value="gym-waves" ${item.bgTheme == 'gym-waves' ? 'selected' : ''}>Gym Waves (Dark)</option>
-                                </select>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:0.25rem;">
-                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Order (TV):</span>
-                                <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px; border-color: rgba(255,255,255,0.08);" 
-                                        onchange="updateTempSettings('${item.id}', null, null, null, null, null, null, this.value)">
-                                    <option value="outdoor-logo-hall" ${(item.layoutOrder == 'outdoor-logo-hall' || !item.layoutOrder) ? 'selected' : ''}>Outdoor - Logo - Hall</option>
-                                    <option value="logo-outdoor-hall" ${item.layoutOrder == 'logo-outdoor-hall' ? 'selected' : ''}>Logo - Outdoor - Hall</option>
-                                    <option value="outdoor-hall-logo" ${item.layoutOrder == 'outdoor-hall-logo' ? 'selected' : ''}>Outdoor - Hall - Logo</option>
-                                    <option value="logo-hall-outdoor" ${item.layoutOrder == 'logo-hall-outdoor' ? 'selected' : ''}>Logo - Hall - Outdoor</option>
-                                    <option value="hall-logo-outdoor" ${item.layoutOrder == 'hall-logo-outdoor' ? 'selected' : ''}>Hall - Logo - Outdoor</option>
-                                    <option value="hall-outdoor-logo" ${item.layoutOrder == 'hall-outdoor-logo' ? 'selected' : ''}>Hall - Outdoor - Logo</option>
-                                </select>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:0.75rem; margin-top:0.15rem;">
-                                <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
-                                    <input type="checkbox" ${item.showGraph ? 'checked' : ''} 
-                                           onchange="updateTempSettings('${item.id}', null, null, this.checked, null, null, null, null)"> 📈 Graph
-                                </label>
-                                <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
-                                    <input type="checkbox" ${item.boldFont ? 'checked' : ''} 
-                                           onchange="updateTempSettings('${item.id}', null, null, null, this.checked, null, null, null)"> 🔤 Bold
-                                </label>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                let welcomeCtrl = '';
-                if (item.type === 'welcome') {
-                    welcomeCtrl = `
-                        <div style="display:flex; flex-direction:column; gap:0.25rem; margin-top:0.35rem;" onclick="event.stopPropagation()">
-                            <div style="display:flex; align-items:center; gap:0.25rem;">
-                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Title:</span>
-                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
-                                       type="text" value="${item.title || 'WELCOME'}" 
-                                       onchange="updateWelcomeSettings('${item.id}', this.value, null, null, null, null, null, null)">
-                            </div>
-                            <div style="display:flex; align-items:center; gap:0.25rem;">
-                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Sub 1:</span>
-                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
-                                       type="text" value="${item.subtitle || ''}" 
-                                       onchange="updateWelcomeSettings('${item.id}', null, this.value, null, null, null, null, null)">
-                            </div>
-                            <div style="display:flex; align-items:center; gap:0.25rem;">
-                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Sub 2:</span>
-                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
-                                       type="text" value="${item.subSubtitle || ''}" 
-                                       onchange="updateWelcomeSettings('${item.id}', null, null, this.value, null, null, null, null)">
-                            </div>
-                            <div style="display:flex; align-items:center; gap:0.25rem;">
-                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Room:</span>
-                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
-                                       type="text" value="${item.room || ''}" 
-                                       onchange="updateWelcomeSettings('${item.id}', null, null, null, this.value, null, null, null)">
-                            </div>
-                            <div style="display:flex; align-items:center; gap:0.25rem;">
-                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Left Dir:</span>
-                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
-                                       type="text" value="${item.leftDir || ''}" 
-                                       onchange="updateWelcomeSettings('${item.id}', null, null, null, null, this.value, null, null)">
-                            </div>
-                            <div style="display:flex; align-items:center; gap:0.25rem;">
-                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Right Dir:</span>
-                                <input class="input-text" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px;" 
-                                       type="text" value="${item.rightDir || ''}" 
-                                       onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, this.value, null)">
-                            </div>
-                            <div style="display:flex; align-items:center; gap:0.25rem;">
-                                <span style="font-size:0.7rem; color:var(--text-muted); width:55px;">Theme:</span>
-                                <select class="select-styled" style="padding:0.15rem 0.35rem; font-size:0.75rem; background:rgba(0,0,0,0.5); border-radius:4px; height:auto; width:120px; border-color: rgba(255,255,255,0.08);" 
-                                        onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, this.value)">
-                                    <option value="navy" ${(item.bgTheme == 'navy' || !item.bgTheme) ? 'selected' : ''}>Navy Blue</option>
-                                    <option value="blue" ${item.bgTheme == 'blue' ? 'selected' : ''}>Classic Blue</option>
-                                    <option value="dark" ${item.bgTheme == 'dark' ? 'selected' : ''}>Charcoal</option>
-                                    <option value="gold" ${item.bgTheme == 'gold' ? 'selected' : ''}>Gold Accent</option>
-                                </select>
-                            </div>
-                            <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-top:0.25rem;">
-                                <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
-                                    <input type="checkbox" ${item.showDomeLogo !== false ? 'checked' : ''} 
-                                           onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, this.checked, null, null)"> Dome Logo
-                                </label>
-                                <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
-                                    <input type="checkbox" ${item.showConfLogo !== false ? 'checked' : ''} 
-                                           onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, null, this.checked, null)"> Conf Logo
-                                </label>
-                                <label style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted); cursor:pointer;">
-                                    <input type="checkbox" ${item.showArrows !== false ? 'checked' : ''} 
-                                           onchange="updateWelcomeSettings('${item.id}', null, null, null, null, null, null, null, null, null, this.checked)"> Arrows
-                                </label>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                itemDiv.innerHTML = `
-                    ${mediaTag}
-                    <div class="item-info">
-                        <div class="item-title" title="${item.name}">${item.name}</div>
-                        <div class="item-meta" style="flex-direction:column; align-items:flex-start; gap:0.25rem;">
-                            <div style="display:flex; align-items:center; gap:0.75rem; width:100%;">
-                                <span class="item-type ${item.type}">${item.type}</span>
-                                ${durationCtrl}
-                                ${soundCtrl}
-                            </div>
-                            ${tempLabelsCtrl}
-                            ${welcomeCtrl}
-                        </div>
-                    </div>
-                    <button class="btn-item-action delete" onclick="removePlaylistItem('${item.id}', event)" title="Remove from Playlist">❌</button>
-                `;
-                playlistContainer.appendChild(itemDiv);
             });
 
             // Update Live Preview Area
@@ -1369,12 +1530,13 @@
                 iframe.style.left = '0';
             }
  
-            if (screen.currentIndex >= 0 && screen.currentIndex < screen.playlist.length) {
-                const currentItem = screen.playlist[screen.currentIndex];
-                nameLabel.innerText = `Playing: ${currentItem.name}`;
+            if (screen.playlist && screen.playlist.length > 0) {
+                const activeIdx = (screen.currentIndex >= 0 && screen.currentIndex < screen.playlist.length) ? screen.currentIndex : 0;
+                const currentItem = screen.playlist[activeIdx];
+                nameLabel.innerText = (screen.isPlaying ? 'Playing: ' : 'Selected: ') + currentItem.name;
                 placeholder.style.display = 'none';
  
-                const targetUrl = `${prefixStr}/player.html?screenId=${activeScreenId}&width=${width}&height=${height}&preview=1`;
+                const targetUrl = `${prefixStr}/player.html?screenId=${activeScreenId}`;
                 // Only update src if changed to prevent reloading of iframe on every state update tick
                 const currentSrc = iframe.getAttribute('src') || '';
                 if (currentSrc !== targetUrl) {
@@ -1536,40 +1698,8 @@
         }
 
         function launchPlayer() {
-            let x = 1920, y = 0, width = 1920, height = 1080;
-            const activeScreen = globalState && globalState.screens ? globalState.screens[activeScreenId] : null;
-            if (globalState && globalState.screenConfig) {
-                x = (globalState.screenConfig.x !== undefined && globalState.screenConfig.x !== null) ? globalState.screenConfig.x : x;
-                y = (globalState.screenConfig.y !== undefined && globalState.screenConfig.y !== null) ? globalState.screenConfig.y : y;
-            }
-            if (activeScreen) {
-                width = activeScreen.width || (activeScreenId === 'default' ? (globalState.screenConfig.width || 955) : 1920);
-                height = activeScreen.height || (activeScreenId === 'default' ? (globalState.screenConfig.height || 192) : 1080);
-            } else if (globalState && globalState.screenConfig) {
-                width = activeScreenId === 'default' ? (globalState.screenConfig.width || width) : width;
-                height = activeScreenId === 'default' ? (globalState.screenConfig.height || height) : height;
-            }
-            
-            // Clamp off-screen positions to main monitor for single-monitor PCs
-            if (window.screen && window.screen.width && x >= window.screen.width) {
-                x = 0;
-            }
-            if (window.screen && window.screen.height && y >= window.screen.height) {
-                y = 0;
-            }
-
-            const targetUrl = `${prefixStr}/player.html?screenId=${activeScreenId}&width=${width}&height=${height}`;
-            const options = `width=${width},height=${height},left=${x},top=${y},menubar=no,toolbar=no,location=no,status=no`;
-            
-            try {
-                const win = window.open(targetUrl, '_blank', options);
-                if (!win) {
-                    window.open(targetUrl, '_blank');
-                }
-            } catch (e) {
-                console.error('[DASHBOARD] launchPlayer failed, opening in new tab:', e);
-                window.open(targetUrl, '_blank');
-            }
+            const targetUrl = `${prefixStr}/player.html?screenId=${activeScreenId}`;
+            window.open(targetUrl, '_blank');
         }
 
         // Spotify Integration JS scoped per screen

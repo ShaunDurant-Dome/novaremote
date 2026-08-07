@@ -20,6 +20,54 @@
             background-color: #000;
             overflow: hidden;
             cursor: none; /* Hide cursor on the LED screen */
+            perspective: 1200px;
+        }
+        @keyframes slideFadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(1.02);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1.00);
+            }
+        }
+        @keyframes slide3DDepthIn {
+            0% {
+                opacity: 0;
+                transform: perspective(1000px) rotateX(6deg) translateZ(-120px) scale(0.94);
+                filter: blur(12px) brightness(1.2);
+            }
+            100% {
+                opacity: 1;
+                transform: perspective(1000px) rotateX(0deg) translateZ(0px) scale(1.0);
+                filter: blur(0px) brightness(1.0);
+            }
+        }
+        @keyframes slide3DFlipIn {
+            0% {
+                opacity: 0;
+                transform: perspective(1200px) rotateY(-18deg) translateZ(-90px);
+                filter: blur(6px);
+            }
+            100% {
+                opacity: 1;
+                transform: perspective(1200px) rotateY(0deg) translateZ(0px);
+                filter: blur(0px);
+            }
+        }
+        .slide-fade-in {
+            animation: slideFadeIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .slide-3d-depth {
+            animation: slide3DDepthIn 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+        }
+        .slide-3d-flip {
+            animation: slide3DFlipIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
         }
     </style>
 </head>
@@ -123,6 +171,74 @@
             </div>
         </div>
 
+        <!-- Live Clock & Outdoor Temp Slide (Big LED / TV) -->
+        <div id="liveInfoContainer" class="live-info-slide-layout" style="display: none;">
+            <!-- Logo Column -->
+            <div id="liveInfoLogoCol" class="live-info-col info-logo-col">
+                <img src="/logo_white.png" class="live-info-logo" alt="The Dome">
+            </div>
+
+            <!-- Live Clock & Date Column -->
+            <div id="liveInfoClockCol" class="live-info-col info-clock-col">
+                <div id="liveInfoTime" class="live-info-time">09:25 AM</div>
+                <div id="liveInfoDate" class="live-info-date">FRIDAY, 7 AUGUST 2026</div>
+            </div>
+
+            <!-- Outdoor Temp Column -->
+            <div id="liveInfoTempCol" class="live-info-col info-temp-col">
+                <div class="live-info-card">
+                    <div class="live-info-temp-label">OUTDOOR</div>
+                    <div class="live-info-temp-value-wrapper">
+                        <span id="liveInfoOutdoorVal" class="live-info-temp-val">--.-</span><span class="live-info-temp-unit">°C</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coastal Weather & Wind Tracker Slide (Big LED / TV) -->
+        <div id="coastalWeatherContainer" class="coastal-weather-slide-layout" style="display: none;">
+            <!-- Logo & Location Column -->
+            <div id="coastalLogoCol" class="coastal-col coastal-logo-col">
+                <img src="/logo_white.png" class="coastal-logo" alt="The Dome">
+                <div class="coastal-location-tag">SWAKOPMUND</div>
+            </div>
+
+            <!-- Temp & Fog Badge Column -->
+            <div id="coastalTempCol" class="coastal-col coastal-temp-col">
+                <div class="coastal-temp-badge">
+                    <span id="coastalOutdoorVal" class="coastal-temp-val">--.-</span><span class="coastal-temp-unit">°C</span>
+                </div>
+                <div id="coastalFogBadge" class="coastal-fog-warning">
+                    <span class="fog-icon">☁️</span> <span id="coastalFogStatusText">Morning Fog Clearing</span>
+                </div>
+            </div>
+
+            <!-- Wind, Humidity, UV Metrics Column -->
+            <div id="coastalMetricsCol" class="coastal-col coastal-metrics-col">
+                <div id="coastalWindCard" class="coastal-metric-card">
+                    <span class="metric-icon">🌬️</span>
+                    <div class="metric-info">
+                        <span class="metric-label">WIND</span>
+                        <span id="coastalWindVal" class="metric-value">14 kts SSW</span>
+                    </div>
+                </div>
+                <div id="coastalHumidityCard" class="coastal-metric-card">
+                    <span class="metric-icon">💧</span>
+                    <div class="metric-info">
+                        <span class="metric-label">HUMIDITY</span>
+                        <span id="coastalHumidityVal" class="metric-value">78%</span>
+                    </div>
+                </div>
+                <div id="coastalUvCard" class="coastal-metric-card">
+                    <span class="metric-icon">☀️</span>
+                    <div class="metric-info">
+                        <span class="metric-label">UV INDEX</span>
+                        <span id="coastalUvVal" class="metric-value">UV 4 (Moderate)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Ticker Marquee Overlay -->
         <div id="ticker" class="player-ticker" style="display: none;">
             <span id="tickerText" class="player-ticker-text"></span>
@@ -146,7 +262,7 @@
                     container.classList.remove('layout-compact');
                 }
 
-                if (screenId === 'default') {
+                if (screenId === 'default' && !isPreview) {
                     // Reset to original absolute positioning for Big LED Screen (no scaling/centering)
                     container.style.transform = '';
                     container.style.transformOrigin = '';
@@ -525,12 +641,37 @@
             });
         }
 
+        function updateLiveInfoClock() {
+            const now = new Date();
+            const timeEl = document.getElementById('liveInfoTime');
+            const dateEl = document.getElementById('liveInfoDate');
+            if (timeEl) {
+                timeEl.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            }
+            if (dateEl) {
+                const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+                const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+                const dayName = days[now.getDay()];
+                const dayNum = now.getDate();
+                const monthName = months[now.getMonth()];
+                const year = now.getFullYear();
+                dateEl.innerText = `${dayName}, ${dayNum} ${monthName} ${year}`;
+            }
+        }
+        setInterval(updateLiveInfoClock, 1000);
+        updateLiveInfoClock();
+
         function fetchTemps() {
             fetch(`${prefixStr}/api/temps`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.outdoor !== undefined && data.outdoor !== null) {
-                        outdoorValEl.innerText = parseFloat(data.outdoor).toFixed(1);
+                        const formatted = parseFloat(data.outdoor).toFixed(1);
+                        outdoorValEl.innerText = formatted;
+                        const liveInfoOutEl = document.getElementById('liveInfoOutdoorVal');
+                        if (liveInfoOutEl) liveInfoOutEl.innerText = formatted;
+                        const coastalOutEl = document.getElementById('coastalOutdoorVal');
+                        if (coastalOutEl) coastalOutEl.innerText = formatted;
                     }
                     if (data.mainHall !== undefined && data.mainHall !== null) {
                         hallValEl.innerText = parseFloat(data.mainHall).toFixed(1);
@@ -543,6 +684,26 @@
                     outdoorValEl.innerText = '--';
                     hallValEl.innerText = '--';
                 });
+        }
+
+        function fetchSwakopmundWeather() {
+            fetch(`${prefixStr}/api/swakopmund-weather`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data) return;
+                    const fogStatusEl = document.getElementById('coastalFogStatusText');
+                    const windValEl = document.getElementById('coastalWindVal');
+                    const humidityValEl = document.getElementById('coastalHumidityVal');
+                    const uvValEl = document.getElementById('coastalUvVal');
+                    const outdoorValEl = document.getElementById('coastalOutdoorVal');
+
+                    if (data.fogStatus && fogStatusEl) fogStatusEl.innerText = data.fogStatus;
+                    if (data.windSpeed && windValEl) windValEl.innerText = data.windSpeed;
+                    if (data.humidity && humidityValEl) humidityValEl.innerText = data.humidity;
+                    if (data.uvIndex && uvValEl) uvValEl.innerText = data.uvIndex;
+                    if (data.temp !== undefined && outdoorValEl) outdoorValEl.innerText = parseFloat(data.temp).toFixed(1);
+                })
+                .catch(err => console.warn('[PLAYER] Weather fetch fallback:', err));
         }
 
         function fetchAndDrawGraph(historyHours) {
@@ -714,15 +875,44 @@
             }
         }
 
+        function hideAllSlideContainers() {
+            [imgEl, vidEl, tempEl, welcomeEl, document.getElementById('liveInfoContainer'), document.getElementById('coastalWeatherContainer')].forEach(el => {
+                if (el) {
+                    el.style.display = 'none';
+                    el.classList.remove('slide-fade-in', 'slide-3d-depth', 'slide-3d-flip');
+                }
+            });
+            if (imgEl) imgEl.removeAttribute('src');
+            if (vidEl) {
+                vidEl.pause();
+                vidEl.removeAttribute('src');
+            }
+        }
+
+        function showSlideContainer(el, displayType = 'flex') {
+            if (!el) return;
+            el.classList.remove('slide-fade-in', 'slide-3d-depth', 'slide-3d-flip');
+            void el.offsetWidth;
+            el.style.display = displayType;
+            el.classList.add('slide-3d-depth');
+        }
+
         function updatePlayer(state) {
             currentState = state;
             
-            const item = (state.currentIndex >= 0 && state.currentIndex < state.playlist.length) 
-                ? state.playlist[state.currentIndex] 
+            if (!state || !state.playlist) return;
+
+            let activeIdx = state.currentIndex;
+            if ((activeIdx < 0 || activeIdx >= state.playlist.length) && state.playlist.length > 0) {
+                activeIdx = 0;
+            }
+            
+            const item = (activeIdx >= 0 && activeIdx < state.playlist.length) 
+                ? state.playlist[activeIdx] 
                 : null;
             
             const itemId = item ? item.id : null;
-            const hasItemChanged = !item || (currentItemId !== itemId) || (currentPlaylistIndex !== state.currentIndex);
+            const hasItemChanged = !item || (currentItemId !== itemId) || (currentPlaylistIndex !== activeIdx);
             
             if (hasItemChanged) {
                 clearTimeout(imageTimer);
@@ -737,7 +927,7 @@
                 
                 currentItemId = itemId;
                 currentItemFilename = item ? item.filename : null;
-                currentPlaylistIndex = state.currentIndex;
+                currentPlaylistIndex = activeIdx;
             }
  
             // Handle Blackout
@@ -748,7 +938,7 @@
             }
  
             // Sync Ticker
-            if (state.ticker.enabled && !state.isBlackout) {
+            if (state.ticker && state.ticker.enabled && !state.isBlackout) {
                 tickerEl.style.display = 'block';
                 tickerTextEl.innerText = state.ticker.text;
                 tickerTextEl.style.color = state.ticker.color;
@@ -771,20 +961,15 @@
             }
  
             // Verify if there is media to display
-            if (state.currentIndex >= 0 && state.currentIndex < state.playlist.length) {
-                const item = state.playlist[state.currentIndex];
+            if (activeIdx >= 0 && activeIdx < state.playlist.length) {
+                const item = state.playlist[activeIdx];
                 const mediaUrl = `${prefixStr}/uploads/${item.filename}`;
+
+                hideAllSlideContainers();
  
                 if (item.type === 'image') {
-                    // Hide other containers
-                    vidEl.style.display = 'none';
-                    vidEl.pause();
-                    vidEl.removeAttribute('src');
-                    tempEl.style.display = 'none';
-                    welcomeEl.style.display = 'none';
- 
                     imgEl.src = mediaUrl;
-                    imgEl.style.display = 'block';
+                    showSlideContainer(imgEl, 'block');
  
                     // Slideshow timer for images
                     if (state.isPlaying && !state.isBlackout && !isPreview) {
@@ -801,12 +986,6 @@
                         }
                     }
                 } else if (item.type === 'video') {
-                    // Hide other containers
-                    imgEl.style.display = 'none';
-                    imgEl.removeAttribute('src');
-                    tempEl.style.display = 'none';
-                    welcomeEl.style.display = 'none';
- 
                     if (vidEl.src.endsWith(item.filename) && vidEl.ended && state.isPlaying && !state.isBlackout && !isPreview) {
                         console.log('[PLAYER] Video already ended while offline. Requesting NEXT...');
                         clearTimeout(videoSafetyTimer);
@@ -837,7 +1016,7 @@
                         // Fallback safety timer if metadata fails to load
                         setSafetyTimer(item.duration || 15);
                     }
-                    vidEl.style.display = 'block';
+                    showSlideContainer(vidEl, 'block');
  
                     // Audio volume sync
                     vidEl.volume = state.volume;
@@ -861,15 +1040,99 @@
                         clearTimeout(videoSafetyTimer);
                         videoSafetyTimer = null;
                     }
+                } else if (item.type === 'live_info') {
+                    const liveInfoEl = document.getElementById('liveInfoContainer');
+                    if (liveInfoEl) {
+                        Array.prototype.slice.call(liveInfoEl.classList).forEach(cls => {
+                            if (cls.startsWith('theme-')) {
+                                liveInfoEl.classList.remove(cls);
+                            }
+                        });
+                        const theme = item.bgTheme || 'gym_motion';
+                        liveInfoEl.classList.add(`theme-${theme}`);
+
+                        const logoCol = document.getElementById('liveInfoLogoCol');
+                        const clockCol = document.getElementById('liveInfoClockCol');
+                        const tempCol = document.getElementById('liveInfoTempCol');
+
+                        if (logoCol) logoCol.style.display = item.showLogo !== false ? 'flex' : 'none';
+                        if (clockCol) clockCol.style.display = (item.showTime !== false || item.showDate !== false) ? 'flex' : 'none';
+                        if (tempCol) tempCol.style.display = item.showTemp !== false ? 'flex' : 'none';
+
+                        const timeEl = document.getElementById('liveInfoTime');
+                        const dateEl = document.getElementById('liveInfoDate');
+                        if (timeEl) timeEl.style.display = item.showTime !== false ? 'block' : 'none';
+                        if (dateEl) dateEl.style.display = item.showDate !== false ? 'block' : 'none';
+
+                        fetchTemps();
+                        showSlideContainer(liveInfoEl, 'flex');
+                    }
+
+                    // Slideshow timer for live_info slide
+                    if (state.isPlaying && !state.isBlackout && !isPreview) {
+                        if (imageTimer === null) {
+                            const durationMs = (item.duration || 15) * 1000;
+                            imageTimer = setTimeout(() => {
+                                sendAction('NEXT');
+                            }, durationMs);
+                        }
+                    } else {
+                        if (imageTimer !== null) {
+                            clearTimeout(imageTimer);
+                            imageTimer = null;
+                        }
+                    }
+                } else if (item.type === 'coastal_weather') {
+                    const coastalEl = document.getElementById('coastalWeatherContainer');
+                    if (coastalEl) {
+                        Array.prototype.slice.call(coastalEl.classList).forEach(cls => {
+                            if (cls.startsWith('theme-')) {
+                                coastalEl.classList.remove(cls);
+                            }
+                        });
+                        const theme = item.bgTheme || 'ocean_motion';
+                        coastalEl.classList.add(`theme-${theme}`);
+
+                        const fogStatusEl = document.getElementById('coastalFogStatusText');
+                        const windValEl = document.getElementById('coastalWindVal');
+                        const humidityValEl = document.getElementById('coastalHumidityVal');
+                        const uvValEl = document.getElementById('coastalUvVal');
+
+                        if (fogStatusEl) fogStatusEl.innerText = item.fogStatus || 'Morning Fog Clearing';
+                        if (windValEl) windValEl.innerText = item.windSpeed || '14 kts SSW';
+                        if (humidityValEl) humidityValEl.innerText = item.humidity || '78%';
+                        if (uvValEl) uvValEl.innerText = item.uvIndex || 'UV 4 (Moderate)';
+
+                        const fogBadge = document.getElementById('coastalFogBadge');
+                        const windCard = document.getElementById('coastalWindCard');
+                        const humidityCard = document.getElementById('coastalHumidityCard');
+                        const uvCard = document.getElementById('coastalUvCard');
+
+                        if (fogBadge) fogBadge.style.display = item.showFog !== false ? 'flex' : 'none';
+                        if (windCard) windCard.style.display = item.showWind !== false ? 'flex' : 'none';
+                        if (humidityCard) humidityCard.style.display = item.showHumidity !== false ? 'flex' : 'none';
+                        if (uvCard) uvCard.style.display = item.showUv !== false ? 'flex' : 'none';
+
+                        fetchTemps();
+                        fetchSwakopmundWeather();
+                        showSlideContainer(coastalEl, 'flex');
+                    }
+
+                    // Slideshow timer for coastal_weather slide
+                    if (state.isPlaying && !state.isBlackout && !isPreview) {
+                        if (imageTimer === null) {
+                            const durationMs = (item.duration || 15) * 1000;
+                            imageTimer = setTimeout(() => {
+                                sendAction('NEXT');
+                            }, durationMs);
+                        }
+                    } else {
+                        if (imageTimer !== null) {
+                            clearTimeout(imageTimer);
+                            imageTimer = null;
+                        }
+                    }
                 } else if (item.type === 'temp') {
-                    // Hide media elements
-                    imgEl.style.display = 'none';
-                    imgEl.removeAttribute('src');
-                    vidEl.style.display = 'none';
-                    vidEl.pause();
-                    vidEl.removeAttribute('src');
-                    welcomeEl.style.display = 'none';
- 
                     // Show Temperature Display
                     document.getElementById('outdoorLabel').innerText = item.label1 || 'Outdoor Temperature';
                     document.getElementById('hallLabel').innerText = item.label2 || 'Main Hall Temperature';
@@ -897,8 +1160,8 @@
                         currentBoldFont = !!item.boldFont;
                     }
  
+                    showSlideContainer(tempEl, 'flex');
                     if (tempFetchInterval === null) {
-                        tempEl.style.display = 'flex';
                         fetchTemps();
                         // Fetch fresh temperatures every 10 seconds while this slide is active
                         tempFetchInterval = setInterval(fetchTemps, 10000);
@@ -1056,7 +1319,7 @@
                     });
 
                     // Show Welcome Container
-                    welcomeEl.style.display = 'flex';
+                    showSlideContainer(welcomeEl, 'flex');
 
                     // Slideshow timer for welcome slide
                     if (state.isPlaying && !state.isBlackout && !isPreview) {
