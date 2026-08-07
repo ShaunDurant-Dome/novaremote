@@ -989,28 +989,31 @@
                         clearTimeout(imageTimer);
                         imageTimer = null;
                     }
-                    const mediaUrl = item.filename ? `${prefixStr}/uploads/${encodeURI(item.filename)}` : '';
-                    if (mediaUrl && !vidEl.src.endsWith(encodeURI(item.filename))) {
-                        clearTimeout(videoSafetyTimer);
-                        videoSafetyTimer = null;
-                        vidEl.src = mediaUrl;
-
-                        const armSafetyTimer = (dur) => {
+                    if (item.filename) {
+                        const mediaUrl = `${prefixStr}/uploads/${encodeURI(item.filename)}`;
+                        if (hasItemChanged || !vidEl.getAttribute('src')) {
                             clearTimeout(videoSafetyTimer);
-                            if (!isPreview) {
-                                const safeSeconds = (dur && !isNaN(dur) && dur > 0) ? (dur + 10) : 300;
-                                videoSafetyTimer = setTimeout(() => {
-                                    console.warn('[PLAYER] Video safety timeout. Skipping...');
-                                    videoSafetyTimer = null;
-                                    sendAction('NEXT');
-                                }, safeSeconds * 1000);
-                            }
-                        };
+                            videoSafetyTimer = null;
+                            vidEl.src = mediaUrl;
+                            try { vidEl.currentTime = 0; } catch (e) {}
 
-                        vidEl.onloadedmetadata = () => {
-                            armSafetyTimer(vidEl.duration);
-                        };
-                        armSafetyTimer(vidEl.duration || 300);
+                            const armSafetyTimer = (dur) => {
+                                clearTimeout(videoSafetyTimer);
+                                if (!isPreview) {
+                                    const safeSeconds = (dur && !isNaN(dur) && dur > 0) ? (dur + 10) : 300;
+                                    videoSafetyTimer = setTimeout(() => {
+                                        console.warn('[PLAYER] Video safety timeout. Skipping...');
+                                        videoSafetyTimer = null;
+                                        sendAction('NEXT');
+                                    }, safeSeconds * 1000);
+                                }
+                            };
+
+                            vidEl.onloadedmetadata = () => {
+                                armSafetyTimer(vidEl.duration);
+                            };
+                            armSafetyTimer(vidEl.duration || 300);
+                        }
                     }
                     showSlideContainer(vidEl, 'block');
  
