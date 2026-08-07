@@ -508,6 +508,8 @@
             if (!isPreview) sendAction('NEXT');
         };
 
+        let imageErrorTimer = null;
+
         vidEl.onerror = () => {
             if (vidEl.style.display !== 'none' && vidEl.getAttribute('src')) {
                 console.error('[PLAYER] Video playback error, skipping...');
@@ -517,10 +519,24 @@
             }
         };
 
+        imgEl.onload = () => {
+            if (imageErrorTimer) {
+                clearTimeout(imageErrorTimer);
+                imageErrorTimer = null;
+            }
+        };
+
         imgEl.onerror = () => {
             if (imgEl.style.display !== 'none' && imgEl.getAttribute('src')) {
-                console.error('[PLAYER] Image loading error, skipping...');
-                if (!isPreview) sendAction('NEXT');
+                console.error('[PLAYER] Image loading error, waiting grace period before skip...');
+                if (imageErrorTimer === null && !isPreview) {
+                    imageErrorTimer = setTimeout(() => {
+                        imageErrorTimer = null;
+                        if (imgEl.style.display !== 'none') {
+                            sendAction('NEXT');
+                        }
+                    }, 2000);
+                }
             }
         };
 
@@ -966,7 +982,10 @@
  
                 if (item.type === 'image') {
                     if (item.filename) {
-                        imgEl.src = `${prefixStr}/uploads/${item.filename}`;
+                        const safeUrl = `${prefixStr}/uploads/${encodeURI(item.filename)}`;
+                        if (!imgEl.src.endsWith(encodeURI(item.filename))) {
+                            imgEl.src = safeUrl;
+                        }
                     }
                     showSlideContainer(imgEl, 'block');
                     scheduleSlideNextTimer(item, 10);
@@ -975,20 +994,28 @@
                         clearTimeout(imageTimer);
                         imageTimer = null;
                     }
-                    const mediaUrl = item.filename ? `${prefixStr}/uploads/${item.filename}` : '';
-                    if (mediaUrl && !vidEl.src.endsWith(item.filename)) {
+                    const mediaUrl = item.filename ? `${prefixStr}/uploads/${encodeURI(item.filename)}` : '';
+                    if (mediaUrl && !vidEl.src.endsWith(encodeURI(item.filename))) {
                         clearTimeout(videoSafetyTimer);
                         videoSafetyTimer = null;
                         vidEl.src = mediaUrl;
 
-                        if (!isPreview) {
-                            const finalDuration = item.duration || 15;
-                            videoSafetyTimer = setTimeout(() => {
-                                console.warn('[PLAYER] Video safety timeout. Skipping...');
-                                videoSafetyTimer = null;
-                                sendAction('NEXT');
-                            }, (finalDuration + 5) * 1000);
-                        }
+                        const armSafetyTimer = (dur) => {
+                            clearTimeout(videoSafetyTimer);
+                            if (!isPreview) {
+                                const safeSeconds = (dur && !isNaN(dur) && dur > 0) ? (dur + 10) : 300;
+                                videoSafetyTimer = setTimeout(() => {
+                                    console.warn('[PLAYER] Video safety timeout. Skipping...');
+                                    videoSafetyTimer = null;
+                                    sendAction('NEXT');
+                                }, safeSeconds * 1000);
+                            }
+                        };
+
+                        vidEl.onloadedmetadata = () => {
+                            armSafetyTimer(vidEl.duration);
+                        };
+                        armSafetyTimer(vidEl.duration || 300);
                     }
                     showSlideContainer(vidEl, 'block');
  
