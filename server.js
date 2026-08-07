@@ -153,6 +153,11 @@ function loadState() {
 }
 loadState();
 
+// Arm screen slide timers for all screens on server startup
+for (let sid in state.screens) {
+    armScreenSlideTimer(sid);
+}
+
 function saveState() {
     try {
         const uploadsDir = path.dirname(stateFile);
@@ -1216,6 +1221,7 @@ wss.on('connection', (ws, req) => {
                         saveState();
                         broadcastScreenState(sid);
                         broadcastGlobalState();
+                        armScreenSlideTimer(sid);
                     }
                     break;
                 case 'REMOVE_PLAYLIST_ITEM':
@@ -1231,6 +1237,7 @@ wss.on('connection', (ws, req) => {
                         saveState();
                         broadcastScreenState(sid);
                         broadcastGlobalState();
+                        armScreenSlideTimer(sid);
                     }
                     break;
                 case 'REORDER_PLAYLIST':
@@ -1244,6 +1251,7 @@ wss.on('connection', (ws, req) => {
                         saveState();
                         broadcastScreenState(sid);
                         broadcastGlobalState();
+                        armScreenSlideTimer(sid);
                     }
                     break;
                 case 'SET_DOME_API_URL':
