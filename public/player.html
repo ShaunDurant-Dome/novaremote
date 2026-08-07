@@ -509,15 +509,19 @@
         };
 
         vidEl.onerror = () => {
-            console.error('[PLAYER] Video playback error, skipping...');
-            clearTimeout(videoSafetyTimer);
-            videoSafetyTimer = null;
-            if (!isPreview) sendAction('NEXT');
+            if (vidEl.style.display !== 'none' && vidEl.getAttribute('src')) {
+                console.error('[PLAYER] Video playback error, skipping...');
+                clearTimeout(videoSafetyTimer);
+                videoSafetyTimer = null;
+                if (!isPreview) sendAction('NEXT');
+            }
         };
 
         imgEl.onerror = () => {
-            console.error('[PLAYER] Image loading error, skipping...');
-            if (!isPreview) sendAction('NEXT');
+            if (imgEl.style.display !== 'none' && imgEl.getAttribute('src')) {
+                console.error('[PLAYER] Image loading error, skipping...');
+                if (!isPreview) sendAction('NEXT');
+            }
         };
 
         function fetchState() {
@@ -957,12 +961,13 @@
             // Verify if there is media to display
             if (activeIdx >= 0 && activeIdx < state.playlist.length) {
                 const item = state.playlist[activeIdx];
-                const mediaUrl = `${prefixStr}/uploads/${item.filename}`;
 
                 hideAllSlideContainers();
  
                 if (item.type === 'image') {
-                    imgEl.src = mediaUrl;
+                    if (item.filename) {
+                        imgEl.src = `${prefixStr}/uploads/${item.filename}`;
+                    }
                     showSlideContainer(imgEl, 'block');
                     scheduleSlideNextTimer(item, 10);
                 } else if (item.type === 'video') {
@@ -970,7 +975,8 @@
                         clearTimeout(imageTimer);
                         imageTimer = null;
                     }
-                    if (!vidEl.src.endsWith(item.filename)) {
+                    const mediaUrl = item.filename ? `${prefixStr}/uploads/${item.filename}` : '';
+                    if (mediaUrl && !vidEl.src.endsWith(item.filename)) {
                         clearTimeout(videoSafetyTimer);
                         videoSafetyTimer = null;
                         vidEl.src = mediaUrl;
