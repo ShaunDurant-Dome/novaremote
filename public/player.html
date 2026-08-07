@@ -877,6 +877,20 @@
             el.classList.add('slide-3d-depth');
         }
 
+        function scheduleSlideNextTimer(item, defaultDuration = 15) {
+            if (imageTimer !== null) {
+                clearTimeout(imageTimer);
+                imageTimer = null;
+            }
+            if (currentState && currentState.isPlaying && !currentState.isBlackout && !isPreview) {
+                const durationMs = Math.max(1, (item.duration || defaultDuration)) * 1000;
+                imageTimer = setTimeout(() => {
+                    imageTimer = null;
+                    if (!isPreview) sendAction('NEXT');
+                }, durationMs);
+            }
+        }
+
         function updatePlayer(state) {
             currentState = state;
             
@@ -950,51 +964,25 @@
                 if (item.type === 'image') {
                     imgEl.src = mediaUrl;
                     showSlideContainer(imgEl, 'block');
- 
-                    // Slideshow timer for images
-                    if (state.isPlaying && !state.isBlackout && !isPreview) {
-                        if (imageTimer === null) {
-                            const durationMs = (item.duration || 10) * 1000;
-                            imageTimer = setTimeout(() => {
-                                sendAction('NEXT');
-                            }, durationMs);
-                        }
-                    } else {
-                        if (imageTimer !== null) {
-                            clearTimeout(imageTimer);
-                            imageTimer = null;
-                        }
-                    }
+                    scheduleSlideNextTimer(item, 10);
                 } else if (item.type === 'video') {
-                    if (vidEl.src.endsWith(item.filename) && vidEl.ended && state.isPlaying && !state.isBlackout && !isPreview) {
-                        console.log('[PLAYER] Video already ended while offline. Requesting NEXT...');
-                        clearTimeout(videoSafetyTimer);
-                        videoSafetyTimer = null;
-                        sendAction('NEXT');
+                    if (imageTimer !== null) {
+                        clearTimeout(imageTimer);
+                        imageTimer = null;
                     }
- 
                     if (!vidEl.src.endsWith(item.filename)) {
                         clearTimeout(videoSafetyTimer);
                         videoSafetyTimer = null;
                         vidEl.src = mediaUrl;
- 
-                        // Set up safety timer once metadata loads or immediately as fallback
-                        const setSafetyTimer = (duration) => {
-                            clearTimeout(videoSafetyTimer);
-                            if (isPreview) return; // Do not schedule safety timer in preview
-                            const finalDuration = duration || item.duration || 15;
+
+                        if (!isPreview) {
+                            const finalDuration = item.duration || 15;
                             videoSafetyTimer = setTimeout(() => {
                                 console.warn('[PLAYER] Video safety timeout. Skipping...');
+                                videoSafetyTimer = null;
                                 sendAction('NEXT');
                             }, (finalDuration + 5) * 1000);
-                        };
- 
-                        vidEl.onloadedmetadata = () => {
-                            setSafetyTimer(vidEl.duration);
-                        };
- 
-                        // Fallback safety timer if metadata fails to load
-                        setSafetyTimer(item.duration || 15);
+                        }
                     }
                     showSlideContainer(vidEl, 'block');
  
@@ -1004,21 +992,11 @@
  
                     // Play/Pause sync
                     if (state.isPlaying && !state.isBlackout) {
-                        // Re-start safety timer if it was cleared and we are resuming
-                        if (!videoSafetyTimer && !isPreview) {
-                            const duration = vidEl.duration || item.duration || 15;
-                            videoSafetyTimer = setTimeout(() => {
-                                console.warn('[PLAYER] Video safety timeout. Skipping...');
-                                sendAction('NEXT');
-                            }, (duration + 5) * 1000);
-                        }
                         vidEl.play().catch(err => {
                             console.log('Video play start blocked, relying on safety timer:', err);
                         });
                     } else {
                         vidEl.pause();
-                        clearTimeout(videoSafetyTimer);
-                        videoSafetyTimer = null;
                     }
                 } else if (item.type === 'live_info') {
                     const liveInfoEl = document.getElementById('liveInfoContainer');
@@ -1047,21 +1025,7 @@
                         fetchTemps();
                         showSlideContainer(liveInfoEl, 'flex');
                     }
-
-                    // Slideshow timer for live_info slide
-                    if (state.isPlaying && !state.isBlackout && !isPreview) {
-                        if (imageTimer === null) {
-                            const durationMs = (item.duration || 15) * 1000;
-                            imageTimer = setTimeout(() => {
-                                sendAction('NEXT');
-                            }, durationMs);
-                        }
-                    } else {
-                        if (imageTimer !== null) {
-                            clearTimeout(imageTimer);
-                            imageTimer = null;
-                        }
-                    }
+                    scheduleSlideNextTimer(item, 15);
                 } else if (item.type === 'coastal_weather') {
                     const coastalEl = document.getElementById('coastalWeatherContainer');
                     if (coastalEl) {
@@ -1097,21 +1061,7 @@
                         fetchSwakopmundWeather();
                         showSlideContainer(coastalEl, 'flex');
                     }
-
-                    // Slideshow timer for coastal_weather slide
-                    if (state.isPlaying && !state.isBlackout && !isPreview) {
-                        if (imageTimer === null) {
-                            const durationMs = (item.duration || 15) * 1000;
-                            imageTimer = setTimeout(() => {
-                                sendAction('NEXT');
-                            }, durationMs);
-                        }
-                    } else {
-                        if (imageTimer !== null) {
-                            clearTimeout(imageTimer);
-                            imageTimer = null;
-                        }
-                    }
+                    scheduleSlideNextTimer(item, 15);
                 } else if (item.type === 'temp') {
                     // Show Temperature Display
                     document.getElementById('outdoorLabel').innerText = item.label1 || 'Outdoor Temperature';
@@ -1187,21 +1137,7 @@
                         currentShowGraph = showGraph;
                         currentHistoryHours = hh;
                     }
- 
-                    // Slideshow timer for temperatures
-                    if (state.isPlaying && !state.isBlackout && !isPreview) {
-                        if (imageTimer === null) {
-                            const durationMs = (item.duration || 15) * 1000;
-                            imageTimer = setTimeout(() => {
-                                sendAction('NEXT');
-                            }, durationMs);
-                        }
-                    } else {
-                        if (imageTimer !== null) {
-                            clearTimeout(imageTimer);
-                            imageTimer = null;
-                        }
-                    }
+                    scheduleSlideNextTimer(item, 15);
                 } else if (item.type === 'welcome') {
                     const hVal = parseInt(document.getElementById('playerContainer').style.height) || 0;
                     // Hide media elements
@@ -1211,7 +1147,7 @@
                     vidEl.pause();
                     vidEl.removeAttribute('src');
                     tempEl.style.display = 'none';
-
+ 
                     // Clear temperature fetch intervals
                     if (tempFetchInterval !== null) {
                         clearInterval(tempFetchInterval);
@@ -1221,7 +1157,7 @@
                         clearInterval(historyFetchInterval);
                         historyFetchInterval = null;
                     }
-
+ 
                     // Populate text content
                     let titleText = item.title || 'WELCOME';
                     titleText = titleText.replace(/^[•\s\-\*·\.\u2022\u00b7\u2219\u25cf\u25e6·◦∙•●*.-]+/g, '');
@@ -1238,7 +1174,7 @@
                     } else {
                         welcomeRoomEl.style.display = 'none';
                     }
-
+ 
                     // Left Direction Text and visibility
                     if (item.leftDir && item.leftDir.trim() !== '') {
                         welcomeLeftDirEl.innerText = item.leftDir;
@@ -1246,7 +1182,7 @@
                     } else {
                         document.getElementById('welcomeLeftDirContainer').style.display = 'none';
                     }
-
+ 
                     // Right Direction Text and visibility
                     if (item.rightDir && item.rightDir.trim() !== '') {
                         welcomeRightDirEl.innerText = item.rightDir;
@@ -1254,7 +1190,7 @@
                     } else {
                         document.getElementById('welcomeRightDirContainer').style.display = 'none';
                     }
-
+ 
                     // Apply Theme and preserve compact classes
                     // Convert DOMTokenList classList to Array for older browser compatibility
                     Array.prototype.slice.call(welcomeEl.classList).forEach(cls => {
@@ -1264,14 +1200,14 @@
                     });
                     const theme = item.bgTheme || 'blue';
                     welcomeEl.classList.add(`theme-welcome-${theme}`);
-
+ 
                     // Toggle Logo displays (TV screen only, i.e., hVal >= 500)
                     const showDomeLogo = item.showDomeLogo !== false;
                     const showConfLogo = item.showConfLogo !== false;
                     const welcomeDomeImg = welcomeEl.querySelector('.welcome-dome-logo');
                     const welcomeConfImg = welcomeEl.querySelector('.welcome-conf-logo') || document.getElementById('welcomeConfLogo');
                     const welcomeHeader = welcomeEl.querySelector('.welcome-header');
-
+ 
                     if (hVal >= 500) {
                         if (welcomeDomeImg) welcomeDomeImg.style.display = showDomeLogo ? 'block' : 'none';
                         if (welcomeConfImg) welcomeConfImg.style.display = showConfLogo ? 'block' : 'none';
@@ -1290,31 +1226,17 @@
                         if (welcomeConfImg) welcomeConfImg.style.display = 'block';
                         if (welcomeHeader) welcomeHeader.style.display = 'flex';
                     }
-
+ 
                     // Toggle Direction Arrow SVGs
                     const showArrows = item.showArrows !== false;
                     const arrowWrappers = welcomeEl.querySelectorAll('.welcome-arrow-wrapper');
                     arrowWrappers.forEach(arr => {
                         arr.style.display = showArrows ? 'flex' : 'none';
                     });
-
+ 
                     // Show Welcome Container
                     showSlideContainer(welcomeEl, 'flex');
-
-                    // Slideshow timer for welcome slide
-                    if (state.isPlaying && !state.isBlackout && !isPreview) {
-                        if (imageTimer === null) {
-                            const durationMs = (item.duration || 15) * 1000;
-                            imageTimer = setTimeout(() => {
-                                sendAction('NEXT');
-                            }, durationMs);
-                        }
-                    } else {
-                        if (imageTimer !== null) {
-                            clearTimeout(imageTimer);
-                            imageTimer = null;
-                        }
-                    }
+                    scheduleSlideNextTimer(item, 15);
                 }
             } else {
                 // Clear display
