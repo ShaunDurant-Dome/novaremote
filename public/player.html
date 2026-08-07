@@ -903,13 +903,7 @@
                 clearTimeout(imageTimer);
                 imageTimer = null;
             }
-            if (currentState && currentState.isPlaying && !currentState.isBlackout && !isPreview) {
-                const durationMs = Math.max(1, (item.duration || defaultDuration)) * 1000;
-                imageTimer = setTimeout(() => {
-                    imageTimer = null;
-                    if (!isPreview) sendAction('NEXT');
-                }, durationMs);
-            }
+            // Central server-side slideshow timer handles static slide advancement
         }
 
         function updatePlayer(state) {

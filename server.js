@@ -206,6 +206,44 @@ function ensureScreenExists(screenId) {
     }
 }
 
+const screenSlideTimers = {};
+
+function armScreenSlideTimer(sid) {
+    if (screenSlideTimers[sid]) {
+        clearTimeout(screenSlideTimers[sid]);
+        delete screenSlideTimers[sid];
+    }
+
+    const screen = state.screens[sid];
+    if (!screen || !screen.isPlaying || screen.isBlackout || !screen.playlist || screen.playlist.length === 0) {
+        return;
+    }
+
+    if (screen.currentIndex < 0 || screen.currentIndex >= screen.playlist.length) {
+        screen.currentIndex = 0;
+    }
+
+    const item = screen.playlist[screen.currentIndex];
+    if (!item) return;
+
+    // Videos trigger NEXT via vidEl.onended
+    if (item.type === 'video') return;
+
+    const durationSec = Math.max(1, parseInt(item.duration) || 15);
+    console.log(`[SLIDE TIMER] Arming server timer for screen '${sid}' item '${item.name}' duration: ${durationSec}s`);
+    screenSlideTimers[sid] = setTimeout(() => {
+        delete screenSlideTimers[sid];
+        if (screen.isPlaying && !screen.isBlackout && screen.playlist.length > 0) {
+            screen.currentIndex = (screen.currentIndex + 1) % screen.playlist.length;
+            console.log(`[SLIDE TIMER] Server advancing screen '${sid}' to index ${screen.currentIndex}`);
+            saveState();
+            broadcastScreenState(sid);
+            broadcastGlobalState();
+            armScreenSlideTimer(sid);
+        }
+    }, durationSec * 1000);
+}
+
 // Broadcast helper
 function broadcastGlobalState() {
     const activeScreenIds = [];
@@ -921,17 +959,20 @@ wss.on('connection', (ws, req) => {
                     }
                     broadcastScreenState(sid);
                     broadcastGlobalState();
+                    armScreenSlideTimer(sid);
                     break;
                 case 'PAUSE':
                     screen.isPlaying = false;
                     broadcastScreenState(sid);
                     broadcastGlobalState();
+                    armScreenSlideTimer(sid);
                     break;
                 case 'STOP':
                     screen.isPlaying = false;
                     screen.currentIndex = screen.playlist.length > 0 ? 0 : -1;
                     broadcastScreenState(sid);
                     broadcastGlobalState();
+                    armScreenSlideTimer(sid);
                     break;
                 case 'NEXT':
                     const nowNext = Date.now();
@@ -942,6 +983,7 @@ wss.on('connection', (ws, req) => {
                         }
                         broadcastScreenState(sid);
                         broadcastGlobalState();
+                        armScreenSlideTimer(sid);
                     }
                     break;
                 case 'FORCE_RELOAD':
@@ -961,6 +1003,7 @@ wss.on('connection', (ws, req) => {
                         }
                         broadcastScreenState(sid);
                         broadcastGlobalState();
+                        armScreenSlideTimer(sid);
                     }
                     break;
                 case 'SET_INDEX':
@@ -969,6 +1012,7 @@ wss.on('connection', (ws, req) => {
                     }
                     broadcastScreenState(sid);
                     broadcastGlobalState();
+                    armScreenSlideTimer(sid);
                     break;
                 case 'SET_VOLUME':
                     screen.volume = Math.max(0.0, Math.min(1.0, data.volume));
