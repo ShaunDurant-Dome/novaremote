@@ -988,6 +988,25 @@
             reader.readAsText(file);
         }
 
+        function movePlaylistItem(itemId, direction, event) {
+            if (event) event.stopPropagation();
+            if (!globalState || !globalState.screens || !globalState.screens[activeScreenId]) return;
+            const playlist = globalState.screens[activeScreenId].playlist || [];
+            const idx = playlist.findIndex(p => p.id === itemId);
+            if (idx === -1) return;
+
+            let targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+            if (targetIdx < 0 || targetIdx >= playlist.length) return;
+
+            const newPlaylist = Array.from(playlist);
+            const temp = newPlaylist[idx];
+            newPlaylist[idx] = newPlaylist[targetIdx];
+            newPlaylist[targetIdx] = temp;
+
+            const newOrder = newPlaylist.map(p => p.id);
+            sendAction('REORDER_PLAYLIST', { newOrder });
+        }
+
         function updateUI(state, activeScreens = []) {
             globalState = state;
             currentActiveScreens = activeScreens;
@@ -1497,6 +1516,10 @@
                                 ${liveInfoCtrl}
                                 ${coastalWeatherCtrl}
                             </div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:0.2rem; margin-right:0.35rem;" onclick="event.stopPropagation()">
+                            <button class="btn-item-action" onclick="movePlaylistItem('${item.id}', 'up', event)" title="Move Up" ${index === 0 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>▲</button>
+                            <button class="btn-item-action" onclick="movePlaylistItem('${item.id}', 'down', event)" title="Move Down" ${index === screen.playlist.length - 1 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>▼</button>
                         </div>
                         <button class="btn-item-action delete" onclick="removePlaylistItem('${item.id}', event)" title="Remove from Playlist">❌</button>
                     `;
