@@ -151,6 +151,44 @@ function loadState() {
         }
     }
 }
+const screenSlideTimers = {};
+
+function armScreenSlideTimer(sid) {
+    if (screenSlideTimers[sid]) {
+        clearTimeout(screenSlideTimers[sid]);
+        delete screenSlideTimers[sid];
+    }
+
+    const screen = state.screens[sid];
+    if (!screen || !screen.isPlaying || screen.isBlackout || !screen.playlist || screen.playlist.length === 0) {
+        return;
+    }
+
+    if (screen.currentIndex < 0 || screen.currentIndex >= screen.playlist.length) {
+        screen.currentIndex = 0;
+    }
+
+    const item = screen.playlist[screen.currentIndex];
+    if (!item) return;
+
+    // Videos trigger NEXT via vidEl.onended
+    if (item.type === 'video') return;
+
+    const durationSec = Math.max(1, parseInt(item.duration) || 15);
+    console.log(`[SLIDE TIMER] Arming server timer for screen '${sid}' item '${item.name}' duration: ${durationSec}s`);
+    screenSlideTimers[sid] = setTimeout(() => {
+        delete screenSlideTimers[sid];
+        if (screen.isPlaying && !screen.isBlackout && screen.playlist.length > 0) {
+            screen.currentIndex = (screen.currentIndex + 1) % screen.playlist.length;
+            console.log(`[SLIDE TIMER] Server advancing screen '${sid}' to index ${screen.currentIndex}`);
+            saveState();
+            broadcastScreenState(sid);
+            broadcastGlobalState();
+            armScreenSlideTimer(sid);
+        }
+    }, durationSec * 1000);
+}
+
 loadState();
 
 // Arm screen slide timers for all screens on server startup
@@ -209,44 +247,6 @@ function ensureScreenExists(screenId) {
         saveState();
         broadcastGlobalState();
     }
-}
-
-const screenSlideTimers = {};
-
-function armScreenSlideTimer(sid) {
-    if (screenSlideTimers[sid]) {
-        clearTimeout(screenSlideTimers[sid]);
-        delete screenSlideTimers[sid];
-    }
-
-    const screen = state.screens[sid];
-    if (!screen || !screen.isPlaying || screen.isBlackout || !screen.playlist || screen.playlist.length === 0) {
-        return;
-    }
-
-    if (screen.currentIndex < 0 || screen.currentIndex >= screen.playlist.length) {
-        screen.currentIndex = 0;
-    }
-
-    const item = screen.playlist[screen.currentIndex];
-    if (!item) return;
-
-    // Videos trigger NEXT via vidEl.onended
-    if (item.type === 'video') return;
-
-    const durationSec = Math.max(1, parseInt(item.duration) || 15);
-    console.log(`[SLIDE TIMER] Arming server timer for screen '${sid}' item '${item.name}' duration: ${durationSec}s`);
-    screenSlideTimers[sid] = setTimeout(() => {
-        delete screenSlideTimers[sid];
-        if (screen.isPlaying && !screen.isBlackout && screen.playlist.length > 0) {
-            screen.currentIndex = (screen.currentIndex + 1) % screen.playlist.length;
-            console.log(`[SLIDE TIMER] Server advancing screen '${sid}' to index ${screen.currentIndex}`);
-            saveState();
-            broadcastScreenState(sid);
-            broadcastGlobalState();
-            armScreenSlideTimer(sid);
-        }
-    }, durationSec * 1000);
 }
 
 // Broadcast helper
