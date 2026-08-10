@@ -1682,7 +1682,7 @@ input:checked + .slider:before {
     position: absolute;
     top: 0;
     left: 0;
-    padding: 1.25rem 3.5rem 1rem 3.5rem;
+    padding: 2.25rem 4.5rem 2.25rem 4.5rem;
     overflow: hidden;
     z-index: 5;
     transition: all 0.5s ease-in-out;
@@ -1738,7 +1738,7 @@ input:checked + .slider:before {
     align-items: center;
     width: 100%;
     height: auto;
-    margin-bottom: 0.15rem;
+    margin-bottom: 0.25rem;
 }
 
 .welcome-header-left {
@@ -1747,7 +1747,7 @@ input:checked + .slider:before {
 }
 
 .welcome-conf-logo {
-    height: clamp(65px, 9vh, 95px) !important;
+    height: clamp(80px, 11vh, 115px) !important;
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0 4px 12px rgba(255,255,255,0.08));
@@ -1759,7 +1759,7 @@ input:checked + .slider:before {
 }
 
 .welcome-dome-logo {
-    height: clamp(65px, 9vh, 95px) !important;
+    height: clamp(80px, 11vh, 115px) !important;
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.12));
@@ -1769,10 +1769,10 @@ input:checked + .slider:before {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     flex: 1;
-    gap: 0.75rem;
-    margin: 0.2rem 0 0 0;
+    gap: 1.1rem;
+    margin: auto 0;
     text-align: center;
     width: 100%;
     max-width: 98%;
@@ -1780,7 +1780,7 @@ input:checked + .slider:before {
 }
 
 .welcome-title {
-    font-size: clamp(4.5rem, 7.5vw, 7.5rem);
+    font-size: clamp(5.5rem, 9.8vw, 9.8rem);
     font-weight: 900;
     text-transform: uppercase;
     color: #f2a104;
@@ -1799,7 +1799,7 @@ input:checked + .slider:before {
 }
 
 .welcome-subtitle {
-    font-size: clamp(2.6rem, 4.5vw, 4.5rem);
+    font-size: clamp(3.0rem, 5.0vw, 5.0rem);
     font-weight: 800;
     color: #ffffff;
     text-transform: uppercase;
@@ -1812,7 +1812,7 @@ input:checked + .slider:before {
 }
 
 .welcome-subsubtitle {
-    font-size: clamp(2.0rem, 3.5vw, 3.5rem);
+    font-size: clamp(2.2rem, 3.8vw, 3.8rem);
     font-weight: 700;
     color: #ffffff;
     text-transform: uppercase;
@@ -1825,13 +1825,13 @@ input:checked + .slider:before {
 }
 
 .welcome-room {
-    font-size: clamp(1.8rem, 2.8vw, 2.8rem);
+    font-size: clamp(1.9rem, 3.2vw, 3.2rem);
     font-weight: 800;
     font-style: italic;
     color: #f2a104;
     letter-spacing: 1.2px;
     text-transform: uppercase;
-    margin-top: 0.35rem;
+    margin-top: 0.5rem;
     margin-bottom: 0.15rem !important;
     text-shadow: 0 0 15px rgba(242, 161, 4, 0.3);
     font-family: 'Outfit', 'Inter', sans-serif;
