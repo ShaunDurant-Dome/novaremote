@@ -1676,13 +1676,13 @@ input:checked + .slider:before {
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
     box-sizing: border-box;
     position: absolute;
     top: 0;
     left: 0;
-    padding: 4rem 6rem 5.5rem 6rem;
+    padding: 1.75rem 4rem 1.75rem 4rem;
     overflow: hidden;
     z-index: 5;
     transition: all 0.5s ease-in-out;
@@ -1738,7 +1738,7 @@ input:checked + .slider:before {
     align-items: center;
     width: 100%;
     height: auto;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .welcome-header-left {
@@ -1747,7 +1747,7 @@ input:checked + .slider:before {
 }
 
 .welcome-conf-logo {
-    height: 175px !important;
+    height: clamp(80px, 12vh, 125px) !important;
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0 4px 12px rgba(255,255,255,0.08));
@@ -1759,7 +1759,7 @@ input:checked + .slider:before {
 }
 
 .welcome-dome-logo {
-    height: 175px !important;
+    height: clamp(80px, 12vh, 125px) !important;
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.12));
@@ -1771,8 +1771,8 @@ input:checked + .slider:before {
     align-items: center;
     justify-content: center;
     flex: 1;
-    gap: 1.25rem;
-    margin: 1rem 0;
+    gap: 0.65rem;
+    margin: 0.25rem 0;
     text-align: center;
     width: 100%;
     max-width: 96%;
@@ -1780,7 +1780,7 @@ input:checked + .slider:before {
 }
 
 .welcome-title {
-    font-size: clamp(4.5rem, 8.5vw, 8.5rem);
+    font-size: clamp(3.5rem, 6.5vw, 6.5rem);
     font-weight: 900;
     text-transform: uppercase;
     color: #f2a104;
@@ -1799,7 +1799,7 @@ input:checked + .slider:before {
 }
 
 .welcome-subtitle {
-    font-size: clamp(2.5rem, 4.2vw, 4.2rem);
+    font-size: clamp(2.2rem, 3.8vw, 3.8rem);
     font-weight: 800;
     color: #ffffff;
     text-transform: uppercase;
@@ -1812,27 +1812,27 @@ input:checked + .slider:before {
 }
 
 .welcome-subsubtitle {
-    font-size: clamp(2.0rem, 3.2vw, 3.2rem);
+    font-size: clamp(1.7rem, 2.8vw, 2.8rem);
     font-weight: 700;
     color: #ffffff;
     text-transform: uppercase;
     letter-spacing: 1.5px;
     text-align: center;
-    margin-top: -0.2rem;
+    margin-top: -0.1rem;
     font-family: 'Outfit', 'Inter', sans-serif;
     text-shadow: 0 4px 15px rgba(0,0,0,0.65);
     max-width: 95%;
 }
 
 .welcome-room {
-    font-size: clamp(1.8rem, 2.8vw, 2.8rem);
+    font-size: clamp(1.6rem, 2.5vw, 2.5rem);
     font-weight: 800;
     font-style: italic;
     color: #f2a104;
     letter-spacing: 1.2px;
     text-transform: uppercase;
-    margin-top: 0;
-    margin-bottom: 1.5rem !important;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem !important;
     text-shadow: 0 0 15px rgba(242, 161, 4, 0.3);
     font-family: 'Outfit', 'Inter', sans-serif;
     text-align: center;
