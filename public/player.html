@@ -546,8 +546,12 @@
                 .then(data => {
                     const screenState = data.screens ? data.screens[screenId] : null;
                     if (screenState) {
-                        const width = screenState.width || (screenId === 'default' ? (data.screenConfig?.width || 955) : 1920);
-                        const height = screenState.height || (screenId === 'default' ? (data.screenConfig?.height || 192) : 1080);
+                        let width = screenState.width || (screenId === 'default' ? (data.screenConfig?.width || 955) : 1920);
+                        let height = screenState.height || (screenId === 'default' ? (data.screenConfig?.height || 192) : 1080);
+                        if (screenId !== 'default' && (height < 500 || width < 1200)) {
+                            width = 1920;
+                            height = 1080;
+                        }
                         applyDimensions(width, height);
                         updatePlayer(screenState);
                         if (screenState.playlist) {

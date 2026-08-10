@@ -88,6 +88,17 @@ function loadState() {
         try {
             const data = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
             state = { ...state, ...data };
+
+            // Migration: Ensure non-default TV screens (like stairs, lobby, hall, tv) have 1920x1080 resolution
+            if (state.screens) {
+                for (let sid in state.screens) {
+                    if (sid !== 'default' && (state.screens[sid].height < 500 || state.screens[sid].width < 1200)) {
+                        console.log(`[MIGRATION] Updating TV screen '${sid}' resolution from ${state.screens[sid].width}x${state.screens[sid].height} to 1920x1080`);
+                        state.screens[sid].width = 1920;
+                        state.screens[sid].height = 1080;
+                    }
+                }
+            }
             
             // Migrate all screen keys to lowercase and clean them
             const migratedScreens = {};
