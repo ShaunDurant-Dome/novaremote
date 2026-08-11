@@ -24,6 +24,11 @@ html {
     font-size: 16px !important;
 }
 
+[style*="display: none"],
+[style*="display:none"] {
+    display: none !important;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -1400,47 +1405,53 @@ input:checked + .slider:before {
         width: 100% !important;
         max-width: 650px !important;
         height: 140px !important;
-        padding: 1.5rem 3rem !important;
+        padding: 1.25rem 2.5rem !important;
         border-radius: 24px !important;
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4) !important;
         box-sizing: border-box !important;
         display: flex !important;
         flex-direction: row !important;
-        justify-content: flex-start !important;
+        justify-content: space-between !important;
         align-items: center !important;
     }
 
     #tempContainer.layout-widescreen .temp-label {
-        width: 45% !important;
+        width: 42% !important;
         flex-shrink: 0 !important;
-        font-size: 1.8rem !important;
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
         margin: 0 !important;
-        line-height: 1.15 !important;
+        line-height: 1.2 !important;
         text-align: left !important;
         height: auto !important;
         display: block !important;
-        color: var(--text-muted) !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        word-break: break-word !important;
     }
 
     #tempContainer.layout-widescreen .temp-value-wrapper {
-        width: 55% !important;
+        width: 58% !important;
         flex-shrink: 0 !important;
         display: flex !important;
         align-items: baseline !important;
-        justify-content: flex-start !important;
+        justify-content: flex-end !important;
         gap: 0.15rem !important;
-        padding-left: 2.2rem !important;
+        padding-left: 0.5rem !important;
         box-sizing: border-box !important;
     }
 
     #tempContainer.layout-widescreen .temp-value {
-        font-size: 5rem !important;
+        font-size: 4.8rem !important;
+        font-weight: 900 !important;
         line-height: 1 !important;
+        color: #ffffff !important;
     }
 
     #tempContainer.layout-widescreen .temp-unit {
-        font-size: 2.5rem !important;
+        font-size: 2.4rem !important;
+        font-weight: 800 !important;
         line-height: 1 !important;
+        color: rgba(255, 255, 255, 0.85) !important;
     }
 
     /* Layout order permutations mapping for 2-column Grid */
