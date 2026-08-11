@@ -1347,7 +1347,7 @@ input:checked + .slider:before {
 /* 1. Fail-safe Widescreen Row Layout for Temperature Screen */
 @media (orientation: landscape) and (min-height: 500px) {
     /* Main Grid Layout - Default Logo on Left, Cards on Right */
-    #tempContainer.layout-widescreen {
+    #tempContainer.layout-widescreen:not([style*="display: none"]):not([style*="display:none"]) {
         display: grid !important;
         grid-template-columns: 32% 58% !important;
         grid-template-rows: 1fr 1fr !important;
@@ -2243,5 +2243,12 @@ input:checked + .slider:before {
     font-weight: 800;
     color: #ffffff;
     white-space: nowrap;
+}
+
+#tempContainer[style*="display: none"],
+#tempContainer[style*="display:none"],
+.temp-slide-layout[style*="display: none"],
+.temp-slide-layout[style*="display:none"] {
+    display: none !important;
 }
 

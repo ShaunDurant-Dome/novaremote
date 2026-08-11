@@ -885,7 +885,7 @@
         function hideAllSlideContainers() {
             [imgEl, vidEl, tempEl, welcomeEl, document.getElementById('liveInfoContainer'), document.getElementById('coastalWeatherContainer')].forEach(el => {
                 if (el) {
-                    el.style.display = 'none';
+                    el.style.setProperty('display', 'none', 'important');
                     el.classList.remove('slide-fade-in', 'slide-3d-depth', 'slide-3d-flip');
                 }
             });
