@@ -892,10 +892,8 @@
                     el.classList.remove('slide-fade-in', 'slide-3d-depth', 'slide-3d-flip');
                 }
             });
-            if (imgEl) imgEl.removeAttribute('src');
-            if (vidEl) {
-                vidEl.pause();
-                vidEl.removeAttribute('src');
+            if (vidEl && vidEl.style.display === 'none') {
+                try { vidEl.pause(); } catch(e) {}
             }
         }
 
@@ -988,7 +986,7 @@
                 if (item.type === 'image') {
                     if (item.filename) {
                         const safeUrl = `${prefixStr}/uploads/${encodeURI(item.filename)}`;
-                        if (!imgEl.src.endsWith(encodeURI(item.filename))) {
+                        if (hasItemChanged || !imgEl.src || !imgEl.src.endsWith(encodeURI(item.filename))) {
                             imgEl.src = safeUrl;
                         }
                     }
