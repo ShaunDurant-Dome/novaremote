@@ -114,6 +114,19 @@ function loadState() {
             }
             state.screens = migratedScreens;
 
+            // If default screen playlist is empty, copy from first populated playlist so default screen is never blank
+            if (state.screens['default'] && (!state.screens['default'].playlist || state.screens['default'].playlist.length === 0)) {
+                for (let sid in state.screens) {
+                    if (sid !== 'default' && state.screens[sid].playlist && state.screens[sid].playlist.length > 0) {
+                        console.log(`[MIGRATION] Populating empty default screen playlist from screen '${sid}'`);
+                        state.screens['default'].playlist = JSON.parse(JSON.stringify(state.screens[sid].playlist));
+                        state.screens['default'].currentIndex = 0;
+                        state.screens['default'].isPlaying = true;
+                        break;
+                    }
+                }
+            }
+
             // Stop playback on start for all screens to be safe
             for (let sid in state.screens) {
                 state.screens[sid].isPlaying = false;

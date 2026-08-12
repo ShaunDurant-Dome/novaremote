@@ -221,6 +221,17 @@
             </div>
         </div>
 
+        <!-- Standby Screen Overlay (Shown when playlist is empty) -->
+        <div id="standbyContainer" class="temp-slide-layout theme-dark" style="display: none; justify-content: center; align-items: center; flex-direction: column; gap: 1rem;">
+            <img src="/logo_white.png" style="max-width: 280px; height: auto; opacity: 0.85;" alt="The Dome">
+            <div style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 700; color: #f2a104; letter-spacing: 2px; text-transform: uppercase;">
+                NOVAREMOTE DISPLAY READY
+            </div>
+            <div style="font-family: 'Inter', sans-serif; font-size: 0.9rem; color: rgba(255,255,255,0.6); letter-spacing: 1px;">
+                Screen target: <span id="standbyScreenName">Default</span> &bull; Waiting for playlist content
+            </div>
+        </div>
+
         <!-- Ticker Marquee Overlay -->
         <div id="ticker" class="player-ticker" style="display: none;">
             <span id="tickerText" class="player-ticker-text"></span>
@@ -885,7 +896,7 @@
         }
 
         function hideAllSlideContainers() {
-            [imgEl, vidEl, tempEl, welcomeEl, document.getElementById('liveInfoContainer'), document.getElementById('coastalWeatherContainer')].forEach(el => {
+            [imgEl, vidEl, tempEl, welcomeEl, document.getElementById('liveInfoContainer'), document.getElementById('coastalWeatherContainer'), document.getElementById('standbyContainer')].forEach(el => {
                 if (el) {
                     el.style.removeProperty('display');
                     el.style.display = 'none';
@@ -917,7 +928,21 @@
         function updatePlayer(state) {
             currentState = state;
             
-            if (!state || !state.playlist) return;
+            const standbyEl = document.getElementById('standbyContainer');
+            if (!state || !state.playlist || state.playlist.length === 0) {
+                hideAllSlideContainers();
+                if (standbyEl) {
+                    const nameSpan = document.getElementById('standbyScreenName');
+                    if (nameSpan) nameSpan.innerText = (state && state.name) ? state.name : screenId;
+                    showSlideContainer(standbyEl, 'flex');
+                }
+                return;
+            } else {
+                if (standbyEl) {
+                    standbyEl.style.removeProperty('display');
+                    standbyEl.style.display = 'none';
+                }
+            }
 
             let activeIdx = state.currentIndex;
             if ((activeIdx < 0 || activeIdx >= state.playlist.length) && state.playlist.length > 0) {
