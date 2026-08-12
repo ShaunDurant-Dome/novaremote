@@ -24,11 +24,6 @@ html {
     font-size: 16px !important;
 }
 
-[style*="display: none"],
-[style*="display:none"] {
-    display: none !important;
-}
-
 * {
     box-sizing: border-box;
     margin: 0;
@@ -2243,12 +2238,5 @@ input:checked + .slider:before {
     font-weight: 800;
     color: #ffffff;
     white-space: nowrap;
-}
-
-#tempContainer[style*="display: none"],
-#tempContainer[style*="display:none"],
-.temp-slide-layout[style*="display: none"],
-.temp-slide-layout[style*="display:none"] {
-    display: none !important;
 }
 

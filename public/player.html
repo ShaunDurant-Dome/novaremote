@@ -887,7 +887,8 @@
         function hideAllSlideContainers() {
             [imgEl, vidEl, tempEl, welcomeEl, document.getElementById('liveInfoContainer'), document.getElementById('coastalWeatherContainer')].forEach(el => {
                 if (el) {
-                    el.style.setProperty('display', 'none', 'important');
+                    el.style.removeProperty('display');
+                    el.style.display = 'none';
                     el.classList.remove('slide-fade-in', 'slide-3d-depth', 'slide-3d-flip');
                 }
             });
@@ -902,7 +903,8 @@
             if (!el) return;
             el.classList.remove('slide-fade-in', 'slide-3d-depth', 'slide-3d-flip');
             void el.offsetWidth;
-            el.style.display = displayType;
+            el.style.removeProperty('display');
+            el.style.setProperty('display', displayType, 'important');
             el.classList.add('slide-3d-depth');
         }
 
