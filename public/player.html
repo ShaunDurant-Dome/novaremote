@@ -235,8 +235,13 @@
             const container = document.getElementById('playerContainer');
             if (!container) return;
 
-            if (!isPreview && window.innerHeight >= 450) {
-                // Standalone TV Player Mode: Automatically fill 100% of the TV screen display
+            const hVal = parseInt(height);
+            const wVal = parseInt(width);
+            const cleanTarget = (targetScreen || '').toLowerCase();
+            const isLedBanner = (hVal < 300) || ((wVal / hVal) > 3.0) || cleanTarget.includes('led') || cleanTarget.includes('banner');
+
+            if (!isPreview && window.innerHeight >= 450 && !isLedBanner) {
+                // Standalone 16:9 Widescreen TV Player Mode: Automatically fill 100% of the TV screen display
                 container.style.width = '100vw';
                 container.style.height = '100vh';
                 container.style.position = 'fixed';
@@ -245,12 +250,11 @@
                 container.style.transform = 'none';
                 container.classList.remove('layout-compact');
             } else {
-                // Admin Dashboard Live Preview Mode (preview=1) or Ultra-Compact LED Hardware Mode
+                // Ultra-Wide LED Hardware Banner Mode (960x192) or Admin Dashboard Live Preview Mode (preview=1)
                 container.style.width = width + 'px';
                 container.style.height = height + 'px';
 
-                const hVal = parseInt(height);
-                if (hVal < 250) {
+                if (hVal < 250 || isLedBanner) {
                     container.classList.add('layout-compact');
                 } else {
                     container.classList.remove('layout-compact');
@@ -273,8 +277,6 @@
                 styleOverrideElement = null;
             }
 
-            const hVal = parseInt(height);
-            const wVal = parseInt(width);
             const tempContainer = document.getElementById('tempContainer');
             if (hVal >= 500) {
                 if (tempContainer) {

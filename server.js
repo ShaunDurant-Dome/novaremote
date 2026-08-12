@@ -89,10 +89,16 @@ function loadState() {
             const data = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
             state = { ...state, ...data };
 
-            // Migration: Ensure non-default TV screens (like stairs, lobby, hall, tv) have 1920x1080 resolution
+            // Migration: Ensure TV screens have 1920x1080 resolution, EXCEPT ultra-wide LED banner screens (like Big LED 960x192)
             if (state.screens) {
                 for (let sid in state.screens) {
-                    if (sid !== 'default' && (state.screens[sid].height < 500 || state.screens[sid].width < 1200)) {
+                    const cleanSid = sid.toLowerCase().trim();
+                    const isLedBanner = cleanSid.includes('led') || cleanSid.includes('banner') || cleanSid.includes('big');
+                    if (isLedBanner) {
+                        console.log(`[MIGRATION] Restoring LED Banner screen '${sid}' resolution to 960x192`);
+                        state.screens[sid].width = 960;
+                        state.screens[sid].height = 192;
+                    } else if (sid !== 'default' && (state.screens[sid].height < 500 || state.screens[sid].width < 1200)) {
                         console.log(`[MIGRATION] Updating TV screen '${sid}' resolution from ${state.screens[sid].width}x${state.screens[sid].height} to 1920x1080`);
                         state.screens[sid].width = 1920;
                         state.screens[sid].height = 1080;
