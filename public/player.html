@@ -248,7 +248,7 @@
 
             const hVal = parseInt(height);
             const wVal = parseInt(width);
-            const cleanTarget = (targetScreen || '').toLowerCase();
+            const cleanTarget = (typeof screenId !== 'undefined' ? screenId : '').toLowerCase();
             const isLedBanner = (hVal < 300) || ((wVal / hVal) > 3.0) || cleanTarget.includes('led') || cleanTarget.includes('banner');
 
             if (!isPreview && window.innerHeight >= 450 && !isLedBanner) {
