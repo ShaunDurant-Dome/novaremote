@@ -251,7 +251,16 @@
             const cleanTarget = (typeof screenId !== 'undefined' ? screenId : '').toLowerCase();
             const isLedBanner = (hVal < 300) || ((wVal / hVal) > 3.0) || cleanTarget.includes('led') || cleanTarget.includes('banner');
 
-            if (!isPreview && window.innerHeight >= 450 && !isLedBanner) {
+            if (isLedBanner) {
+                // Ultra-Wide LED Hardware Banner Mode (960x192): Lock pixel-perfect 1:1 mapping at TOP-LEFT CORNER (0, 0)
+                container.style.width = width + 'px';
+                container.style.height = height + 'px';
+                container.style.position = 'absolute';
+                container.style.top = '0px';
+                container.style.left = '0px';
+                container.style.transform = 'none';
+                container.classList.add('layout-compact');
+            } else if (!isPreview && window.innerHeight >= 450) {
                 // Standalone 16:9 Widescreen TV Player Mode: Automatically fill 100% of the TV screen display
                 container.style.width = '100vw';
                 container.style.height = '100vh';
@@ -261,11 +270,11 @@
                 container.style.transform = 'none';
                 container.classList.remove('layout-compact');
             } else {
-                // Ultra-Wide LED Hardware Banner Mode (960x192) or Admin Dashboard Live Preview Mode (preview=1)
+                // Admin Dashboard Live Preview Mode (preview=1)
                 container.style.width = width + 'px';
                 container.style.height = height + 'px';
 
-                if (hVal < 250 || isLedBanner) {
+                if (hVal < 250) {
                     container.classList.add('layout-compact');
                 } else {
                     container.classList.remove('layout-compact');
@@ -277,8 +286,8 @@
 
                 container.style.transform = `scale(${scale})`;
                 container.style.transformOrigin = 'top left';
-                container.style.left = ((winW - width * scale) / 2) + 'px';
-                container.style.top = ((winH - height * scale) / 2) + 'px';
+                container.style.left = '0px';
+                container.style.top = '0px';
                 container.style.position = 'absolute';
             }
 
