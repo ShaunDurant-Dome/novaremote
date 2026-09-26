@@ -932,7 +932,19 @@
                 clearTimeout(imageTimer);
                 imageTimer = null;
             }
-            // Central server-side slideshow timer handles static slide advancement
+            // Client-side safety watchdog: if the server timer stalls or misses an advancement,
+            // request NEXT after (duration + 4) seconds so slides never freeze.
+            if (!isPreview && currentState && currentState.isPlaying && !currentState.isBlackout) {
+                const dur = (item && item.duration) ? parseInt(item.duration) : defaultDuration;
+                const safeSeconds = (dur && !isNaN(dur) && dur > 0) ? (dur + 4) : 19;
+                imageTimer = setTimeout(() => {
+                    imageTimer = null;
+                    if (currentState && currentState.isPlaying && !currentState.isBlackout) {
+                        console.warn('[PLAYER] Slide advancement safety timeout reached. Requesting NEXT...');
+                        sendAction('NEXT');
+                    }
+                }, safeSeconds * 1000);
+            }
         }
 
         function updatePlayer(state) {
@@ -1344,6 +1356,17 @@
                 const screenW = currentState.width || 960;
                 const screenH = currentState.height || 192;
                 applyDimensions(screenW, screenH);
+            }
+        });
+
+        // Listen for visibility change (wake up from sleep mode or display reactivation)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                console.log('[PLAYER] Window regained visibility. Verifying WebSocket and refreshing state...');
+                if (!ws || ws.readyState !== WebSocket.OPEN) {
+                    connectWebSocket();
+                }
+                pollState();
             }
         });
 

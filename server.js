@@ -961,6 +961,9 @@ wss.on('connection', (ws, req) => {
         broadcastGlobalState(); // immediate full sync
     } else {
         const screen = state.screens[screenId];
+        if (screen && screen.isPlaying && !screen.isBlackout && !screenSlideTimers[screenId]) {
+            armScreenSlideTimer(screenId);
+        }
         ws.send(JSON.stringify({ 
             type: 'STATE_UPDATE', 
             screenId, 
@@ -1056,12 +1059,14 @@ wss.on('connection', (ws, req) => {
                     break;
                 case 'SET_BLACKOUT':
                     screen.isBlackout = !!data.value;
+                    saveState();
                     broadcastScreenState(sid);
                     broadcastGlobalState();
                     if (screen.isBlackout) {
                         spotifyServerAction(sid, 'pause');
                     } else {
                         spotifyServerAction(sid, 'resume');
+                        armScreenSlideTimer(sid);
                     }
                     break;
                 case 'UPDATE_TICKER':
@@ -1444,6 +1449,22 @@ setInterval(() => {
                         spotifyServerAction(sid, 'pause');
                     } else {
                         spotifyServerAction(sid, 'resume');
+                        armScreenSlideTimer(sid);
+                    }
+                }
+            }
+        }
+
+        // Continuous Watchdog: Ensure slide timer is running for any playing screen not in blackout
+        for (let sid in state.screens) {
+            const sc = state.screens[sid];
+            if (sc && sc.isPlaying && !sc.isBlackout && sc.playlist && sc.playlist.length > 0) {
+                if (!screenSlideTimers[sid]) {
+                    const currentIdx = (sc.currentIndex >= 0 && sc.currentIndex < sc.playlist.length) ? sc.currentIndex : 0;
+                    const currentItem = sc.playlist[currentIdx];
+                    if (currentItem && currentItem.type !== 'video') {
+                        console.log(`[WATCHDOG] Re-arming inactive slide timer for screen "${sid}" on item "${currentItem.name}"`);
+                        armScreenSlideTimer(sid);
                     }
                 }
             }
