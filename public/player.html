@@ -61,6 +61,21 @@
             [Screen: <span id="diagScreenId">loading</span> | WS: <span id="diagWsStatus">connecting</span>]
         </div>
 
+        <!-- Blend 2 Left Info Sidebar (Shown when item.showSideInfo is enabled on Big LED) -->
+        <div id="sideInfoDock" style="display: none; position: absolute; top: 0; left: 0; width: 210px; height: 100%; z-index: 20; overflow: hidden; background: #0c182e; font-family: 'Outfit', sans-serif;">
+            <img id="sideInfoBackdropImg" style="display: none; position: absolute; top: 0; left: 0; width: 260px; height: 100%; object-fit: cover; object-position: left center; filter: blur(18px) brightness(0.6) saturate(1.4); transform: scale(1.25); pointer-events: none;">
+            <video id="sideInfoBackdropVid" muted loop playsinline style="display: none; position: absolute; top: 0; left: 0; width: 260px; height: 100%; object-fit: cover; object-position: left center; filter: blur(18px) brightness(0.6) saturate(1.4); transform: scale(1.25); pointer-events: none;"></video>
+            <div style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8,14,28,0.72) 0%, rgba(12,24,46,0.45) 75%, rgba(12,24,46,0) 100%); pointer-events: none;"></div>
+            <div style="position: relative; z-index: 2; width: 210px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 14px 12px; box-sizing: border-box;">
+                <img src="/logo_white.png" alt="The Dome" style="width: 152px; height: 62px; object-fit: contain; display: block; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.7));">
+                <div id="sideInfoClock" style="font-size: 34px; font-weight: 900; color: #ffffff; line-height: 1; letter-spacing: 1.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.8);">00:00</div>
+                <div style="display: flex; align-items: baseline; gap: 6px; line-height: 1; white-space: nowrap; text-shadow: 0 2px 8px rgba(0,0,0,0.8);">
+                    <span style="font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.8); letter-spacing: 1px;">TEMP</span>
+                    <span id="sideInfoTempVal" style="font-size: 28px; font-weight: 900; color: #ffffff;">--.-</span><span style="color: #ff7b00; font-size: 20px; font-weight: 900; margin-left: 1px;">°C</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Media containers -->
         <img id="imgContainer" class="player-media" style="display: none;">
         <video id="vidContainer" class="player-media" style="display: none;" autoplay muted></video>
@@ -675,8 +690,12 @@
             const now = new Date();
             const timeEl = document.getElementById('liveInfoTime');
             const dateEl = document.getElementById('liveInfoDate');
+            const sideClockEl = document.getElementById('sideInfoClock');
             if (timeEl) {
                 timeEl.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            }
+            if (sideClockEl) {
+                sideClockEl.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
             }
             if (dateEl) {
                 const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
@@ -702,6 +721,8 @@
                         if (liveInfoOutEl) liveInfoOutEl.innerText = formatted;
                         const coastalOutEl = document.getElementById('coastalOutdoorVal');
                         if (coastalOutEl) coastalOutEl.innerText = formatted;
+                        const sideTempEl = document.getElementById('sideInfoTempVal');
+                        if (sideTempEl) sideTempEl.innerText = formatted;
                     }
                     if (data.mainHall !== undefined && data.mainHall !== null) {
                         hallValEl.innerText = parseFloat(data.mainHall).toFixed(1);
@@ -715,6 +736,8 @@
                     hallValEl.innerText = '--';
                 });
         }
+        fetchTemps();
+        setInterval(fetchTemps, 60000);
 
         function fetchSwakopmundWeather() {
             fetch(`${prefixStr}/api/swakopmund-weather`)
@@ -916,6 +939,69 @@
             if (vidEl && vidEl.style.display === 'none') {
                 try { vidEl.pause(); } catch(e) {}
             }
+            const sideDock = document.getElementById('sideInfoDock');
+            if (sideDock) sideDock.style.display = 'none';
+            const bdVid = document.getElementById('sideInfoBackdropVid');
+            if (bdVid) {
+                try { bdVid.pause(); } catch(e) {}
+            }
+            [imgEl, vidEl].forEach(el => {
+                if (el) {
+                    el.style.position = '';
+                    el.style.top = '';
+                    el.style.left = '';
+                    el.style.width = '';
+                    el.style.height = '';
+                    el.style.objectFit = '';
+                    el.style.webkitMaskImage = '';
+                    el.style.maskImage = '';
+                }
+            });
+        }
+
+        function applySideInfoLayout(item, mediaEl, mediaUrl) {
+            const container = document.getElementById('playerContainer');
+            const isLed = container && container.classList.contains('layout-compact');
+            const sideDock = document.getElementById('sideInfoDock');
+            const bdImg = document.getElementById('sideInfoBackdropImg');
+            const bdVid = document.getElementById('sideInfoBackdropVid');
+            if (!sideDock || !mediaEl) return;
+
+            if (isLed && item && item.showSideInfo === true && (item.type === 'image' || item.type === 'video')) {
+                sideDock.style.display = 'block';
+                updateLiveInfoClock();
+                fetchTemps();
+                if (item.type === 'image') {
+                    if (bdVid) { bdVid.style.display = 'none'; try { bdVid.pause(); } catch(e) {} }
+                    if (bdImg && mediaUrl) {
+                        if (!bdImg.src || !bdImg.src.endsWith(encodeURI(item.filename))) {
+                            bdImg.src = mediaUrl;
+                        }
+                        bdImg.style.display = 'block';
+                    }
+                } else if (item.type === 'video') {
+                    if (bdImg) bdImg.style.display = 'none';
+                    if (bdVid && mediaUrl) {
+                        if (!bdVid.getAttribute('src') || !bdVid.src.endsWith(encodeURI(item.filename))) {
+                            bdVid.src = mediaUrl;
+                        }
+                        bdVid.style.display = 'block';
+                        try { bdVid.play().catch(() => {}); } catch(e) {}
+                    }
+                }
+                mediaEl.style.position = 'absolute';
+                mediaEl.style.top = '0px';
+                mediaEl.style.left = '210px';
+                mediaEl.style.width = 'calc(100% - 210px)';
+                mediaEl.style.height = '100%';
+                mediaEl.style.objectFit = 'fill';
+                mediaEl.style.webkitMaskImage = 'linear-gradient(90deg, transparent 0px, black 12px, black 100%)';
+                mediaEl.style.maskImage = 'linear-gradient(90deg, transparent 0px, black 12px, black 100%)';
+            } else {
+                sideDock.style.display = 'none';
+                if (bdImg) bdImg.style.display = 'none';
+                if (bdVid) { bdVid.style.display = 'none'; try { bdVid.pause(); } catch(e) {} }
+            }
         }
 
         function showSlideContainer(el, displayType = 'flex') {
@@ -1031,12 +1117,13 @@
                 hideAllSlideContainers();
  
                 if (item.type === 'image') {
-                    if (item.filename) {
-                        const safeUrl = `${prefixStr}/uploads/${encodeURI(item.filename)}`;
+                    const safeUrl = item.filename ? `${prefixStr}/uploads/${encodeURI(item.filename)}` : '';
+                    if (safeUrl) {
                         if (hasItemChanged || !imgEl.src || !imgEl.src.endsWith(encodeURI(item.filename))) {
                             imgEl.src = safeUrl;
                         }
                     }
+                    applySideInfoLayout(item, imgEl, safeUrl);
                     showSlideContainer(imgEl, 'block');
                     scheduleSlideNextTimer(item, 10);
                 } else if (item.type === 'video') {
@@ -1044,8 +1131,8 @@
                         clearTimeout(imageTimer);
                         imageTimer = null;
                     }
-                    if (item.filename) {
-                        const mediaUrl = `${prefixStr}/uploads/${encodeURI(item.filename)}`;
+                    const mediaUrl = item.filename ? `${prefixStr}/uploads/${encodeURI(item.filename)}` : '';
+                    if (mediaUrl) {
                         if (hasItemChanged || !vidEl.getAttribute('src')) {
                             clearTimeout(videoSafetyTimer);
                             videoSafetyTimer = null;
@@ -1070,6 +1157,7 @@
                             armSafetyTimer(vidEl.duration || 300);
                         }
                     }
+                    applySideInfoLayout(item, vidEl, mediaUrl);
                     showSlideContainer(vidEl, 'block');
  
                     // Audio volume sync

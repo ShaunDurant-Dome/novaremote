@@ -2258,3 +2258,332 @@ input:checked + .slider:before {
     white-space: nowrap;
 }
 
+/* =========================================================================
+   Modern Dashboard UI & Mobile-First Responsive Layout Overhaul
+   ========================================================================= */
+
+.dashboard-two-col {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.nav-label-short {
+    display: none;
+}
+
+.mobile-brand-badge {
+    display: none;
+}
+
+/* Screen Selector Pill in Header */
+.screen-selector-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(16, 23, 40, 0.9);
+    border: 1px solid rgba(255, 123, 0, 0.45);
+    border-radius: 30px;
+    padding: 0.35rem 0.65rem 0.35rem 1rem;
+    box-shadow: 0 4px 16px rgba(255, 123, 0, 0.14);
+}
+
+.screen-selector-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--primary, #ff7b00);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    white-space: nowrap;
+}
+
+.screen-selector-dropdown {
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    padding: 0.25rem 0.5rem !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    min-width: 165px;
+    cursor: pointer;
+}
+
+/* Playlist Item Primary Meta Row & Blend 2 Side Info Toggle Button */
+.item-meta-primary-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    width: 100%;
+}
+
+.btn-side-info-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+    padding: 0.22rem 0.6rem;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.btn-side-info-toggle:hover {
+    border-color: rgba(255, 123, 0, 0.6);
+    color: #ffffff;
+    background: rgba(255, 123, 0, 0.12);
+}
+
+.btn-side-info-toggle.active {
+    border-color: #ff7b00;
+    background: rgba(255, 123, 0, 0.22);
+    color: #ff7b00;
+    box-shadow: 0 0 12px rgba(255, 123, 0, 0.25);
+}
+
+/* Tablet & Mobile Responsive Layout (<= 960px) */
+@media (max-width: 960px) {
+    .app-container {
+        flex-direction: column;
+        padding-bottom: 74px; /* Space for fixed bottom app bar */
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Convert Left Sidebar into a Sleek Fixed Bottom App Navigation Bar */
+    .sidebar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        min-width: 0;
+        height: 68px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.3rem 0.4rem;
+        gap: 0;
+        background: rgba(10, 14, 24, 0.96);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-right: none;
+        border-top: 1px solid rgba(255, 123, 0, 0.35);
+        box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.6);
+        z-index: 1000;
+    }
+
+    .sidebar-brand,
+    .sidebar-footer {
+        display: none !important;
+    }
+
+    .sidebar-nav {
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        gap: 0.15rem;
+    }
+
+    .sidebar-btn {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 2px;
+        padding: 0.35rem 0.2rem;
+        border-radius: 10px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-align: center;
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+    }
+
+    .sidebar-btn .btn-icon {
+        font-size: 1.15rem;
+        line-height: 1;
+    }
+
+    .nav-label-full {
+        display: none;
+    }
+
+    .nav-label-short {
+        display: inline;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    /* Sticky Top Header on Mobile */
+    .top-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.6rem;
+        padding: 0.75rem 0.9rem;
+        margin-bottom: 0;
+        background: rgba(13, 18, 28, 0.95);
+        backdrop-filter: blur(14px);
+    }
+
+    .top-header-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        width: 100%;
+        flex-wrap: nowrap;
+    }
+
+    .mobile-brand-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    #connectionStatus {
+        padding: 0.3rem 0.55rem;
+        font-size: 0.72rem;
+        flex-shrink: 0;
+    }
+
+    #connectionStatus .status-text {
+        display: none; /* Show compact green/red status dot on mobile to give full room to Screen Selector */
+    }
+
+    .screen-selector-pill {
+        flex: 1;
+        min-width: 0;
+        padding: 0.3rem 0.5rem 0.3rem 0.75rem;
+        justify-content: space-between;
+    }
+
+    .screen-selector-label {
+        font-size: 0.65rem;
+    }
+
+    .screen-selector-dropdown {
+        flex: 1;
+        min-width: 0 !important;
+        width: 100%;
+        font-size: 0.85rem !important;
+        padding: 0.2rem 0.25rem !important;
+    }
+
+    .top-header-actions {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.45rem;
+        width: 100%;
+    }
+
+    .top-header-actions .btn {
+        justify-content: center;
+        padding: 0.5rem 0.35rem;
+        font-size: 0.78rem;
+        border-radius: 10px;
+        white-space: nowrap;
+    }
+
+    /* Workspace & Two-Column Grids Stack Cleanly */
+    .tab-content {
+        padding: 0.9rem;
+        gap: 1rem;
+    }
+
+    .dashboard-two-col {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .panel {
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-radius: 14px;
+    }
+
+    .panel-header {
+        margin-bottom: 1rem;
+        padding-bottom: 0.6rem;
+    }
+
+    .panel-title {
+        font-size: 1.05rem;
+    }
+
+    /* Control Bar 2x2 Thumb Grid on Mobile */
+    .control-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.55rem;
+    }
+
+    .control-bar .btn {
+        justify-content: center;
+        padding: 0.7rem 0.5rem;
+        font-size: 0.88rem;
+        width: 100%;
+    }
+
+    /* Playlist Items on Mobile */
+    .playlist-items {
+        max-height: none;
+        padding-right: 0;
+    }
+
+    .playlist-item {
+        padding: 0.65rem 0.75rem;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+
+    .item-thumb {
+        width: 42px;
+        height: 42px;
+        margin-right: 0.25rem;
+        flex-shrink: 0;
+    }
+
+    .item-title {
+        font-size: 0.88rem;
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .btn-item-action {
+        margin-left: 0.15rem;
+        padding: 0.35rem;
+    }
+
+    /* Ticker 3-column form row stacks on mobile */
+    #tab-ticker .form-row {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+    }
+}
+
+@media (max-width: 420px) {
+    .hide-xs {
+        display: none;
+    }
+    .screen-selector-label {
+        display: none;
+    }
+}
+
+

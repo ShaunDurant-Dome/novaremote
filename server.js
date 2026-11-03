@@ -1330,6 +1330,15 @@ wss.on('connection', (ws, req) => {
                     }
                     broadcastScreenState(sid);
                     break;
+                case 'TOGGLE_SIDE_INFO':
+                    const sideInfoItem = screen.playlist.find(p => p.id === data.id);
+                    if (sideInfoItem && (sideInfoItem.type === 'image' || sideInfoItem.type === 'video')) {
+                        sideInfoItem.showSideInfo = !!data.showSideInfo;
+                    }
+                    saveState();
+                    broadcastScreenState(sid);
+                    broadcastGlobalState();
+                    break;
                 case 'UPDATE_BLACKOUT_SCHEDULE':
                     screen.blackoutSchedule = {
                         enabled: !!data.enabled,

@@ -6,230 +6,45 @@
     <title>The Dome Digital Platform</title>
     <link rel="stylesheet" href="app.css">
     <style>
-        /* Extra styles for two-pane layout */
-        .layout-container {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
-            gap: 2rem;
-            width: 100%;
-        }
-        .layout-container > div {
-            min-width: 0;
-        }
-        .panel {
-            min-width: 0;
-        }
-        .item-info {
-            min-width: 0;
-        }
-        
-        @media (max-width: 1024px) {
-            .layout-container {
-                grid-template-columns: 1fr 1fr;
-                gap: 1.5rem;
-            }
-            .layout-container > div {
-                display: contents;
-            }
-            
-            /* Order of panels on Mobile/Tablet */
-            #spotifyPanel { order: 1; }
-            #screenControlPanel { order: 2; }
-            #livePreviewPanel { order: 3; }
-            #activePlaylistPanel { order: 4; }
-            #mediaLibraryPanel { order: 5; }
-            #tickerPanel { order: 6; }
-            #savedPlaylistsPanel { order: 7; }
-            #ledSetupPanel { order: 8; }
-            
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1.5rem;
-            }
-            header > div {
-                width: 100%;
-                justify-content: space-between;
-            }
-            
-            /* Touch target scaling on mobile/tablet (46px touch targets) */
-            .btn {
-                padding: 0.8rem 1.25rem !important;
-                font-size: 1rem !important;
-                border-radius: 12px;
-            }
-            .input-text {
-                padding: 0.8rem 1rem !important;
-                font-size: 1rem !important;
-                border-radius: 10px;
-            }
-            .select-styled {
-                padding: 0.8rem 1.25rem !important;
-                font-size: 1rem !important;
-                border-radius: 10px;
-                min-width: 0 !important;
-            }
-            .form-label {
-                font-size: 0.95rem !important;
-                font-weight: 500 !important;
-            }
-            .panel-title {
-                font-size: 1.3rem !important;
-            }
-            
-            /* Wrap screen control buttons into a 2x2 grid */
-            .control-bar {
-                flex-wrap: wrap;
-                gap: 0.5rem;
-            }
-            .control-bar > button {
-                flex: 1 1 calc(50% - 0.25rem);
-                justify-content: center;
-                padding: 0.8rem 1.25rem !important;
-                font-size: 1rem !important;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .layout-container {
-                grid-template-columns: 1fr;
-                gap: 1.25rem;
-            }
-            .screen-select-bar {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 1rem;
-            }
-            .screen-select-bar > div:nth-child(3) {
-                display: none;
-            }
-            .screen-select-bar > div:last-child {
-                width: 100%;
-                display: flex;
-            }
-            .screen-select-bar > div:last-child > input {
-                flex: 1;
-            }
-            
-            /* Stack header buttons vertically to fit narrow mobile screens */
-            header > div:last-child {
-                flex-direction: column;
-                align-items: stretch !important;
-                gap: 0.75rem;
-                width: 100%;
-            }
-            header > div:last-child > a,
-            header > div:last-child > div {
-                width: 100% !important;
-                justify-content: center !important;
-            }
-            
-            /* Shrink container padding on mobile */
-            .container {
-                padding: 1rem;
-            }
-            
-            /* Shrink panel padding on mobile */
-            .panel {
-                padding: 1rem;
-                border-radius: 12px;
-            }
-            .panel-header {
-                margin-bottom: 1rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            /* Title wrapping on small screens */
-            header > div:first-child {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.75rem;
-            }
-            header > div:first-child > div {
-                border-left: none !important;
-                padding-left: 0 !important;
-                margin-top: 0.25rem;
-            }
-            .platform-title {
-                font-size: 1.4rem !important;
-            }
-            
-            /* Wrap double inputs like Saved Playlists buttons */
-            .panel div[style*="display: flex; gap: 0.5rem;"] {
-                flex-wrap: wrap !important;
-            }
-            .panel div[style*="display: flex; gap: 0.5rem;"] > input {
-                flex: 1 1 100% !important;
-            }
-            .panel div[style*="display: flex; gap: 0.5rem;"] > button {
-                flex: 1 1 100% !important;
-                justify-content: center;
-            }
-            .screen-select-bar > div:last-child {
-                flex-wrap: wrap;
-                gap: 0.5rem;
-            }
-            .screen-select-bar > div:last-child > input {
-                flex: 1 1 100% !important;
-            }
-            .screen-select-bar > div:last-child > button {
-                flex: 1 1 100% !important;
-            }
-        }
-        
-        .screen-select-bar {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            margin-bottom: 2rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 1rem;
-            border-radius: 12px;
-            backdrop-filter: blur(12px);
-        }
-        
+        .panel { min-width: 0; }
+        .item-info { min-width: 0; }
         .select-styled {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.45);
             border: 1px solid var(--border-color);
             color: var(--text-main);
-            padding: 0.5rem 1rem;
+            padding: 0.5rem 0.9rem;
             border-radius: 8px;
             outline: none;
             font-family: inherit;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             cursor: pointer;
-            min-width: 200px;
+            min-width: 0;
         }
         .select-styled option {
             background-color: var(--bg-dark);
             color: var(--text-main);
         }
-        
         .library-item {
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.025);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 0.5rem;
+            border-radius: 10px;
+            padding: 0.65rem 0.85rem;
             margin-bottom: 0.5rem;
+            gap: 0.6rem;
             transition: all 0.2s ease;
         }
         .library-item:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.06);
             border-color: rgba(255, 255, 255, 0.15);
         }
         .library-thumb {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 6px;
             object-fit: cover;
-            margin-right: 0.75rem;
-        }
-        .platform-title::before {
-            display: none !important;
+            flex-shrink: 0;
         }
     </style>
 </head>
@@ -245,29 +60,29 @@
                 </div>
             </div>
 
-            <!-- Sidebar Navigation Tabs -->
+            <!-- Sidebar Navigation Tabs (Desktop Left Rail / Mobile Bottom App Bar) -->
             <nav class="sidebar-nav">
                 <button class="sidebar-btn active" id="btnTabControl" onclick="switchTab('control')">
-                    <span class="btn-icon">📺</span> <span>Control & Live View</span>
+                    <span class="btn-icon">📺</span> <span class="nav-label-full">Control & Live View</span><span class="nav-label-short">Control</span>
                 </button>
                 <button class="sidebar-btn" id="btnTabPlaylist" onclick="switchTab('playlist')">
-                    <span class="btn-icon">📑</span> <span>Playlist & Templates</span>
+                    <span class="btn-icon">📑</span> <span class="nav-label-full">Playlist & Templates</span><span class="nav-label-short">Playlist</span>
                 </button>
                 <button class="sidebar-btn" id="btnTabMedia" onclick="switchTab('media')">
-                    <span class="btn-icon">📁</span> <span>Media Library</span>
+                    <span class="btn-icon">📁</span> <span class="nav-label-full">Media Library</span><span class="nav-label-short">Media</span>
                 </button>
                 <button class="sidebar-btn" id="btnTabSaved" onclick="switchTab('saved')">
-                    <span class="btn-icon">💾</span> <span>Saved Layouts</span>
+                    <span class="btn-icon">💾</span> <span class="nav-label-full">Saved Layouts</span><span class="nav-label-short">Saved</span>
                 </button>
                 <button class="sidebar-btn" id="btnTabTicker" onclick="switchTab('ticker')">
-                    <span class="btn-icon">💬</span> <span>Ticker Overlay</span>
+                    <span class="btn-icon">💬</span> <span class="nav-label-full">Ticker Overlay</span><span class="nav-label-short">Ticker</span>
                 </button>
                 <button class="sidebar-btn" id="btnTabConfig" onclick="switchTab('config')">
-                    <span class="btn-icon">⚙️</span> <span>Screen Settings</span>
+                    <span class="btn-icon">⚙️</span> <span class="nav-label-full">Screen Settings</span><span class="nav-label-short">Settings</span>
                 </button>
             </nav>
 
-            <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1rem; margin-top: auto;">
+            <div class="sidebar-footer" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1rem; margin-top: auto;">
                 <a href="/novaremote-player.apk" class="btn btn-secondary" style="width: 100%; justify-content: center; padding: 0.5rem; font-size: 0.78rem; border-color: rgba(255,123,0,0.3); color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 0.4rem;" download>
                     🤖 Download TV APK
                 </a>
@@ -278,35 +93,38 @@
         <main class="main-workspace">
             <!-- Top Header Bar -->
             <header class="top-header">
-                <div class="top-header-info" style="display: flex; align-items: center; gap: 0.85rem;">
+                <div class="top-header-info">
+                    <div class="mobile-brand-badge">
+                        <img src="/logo_white.png" alt="The Dome" style="width: 32px; height: auto;">
+                    </div>
                     <div id="connectionStatus" class="status-badge">
                         <span class="status-dot"></span>
                         <span class="status-text">Connecting...</span>
                     </div>
 
                     <!-- Active Screen Selector Pill -->
-                    <div style="display: flex; align-items: center; gap: 0.35rem; background: rgba(0, 210, 255, 0.1); border: 1px solid rgba(0, 210, 255, 0.3); border-radius: 999px; padding: 0.2rem 0.5rem 0.2rem 0.75rem;">
-                        <span style="font-size: 0.75rem; font-weight: 600; color: #00d2ff; white-space: nowrap;">Screen:</span>
-                        <select id="screenSelector" class="select-styled" style="background: transparent; border: none; color: #ffffff; font-size: 0.82rem; font-weight: 600; padding: 0.15rem 0.4rem; cursor: pointer; outline: none;" onchange="switchScreen(this.value)">
+                    <div class="screen-selector-pill">
+                        <span class="screen-selector-label">Screen:</span>
+                        <select id="screenSelector" class="select-styled screen-selector-dropdown" onchange="switchScreen(this.value)">
                             <!-- Screens populated dynamically -->
                         </select>
-                        <button class="btn btn-danger" id="btnDeleteScreen" style="padding: 0; border-radius: 50%; background: rgba(255,75,75,0.2); border: 1px solid rgba(255,75,75,0.4); color: #ff4b4b; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; font-size: 0.7rem;" onclick="deleteCurrentScreen()" title="Delete Current Screen">🗑️</button>
+                        <button class="btn btn-danger" id="btnDeleteScreen" style="padding: 0; border-radius: 50%; background: rgba(255,75,75,0.2); border: 1px solid rgba(255,75,75,0.4); color: #ff4b4b; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; font-size: 0.72rem; flex-shrink: 0;" onclick="deleteCurrentScreen()" title="Delete Current Screen">🗑️</button>
                     </div>
                 </div>
 
                 <div class="top-header-actions">
-                    <button class="btn btn-secondary" onclick="sendAction('PREV')" title="Previous Slide">⏮ Prev</button>
+                    <button class="btn btn-secondary" onclick="sendAction('PREV')" title="Previous Slide">⏮ <span class="hide-xs">Prev</span></button>
                     <button id="btnPlay" class="btn btn-primary" onclick="togglePlay()" title="Play / Pause">
                         <span id="playIcon">▶</span> <span id="playText">Play</span>
                     </button>
-                    <button class="btn btn-secondary" onclick="sendAction('NEXT')" title="Next Slide">⏭ Next</button>
-                    <button class="btn btn-secondary" style="border-color: rgba(0,255,135,0.4); color: #00ff87;" onclick="launchPlayer()" title="Open Player in New Tab">🖥️ Open Player</button>
+                    <button class="btn btn-secondary" onclick="sendAction('NEXT')" title="Next Slide">⏭ <span class="hide-xs">Next</span></button>
+                    <button class="btn btn-secondary" style="border-color: rgba(0,255,135,0.4); color: #00ff87;" onclick="launchPlayer()" title="Open Player in New Tab">🖥️ <span class="hide-xs">Open Player</span></button>
                 </div>
             </header>
 
             <!-- Tab 1: Control & Live View -->
             <div id="tab-control" class="tab-content active">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="dashboard-two-col">
                     <!-- Control Panel Card -->
                     <div class="panel">
                         <div class="panel-header" style="flex-direction: column; align-items: flex-start; gap: 0.25rem;">
@@ -344,7 +162,7 @@
                             <h2 class="panel-title">Live Preview Monitor</h2>
                         </div>
                         
-                        <div class="screen-preview-container" style="position: relative; width: 100%; height: 320px; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                        <div class="screen-preview-container" style="position: relative; width: 100%; min-height: 90px; max-height: 360px; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
                             <div class="blackout-overlay" id="previewBlackout">
                                 DISPLAY BLACKOUT ACTIVE
                             </div>
@@ -535,7 +353,7 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                <div class="dashboard-two-col" style="margin-top: 1.5rem;">
                     <!-- Screen Resolution & Coordinates Setup -->
                     <div class="panel" id="ledSetupPanel">
                         <div class="panel-header">
@@ -775,6 +593,30 @@
 
             const targetTab = document.getElementById(`tab-${tabId}`);
             if (targetTab) targetTab.classList.add('active');
+
+            // Ensure Live Preview Monitor scales accurately when switching back to Control tab
+            setTimeout(resizePreviewIframe, 50);
+        }
+
+        function resizePreviewIframe() {
+            if (!globalState || !globalState.screens) return;
+            const previewContainer = document.querySelector('.screen-preview-container');
+            const iframe = document.getElementById('screenPreviewIframe');
+            const screen = globalState.screens[activeScreenId];
+            if (previewContainer && iframe && screen) {
+                const width = screen.width || 960;
+                const height = screen.height || 192;
+                previewContainer.style.aspectRatio = `${width}/${height}`;
+                const containerWidth = previewContainer.clientWidth || 300;
+                const scale = containerWidth / width;
+                iframe.style.width = width + 'px';
+                iframe.style.height = height + 'px';
+                iframe.style.transform = `scale(${scale})`;
+                iframe.style.transformOrigin = 'top left';
+                iframe.style.position = 'absolute';
+                iframe.style.top = '0';
+                iframe.style.left = '0';
+            }
         }
         let ws;
         let globalState = null;
@@ -1059,6 +901,10 @@
 
         function updateVideoSound(id, sound) {
             sendAction('UPDATE_VIDEO_SOUND', { id, sound });
+        }
+
+        function toggleSideInfo(id, showSideInfo) {
+            sendAction('TOGGLE_SIDE_INFO', { id, showSideInfo });
         }
 
         // Media Library controls
@@ -1462,6 +1308,18 @@
                         `;
                     }
 
+                    let sideInfoCtrl = '';
+                    const isLedScreen = (activeScreenId === 'default') || ((screen.height || 192) < 300);
+                    if (isLedScreen && (item.type === 'image' || item.type === 'video')) {
+                        const isOn = !!item.showSideInfo;
+                        sideInfoCtrl = `
+                            <button type="button" class="btn-side-info-toggle ${isOn ? 'active' : ''}" onclick="event.stopPropagation(); toggleSideInfo('${item.id}', ${!isOn})"
+                                    title="Toggle Blend 2 Left Info Sidebar (Dome Logo + Live Time + Outdoor Temp) on Big LED Screen">
+                                🕒 Side Info: ${isOn ? 'ON' : 'OFF'}
+                            </button>
+                        `;
+                    }
+
                     let tempLabelsCtrl = '';
                     if (item.type === 'temp') {
                         tempLabelsCtrl = `
@@ -1680,10 +1538,11 @@
                         <div class="item-info">
                             <div class="item-title" title="${item.name}">${item.name}</div>
                             <div class="item-meta" style="flex-direction:column; align-items:flex-start; gap:0.25rem;">
-                                <div style="display:flex; align-items:center; gap:0.75rem; width:100%;">
+                                <div class="item-meta-primary-row">
                                     <span class="item-type ${item.type}">${item.type}</span>
                                     ${durationCtrl}
                                     ${soundCtrl}
+                                    ${sideInfoCtrl}
                                 </div>
                                 ${tempLabelsCtrl}
                                 ${welcomeCtrl}
@@ -2302,17 +2161,7 @@
         }
 
         window.addEventListener('resize', () => {
-            if (globalState) {
-                const previewContainer = document.querySelector('.screen-preview-container');
-                const iframe = document.getElementById('screenPreviewIframe');
-                const screen = globalState.screens[activeScreenId];
-                if (previewContainer && iframe && screen) {
-                    const width = screen.width || 960;
-                    const containerWidth = previewContainer.clientWidth || 300;
-                    const scale = containerWidth / width;
-                    iframe.style.transform = `scale(${scale})`;
-                }
-            }
+            resizePreviewIframe();
         });
 
         connectWebSocket();
